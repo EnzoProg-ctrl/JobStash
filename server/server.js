@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { pool } from './db/pool.js'
-import * as sightings from './sightingsRepo.js'
+import * as jobs from './jobsRepo.js'
 
 const app = express()
 
@@ -36,36 +36,60 @@ app.get('/readyz', async (request, response) => {
   }
 })
 
-// Validation lives on the server because the client can be bypassed. The
-// browser form is for a fast, friendly message; this is for correctness.
-function validate(body) {
-  const errors = []
-  const place = typeof body.place === 'string' ? body.place.trim() : ''
-  const description =
-    typeof body.description === 'string' ? body.description.trim() : ''
-  const spookiness = Number(body.spookiness)
+const STATUSES = ['to_apply', 'done']
 
-  if (!place) errors.push('place is required')
-  if (place.length > 120) errors.push('place must be 120 characters or fewer')
-  if (description.length > 2000) errors.push('description must be 2000 characters or fewer')
-  if (!Number.isInteger(spookiness) || spookiness < 1 || spookiness > 5) {
-    errors.push('spookiness must be a whole number from 1 to 5')
+// A saved job is only useful if its link actually opens, so the URL is checked
+// rather than just measured. mailto: and javascript: parse fine as URLs, which
+// is why the protocol is checked too.
+function validUrl(value) {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
   }
-
-  return { errors, value: { place, description, spookiness } }
 }
 
-app.get('/api/sightings', async (request, response, next) => {
+// Validation lives on the server because the client can be bypassed. The
+// browser form is for a fast, friendly message; this is for correctness, and it
+// matches the CHECK constraints in db/schema.sql.
+function validate(body) {
+  const errors = []
+  const company_name = typeof body.company_name === 'string' ? body.company_name.trim() : ''
+  const job_title = typeof body.job_title === 'string' ? body.job_title.trim() : ''
+  const posting_url = typeof body.posting_url === 'string' ? body.posting_url.trim() : ''
+  const status = body.status ?? 'to_apply'
+
+  if (!company_name) errors.push('company_name is required')
+  if (company_name.length > 120) errors.push('company_name must be 120 characters or fewer')
+  if (job_title.length > 160) errors.push('job_title must be 160 characters or fewer')
+  if (!posting_url) errors.push('posting_url is required')
+  else if (posting_url.length > 2000) errors.push('posting_url must be 2000 characters or fewer')
+  else if (!validUrl(posting_url)) errors.push('posting_url must start with http:// or https://')
+  if (!STATUSES.includes(status)) errors.push(`status must be one of: ${STATUSES.join(', ')}`)
+
+  return { errors, value: { company_name, job_title, posting_url, status } }
+}
+
+// GET /api/jobs            everything, newest first
+// GET /api/jobs?status=done  one tab of My Stash
+app.get('/api/jobs', async (request, response, next) => {
+  const { status } = request.query
+
+  if (status !== undefined && !STATUSES.includes(status)) {
+    return response.status(400).json({ error: `status must be one of: ${STATUSES.join(', ')}` })
+  }
+
   try {
-    response.json(await sightings.getAll(pool))
+    response.json(await jobs.getAll(pool, { status }))
   } catch (error) {
     next(error)
   }
 })
 
-app.get('/api/sightings/:id', async (request, response, next) => {
+app.get('/api/jobs/:id', async (request, response, next) => {
   try {
-    const row = await sightings.getById(pool, request.params.id)
+    const row = await jobs.getById(pool, request.params.id)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -73,23 +97,23 @@ app.get('/api/sightings/:id', async (request, response, next) => {
   }
 })
 
-app.post('/api/sightings', async (request, response, next) => {
+app.post('/api/jobs', async (request, response, next) => {
   const { errors, value } = validate(request.body ?? {})
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    response.status(201).json(await sightings.create(pool, value))
+    response.status(201).json(await jobs.create(pool, value))
   } catch (error) {
     next(error)
   }
 })
 
-app.put('/api/sightings/:id', async (request, response, next) => {
+app.put('/api/jobs/:id', async (request, response, next) => {
   const { errors, value } = validate(request.body ?? {})
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    const row = await sightings.update(pool, request.params.id, value)
+    const row = await jobs.update(pool, request.params.id, value)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -97,9 +121,27 @@ app.put('/api/sightings/:id', async (request, response, next) => {
   }
 })
 
-app.delete('/api/sightings/:id', async (request, response, next) => {
+// Ticking "Done" changes one column. PATCH says exactly that, and means the
+// client does not have to send a whole job back to toggle a checkbox.
+app.patch('/api/jobs/:id', async (request, response, next) => {
+  const { status } = request.body ?? {}
+
+  if (!STATUSES.includes(status)) {
+    return response.status(400).json({ error: `status must be one of: ${STATUSES.join(', ')}` })
+  }
+
   try {
-    const removed = await sightings.remove(pool, request.params.id)
+    const row = await jobs.setStatus(pool, request.params.id, status)
+    if (!row) return response.status(404).json({ error: 'Not found' })
+    response.json(row)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.delete('/api/jobs/:id', async (request, response, next) => {
+  try {
+    const removed = await jobs.remove(pool, request.params.id)
     if (!removed) return response.status(404).json({ error: 'Not found' })
     response.status(204).end()
   } catch (error) {
@@ -111,8 +153,8 @@ app.use((request, response) => {
   response.status(404).json({ error: 'No such route' })
 })
 
-// The detail goes in your logs; the visitor gets a plain message. Sending a
-// stack trace to a stranger tells them about your file layout and dependencies.
+// The detail goes in the logs; the visitor gets a plain message. Sending a
+// stack trace to a stranger tells them about the file layout and dependencies.
 app.use((error, request, response, next) => {
   console.error(error)
   response.status(500).json({ error: 'Something went wrong on the server' })

@@ -1,27 +1,37 @@
 -- Sample data for development.
 --
--- This starts with TRUNCATE. That is correct on your laptop and catastrophic
--- against the database your live demo depends on. Check which DATABASE_URL is
--- loaded before you run it.
+-- This starts with TRUNCATE. That is correct on a laptop and catastrophic
+-- against the database a live demo depends on. Check which DATABASE_URL is
+-- loaded before running it.
 
-TRUNCATE TABLE sightings RESTART IDENTITY CASCADE;
+TRUNCATE TABLE saved_jobs RESTART IDENTITY CASCADE;
 
-INSERT INTO sightings (place, description, spookiness, reported_at) VALUES
-  ('Library, third floor',
-   'Chairs rearranged overnight, every time. The night guard says he locks the room himself.',
-   3, now() - interval '12 days'),
-  ('Old gym',
-   'Lights flicker in a fixed pattern after 9pm, always three short and one long.',
-   4, now() - interval '10 days'),
-  ('Parking basement',
-   'Footsteps with no one there. Reported separately by three different people in one week, which is what makes this one hard to dismiss. Two of them were alone at the time and did not know about the others. This row is deliberately long, because a seed of four words hides every text-wrapping bug you have.',
-   5, now() - interval '8 days'),
-  ('Canteen',
-   'A cold spot near the back door, every morning before seven.',
-   1, now() - interval '7 days'),
-  ('AB Building stairwell',
+INSERT INTO saved_jobs (company_name, job_title, posting_url, status, added_at) VALUES
+  ('Brightside Co.',
+   'Frontend Intern',
+   'https://www.linkedin.com/jobs/view/4011223344',
+   'to_apply', now() - interval '2 days'),
+  ('Northwind Labs',
+   'IT Support Associate',
+   'https://northwind.example.com/careers/it-support-associate',
+   'to_apply', now() - interval '4 days'),
+  ('Harbour Analytics',
+   'Data Analyst Intern',
+   'https://ph.indeed.com/viewjob?jk=9f2c1a77bd40e510',
+   'to_apply', now() - interval '6 days'),
+  ('Quill & Type',
+   'Marketing Assistant (Work From Home, 20 hours a week, open to students taking evening classes)',
+   'https://www.jobstreet.com.ph/job/78451236',
+   'to_apply', now() - interval '8 days'),
+  ('Meridian Software',
+   'Junior QA Tester',
+   'https://careers.meridian.example.org/postings/junior-qa-tester',
+   'done', now() - interval '11 days'),
+  ('Cassava Studio',
    '',
-   2, now() - interval '5 days'),
-  ('Chapel garden',
-   'Someone humming. Stops the moment you turn around.',
-   3, now() - interval '2 days');
+   'https://cassava.example.net/jobs/1042',
+   'done', now() - interval '14 days');
+
+-- Two of these are deliberately awkward: one job title long enough to find every
+-- text-wrapping bug, and one row with no title at all, because the form allows
+-- saving a link before you know what the role is called.

@@ -1,20 +1,32 @@
 -- The complete shape of the database. Safe to run against an empty database,
 -- and safe to run twice.
 --
--- This file is committed on purpose. Your schema is a fact about your
+-- This file is committed on purpose. The schema is a fact about the
 -- application, not a runtime concern: it should be readable by opening a file
--- rather than by connecting to a server. It is also what lets you move to a
--- hosted database in one command.
+-- rather than by connecting to a server.
 
-CREATE TABLE IF NOT EXISTS sightings (
-  id          SERIAL PRIMARY KEY,
-  place       TEXT        NOT NULL,
-  description TEXT        NOT NULL DEFAULT '',
-  spookiness  INTEGER     NOT NULL CHECK (spookiness BETWEEN 1 AND 5),
-  reported_at TIMESTAMPTZ NOT NULL DEFAULT now()
+CREATE TABLE IF NOT EXISTS saved_jobs (
+  id           BIGSERIAL PRIMARY KEY,
+  company_name TEXT        NOT NULL CHECK (length(company_name) BETWEEN 1 AND 120),
+  job_title    TEXT        NOT NULL DEFAULT '' CHECK (length(job_title) <= 160),
+  posting_url  TEXT        NOT NULL CHECK (posting_url ~* '^https?://' AND length(posting_url) <= 2000),
+  status       TEXT        NOT NULL DEFAULT 'to_apply' CHECK (status IN ('to_apply', 'done')),
+  added_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- The list page always sorts newest first. Without this the database reads
--- every row and sorts it on each request.
-CREATE INDEX IF NOT EXISTS sightings_reported_at_idx
-  ON sightings (reported_at DESC);
+-- My Stash always sorts newest first. Without this the database reads every row
+-- and sorts it on each request.
+CREATE INDEX IF NOT EXISTS saved_jobs_added_at_idx
+  ON saved_jobs (added_at DESC);
+
+-- The filter tabs query by status, and a partial index on the common case is
+-- cheaper than one covering rows nobody filters for.
+CREATE INDEX IF NOT EXISTS saved_jobs_to_apply_idx
+  ON saved_jobs (added_at DESC)
+  WHERE status = 'to_apply';
+
+-- TODO (once accounts exist): add user_id and make every query filter on it.
+--   ALTER TABLE saved_jobs ADD COLUMN user_id TEXT NOT NULL;
+--   CREATE INDEX saved_jobs_user_idx ON saved_jobs (user_id, added_at DESC);
+-- Until then this table holds one shared list, so the deployed app must not be
+-- described as private.
