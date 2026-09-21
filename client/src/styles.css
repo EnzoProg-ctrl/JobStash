@@ -1,6 +1,31 @@
+@import "tailwindcss";
 /* Deliberately plain. Module 3 covered styling in React properly: CSS modules,
    Tailwind, styled-components, a component library. Replace this with whichever
    you chose and can defend. */
+
+
+/* JobStash design tokens (Navy + Slate). Each one becomes a Tailwind class:
+   --color-primary gives bg-primary, text-primary, border-primary, and so on. */
+@theme {
+  --color-primary: #0F2D5B;      /* navy: main buttons, active tab */
+  --color-accent: #64748B;       /* slate: icons, small details */
+  --color-bg: #F8FAFC;           /* page background */
+  --color-surface: #FFFFFF;      /* cards, forms */
+  --color-ink: #0F172A;          /* main text */
+  --color-muted: #64748B;        /* small grey text */
+  --color-line: #E2E8F0;         /* borders */
+  --color-subtle: #F1F5F9;       /* grey tabs, secondary buttons */
+  --color-brand-blue: #2563EB;   /* "Stash" in the logo, links */
+  --color-todo: #1D4ED8;         /* To Apply badge text */
+  --color-todo-bg: #EFF6FF;      /* To Apply badge background */
+  --color-done: #15803D;         /* Done badge text */
+  --color-done-bg: #F0FDF4;      /* Done badge background */
+  --color-error: #B91C1C;        /* form error messages */
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-heading: 1.75rem;       /* 28px: screen titles */
+  --radius-card: 12px;           /* job cards, form cards */
+}
 
 :root {
   color-scheme: light dark;
