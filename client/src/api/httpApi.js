@@ -26,15 +26,22 @@ async function request(path, options) {
   return response.status === 204 ? null : response.json()
 }
 
-export const listSightings = () => request('/api/sightings')
+// listJobs()                   every job, newest first
+// listJobs({ status: 'done' }) one tab of My Stash
+export const listJobs = ({ status } = {}) =>
+  request(status ? `/api/jobs?status=${encodeURIComponent(status)}` : '/api/jobs')
 
-export const getSighting = (id) => request(`/api/sightings/${id}`)
+export const getJob = (id) => request(`/api/jobs/${id}`)
 
-export const createSighting = (input) =>
-  request('/api/sightings', { method: 'POST', body: JSON.stringify(input) })
+export const createJob = (input) =>
+  request('/api/jobs', { method: 'POST', body: JSON.stringify(input) })
 
-export const updateSighting = (id, input) =>
-  request(`/api/sightings/${id}`, { method: 'PUT', body: JSON.stringify(input) })
+export const updateJob = (id, input) =>
+  request(`/api/jobs/${id}`, { method: 'PUT', body: JSON.stringify(input) })
 
-export const deleteSighting = (id) =>
-  request(`/api/sightings/${id}`, { method: 'DELETE' })
+// The Done checkbox. Sends only the new status, not the whole job.
+export const setJobStatus = (id, status) =>
+  request(`/api/jobs/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) })
+
+export const deleteJob = (id) =>
+  request(`/api/jobs/${id}`, { method: 'DELETE' })

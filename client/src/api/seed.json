@@ -1,8 +1,8 @@
 [
-  { "id": "seed-1", "place": "Library, third floor", "description": "Chairs rearranged overnight, every time. The night guard says he locks the room himself.", "spookiness": 3, "reported_at": "2026-08-01T14:20:00.000Z" },
-  { "id": "seed-2", "place": "Old gym", "description": "Lights flicker in a fixed pattern after 9pm, always three short and one long.", "spookiness": 4, "reported_at": "2026-08-03T11:05:00.000Z" },
-  { "id": "seed-3", "place": "Parking basement", "description": "Footsteps with no one there. Reported separately by three different people in one week, which is what makes this one hard to dismiss. Two of them were alone at the time and did not know about the others. This entry is deliberately long, because a seed row of four words hides every text-wrapping bug you have.", "spookiness": 5, "reported_at": "2026-08-05T22:40:00.000Z" },
-  { "id": "seed-4", "place": "Canteen", "description": "A cold spot near the back door, every morning before seven.", "spookiness": 1, "reported_at": "2026-08-06T07:15:00.000Z" },
-  { "id": "seed-5", "place": "AB Building stairwell", "description": "", "spookiness": 2, "reported_at": "2026-08-08T18:30:00.000Z" },
-  { "id": "seed-6", "place": "Chapel garden", "description": "Someone humming. Stops the moment you turn around.", "spookiness": 3, "reported_at": "2026-08-10T05:50:00.000Z" }
+  { "id": "seed-1", "company_name": "Brightside Co.", "job_title": "Frontend Intern", "posting_url": "https://www.linkedin.com/jobs/view/4011223344", "status": "to_apply", "added_at": "2026-09-20T09:15:00.000Z" },
+  { "id": "seed-2", "company_name": "Northwind Labs", "job_title": "IT Support Associate", "posting_url": "https://northwind.example.com/careers/it-support-associate", "status": "to_apply", "added_at": "2026-09-18T13:40:00.000Z" },
+  { "id": "seed-3", "company_name": "Harbour Analytics", "job_title": "Data Analyst Intern", "posting_url": "https://ph.indeed.com/viewjob?jk=9f2c1a77bd40e510", "status": "to_apply", "added_at": "2026-09-16T02:05:00.000Z" },
+  { "id": "seed-4", "company_name": "Quill & Type", "job_title": "Marketing Assistant (Work From Home, 20 hours a week, open to students taking evening classes)", "posting_url": "https://www.jobstreet.com.ph/job/78451236", "status": "to_apply", "added_at": "2026-09-14T11:30:00.000Z" },
+  { "id": "seed-5", "company_name": "Meridian Software", "job_title": "Junior QA Tester", "posting_url": "https://careers.meridian.example.org/postings/junior-qa-tester", "status": "done", "added_at": "2026-09-11T07:20:00.000Z" },
+  { "id": "seed-6", "company_name": "Cassava Studio", "job_title": "", "posting_url": "https://cassava.example.net/jobs/1042", "status": "done", "added_at": "2026-09-08T05:50:00.000Z" }
 ]

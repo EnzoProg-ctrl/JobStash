@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listSightings, createSighting, deleteSighting } from './api'
+import { listJobs, createJob, deleteJob } from './api'
 import DemoNotice from './components/DemoNotice.jsx'
 
 // A deliberately small working app. Replace all of it with your own project.
@@ -27,7 +27,7 @@ export default function App() {
     const timer = setTimeout(() => setSlow(true), 3000)
 
     try {
-      setRows(await listSightings())
+      setRows(await listJobs())
       setStatus('ready')
     } catch (caught) {
       setError(caught)
@@ -48,7 +48,7 @@ export default function App() {
 
     setSaving(true)
     try {
-      const created = await createSighting({
+      const created = await createJob({
         place: form.place.trim(),
         description: form.description.trim(),
         spookiness: Number(form.spookiness),
@@ -66,7 +66,7 @@ export default function App() {
     const previous = rows
     setRows(rows.filter((row) => row.id !== id))   // optimistic
     try {
-      await deleteSighting(id)
+      await deleteJob(id)
     } catch (caught) {
       setRows(previous)                            // put it back on failure
       setError(caught)

@@ -28,10 +28,13 @@ export const USING_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false'
 
 const implementation = USING_MOCK_API ? mockApi : httpApi
 
+// Both files must provide every one of these, with the same arguments and the
+// same return values. If you add a function to one, add it to the other.
 export const {
-  listSightings,
-  getSighting,
-  createSighting,
-  updateSighting,
-  deleteSighting,
+  listJobs,
+  getJob,
+  createJob,
+  updateJob,
+  setJobStatus,
+  deleteJob,
 } = implementation
