@@ -21,8 +21,9 @@ export default function App() {
   )
 }
 
+// Inside the app, My Stash is home. The landing page at "/" is for visitors,
+// so it is not in this menu.
 const LINKS = [
-  { to: '/', label: 'Home' },
   { to: '/stash', label: 'My Stash' },
   { to: '/add', label: 'Add Job' },
 ]
