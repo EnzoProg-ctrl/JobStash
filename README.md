@@ -13,7 +13,6 @@ moment you find it, then open the same list on your laptop and actually apply.
 
 ![My Stash: saved jobs with To Apply, Done and All tabs](docs/assets/my-stash.png)
 
-_[Your AI credit line goes here. Required by the documentation guide.]_
 
 ## Contents
 
@@ -22,8 +21,7 @@ _[Your AI credit line goes here. Required by the documentation guide.]_
 3. [How to run it](#3-how-to-run-it)
 4. [Features and usage](#4-features-and-usage)
 5. [Project structure](#5-project-structure)
-6. [Screenshots](#6-screenshots)
-7. [Known issues and next steps](#7-known-issues-and-next-steps)
+6. [Known issues and next steps](#7-known-issues-and-next-steps)
 
 ## 1. Overview
 
@@ -279,25 +277,7 @@ JobStash/
 └── AI-USAGE.md                how AI was used in this project
 ```
 
-## 6. Screenshots
-
-**Landing page**
-
-![The landing page: "Found it on your phone? Stash it. Apply later." with a phone showing the app](docs/assets/landing.png)
-
-**My Stash**, on the To Apply tab
-
-![My Stash with job cards and the To Apply, Done and All tabs](docs/assets/my-stash.png)
-
-**The ⋮ menu** on a card
-
-![A job card with its menu open, showing "Mark as done"](docs/assets/card-menu.png)
-
-**On a phone**
-
-![My Stash on a phone-sized screen, with the cards stacked](docs/assets/my-stash-phone.png)
-
-## 7. Known issues and next steps
+## 6. Known issues and next steps
 
 **Known issues**
 - **Everyone shares one list.** There are no accounts yet, and the table
