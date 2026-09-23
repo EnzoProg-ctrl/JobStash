@@ -1,10 +1,25 @@
-import { NavLink, Navigate, Route, Routes } from 'react-router'
+import { NavLink, Navigate, Outlet, Route, Routes } from 'react-router'
 import DemoNotice from './components/DemoNotice.jsx'
 import HomePage from './pages/HomePage.jsx'
 import StashPage from './pages/StashPage.jsx'
 import AddJobPage from './pages/AddJobPage.jsx'
 
 // The three screens from the wireframes. Every other address goes back to Home.
+//
+// The landing page has its own header and full-width layout. The app screens
+// share AppLayout, so they keep the same menu and width.
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route element={<AppLayout />}>
+        <Route path="/stash" element={<StashPage />} />
+        <Route path="/add" element={<AddJobPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
 
 const LINKS = [
   { to: '/', label: 'Home' },
@@ -12,9 +27,9 @@ const LINKS = [
   { to: '/add', label: 'Add Job' },
 ]
 
-export default function App() {
+function AppLayout() {
   return (
-    <div className="min-h-screen bg-bg font-sans text-ink">
+    <div className="min-h-screen">
       {/* Temporary menu so the pages can be reached. It is replaced by the
           sidebar and phone menu from the mockup. */}
       <nav className="flex gap-2 border-b border-line bg-surface px-4 py-3">
@@ -36,13 +51,7 @@ export default function App() {
 
       <main className="mx-auto max-w-3xl px-4 py-8">
         <DemoNotice />
-
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/stash" element={<StashPage />} />
-          <Route path="/add" element={<AddJobPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Outlet />
       </main>
     </div>
   )
