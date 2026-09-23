@@ -1,3 +1,4 @@
+import CardMenu from './CardMenu.jsx'
 import StatusBadge from './StatusBadge.jsx'
 import { siteName, timeAgo } from '../lib/format.js'
 
@@ -5,7 +6,7 @@ import { siteName, timeAgo } from '../lib/format.js'
 //
 // On a phone everything stacks: the badge and link sit under the text. From
 // 768px up (md:) the card becomes one row with them on the right.
-export default function JobCard({ job }) {
+export default function JobCard({ job, onSetStatus }) {
   // The title is optional, so a link can be saved before you know what the
   // role is called. Without one, the company moves up to the bold line.
   const heading = job.job_title || job.company_name
@@ -23,7 +24,7 @@ export default function JobCard({ job }) {
           {job.company_name.charAt(0).toUpperCase()}
         </span>
 
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className="font-semibold wrap-anywhere">{heading}</h2>
           {subheading && <p className="wrap-anywhere">{subheading}</p>}
           <p className="text-sm text-muted">
@@ -31,6 +32,12 @@ export default function JobCard({ job }) {
             Added <time dateTime={job.added_at}>{timeAgo(job.added_at)}</time>
           </p>
         </div>
+
+        <CardMenu
+          label={heading}
+          status={job.status}
+          onSetStatus={(status) => onSetStatus(job, status)}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-2 pl-15 md:shrink-0 md:pl-0">

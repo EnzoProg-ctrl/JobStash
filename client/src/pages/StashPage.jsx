@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listJobs } from '../api'
+import { listJobs, setJobStatus } from '../api'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
 
@@ -10,13 +10,14 @@ const EMPTY_TAB = {
   done: 'Nothing marked as done yet.',
 }
 
-// My Stash: every saved job, filtered by the tabs. Search and the card actions
-// come next.
+// My Stash: every saved job, filtered by the tabs, with a menu on each card to
+// mark it done. Search and delete come next.
 export default function StashPage() {
   const [status, setStatus] = useState('loading')   // loading | ready | error
   const [jobs, setJobs] = useState([])
   const [error, setError] = useState(null)
   const [tab, setTab] = useState('to_apply')        // to_apply | done | all
+  const [actionError, setActionError] = useState(null)
 
   useEffect(() => {
     listJobs()
@@ -29,6 +30,23 @@ export default function StashPage() {
         setStatus('error')
       })
   }, [])
+
+  // The card changes straight away, then the change is saved. If saving fails
+  // the card goes back to how it was, so the screen never shows something that
+  // was not saved.
+  async function handleSetStatus(job, next) {
+    const replace = (changed) =>
+      setJobs((current) => current.map((row) => (row.id === changed.id ? changed : row)))
+
+    setActionError(null)
+    replace({ ...job, status: next })
+    try {
+      replace(await setJobStatus(job.id, next))
+    } catch (caught) {
+      replace(job)
+      setActionError(`Couldn't update "${job.job_title || job.company_name}": ${caught.message}`)
+    }
+  }
 
   // All jobs are already loaded, so switching tabs only filters what is here.
   // No extra request, and the counts come for free.
@@ -65,6 +83,12 @@ export default function StashPage() {
             <FilterTabs value={tab} counts={counts} onChange={setTab} />
           </div>
 
+          {actionError && (
+            <p className="mt-4 rounded-card border border-line bg-surface p-4 text-error" role="alert">
+              {actionError}
+            </p>
+          )}
+
           {visible.length === 0 ? (
             <p className="mt-6 rounded-card border border-line bg-surface p-8 text-center text-muted">
               {EMPTY_TAB[tab]}
@@ -72,7 +96,7 @@ export default function StashPage() {
           ) : (
             <ul className="mt-6 flex flex-col gap-4">
               {visible.map((job) => (
-                <JobCard key={job.id} job={job} />
+                <JobCard key={job.id} job={job} onSetStatus={handleSetStatus} />
               ))}
             </ul>
           )}
