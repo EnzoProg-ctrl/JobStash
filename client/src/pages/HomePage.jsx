@@ -41,7 +41,7 @@ export default function HomePage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 md:px-8">
-        <DemoNotice />
+        <DemoNotice className="mb-6" />
 
         <section className="grid items-center gap-12 py-8 lg:grid-cols-[1.35fr_1fr] lg:py-12">
           <div>

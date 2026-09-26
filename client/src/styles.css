@@ -20,7 +20,8 @@
 
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-hand: "Caveat", cursive;  /* the handwritten notes on the landing page */
-  --text-heading: 1.75rem;       /* 28px: screen titles */
+  --text-heading: 2.5rem;        /* 40px: screen titles ("My Stash") */
+  --text-heading--line-height: 1.1;
   --text-display: 3.5rem;        /* 56px: the landing page headline only */
   --text-display--line-height: 1.05;
   --radius-card: 12px;           /* job cards, form cards */

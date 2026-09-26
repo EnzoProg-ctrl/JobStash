@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listJobs, setJobStatus } from '../api'
+import DemoNotice from '../components/DemoNotice.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
 
@@ -59,8 +60,13 @@ export default function StashPage() {
 
   return (
     <section>
-      <h1 className="text-heading font-bold">My Stash</h1>
-      <p className="mt-2 text-muted">Jobs you've saved for later.</p>
+      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h1 className="text-heading font-bold">My Stash</h1>
+          <p className="mt-2 text-lg text-muted">Keep track of jobs you want to apply to.</p>
+        </div>
+        <DemoNotice className="md:max-w-sm" />
+      </div>
 
       {/* Four states, and each looks different. An empty list means "nothing
           here yet"; an error means "we could not find out". */}
@@ -79,7 +85,7 @@ export default function StashPage() {
 
       {status === 'ready' && jobs.length > 0 && (
         <>
-          <div className="mt-6">
+          <div className="mt-8">
             <FilterTabs value={tab} counts={counts} onChange={setTab} />
           </div>
 
