@@ -70,6 +70,14 @@ export default function StashPage() {
     }
   }
 
+  // Called by the Add Job pop-up after it saves. The new job goes first because
+  // it is the newest, and the tab and search are reset so it is always visible.
+  function handleJobSaved(job) {
+    setJobs((current) => [job, ...current])
+    setTab('to_apply')
+    setQuery('')
+  }
+
   // All jobs are already loaded, so the tabs, search and sort only rearrange
   // what is here. No extra request.
   //
@@ -153,7 +161,7 @@ export default function StashPage() {
           )}
         </>
       )}
-      <Outlet/>
+      <Outlet context={{ onJobSaved: handleJobSaved }} />
     </section>
   )
 }

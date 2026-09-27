@@ -4,7 +4,8 @@ import HomePage from './pages/HomePage.jsx'
 import StashPage from './pages/StashPage.jsx'
 import AddJobDialog from './components/AddJobDialog.jsx'
 
-// The three screens from the wireframes. Every other address goes back to Home.
+// The landing page, My Stash, and the Add Job pop-up on top of My Stash.
+// Every other address goes back to Home.
 //
 // The landing page has its own header and full-width layout. The app screens
 // share AppLayout, so they keep the same header and width.
@@ -14,9 +15,10 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route element={<AppLayout />}>
         <Route path="/stash" element={<StashPage />}>
-        <Route path="add" element={<AddJobDialog />} />
+          <Route path="add" element={<AddJobDialog />} />
         </Route>
-        <Route path="/add" element={<Navigate to="/stash/add" replace/>}/>
+        {/* Old links to /add still work. */}
+        <Route path="/add" element={<Navigate to="/stash/add" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

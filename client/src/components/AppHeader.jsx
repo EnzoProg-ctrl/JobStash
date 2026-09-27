@@ -14,7 +14,7 @@ export default function AppHeader() {
           <Logo className="text-2xl md:text-3xl" />
         </Link>
         <Link
-          to="/add"
+          to="/stash/add"
           className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brand-blue px-4 font-semibold text-white hover:bg-todo md:px-6"
         >
           <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">

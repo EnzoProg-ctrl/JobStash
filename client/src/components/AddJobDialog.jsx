@@ -1,6 +1,12 @@
-import {useEffect, useRef, useState} from 'react'
-import {useNavigate} from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useOutletContext } from 'react-router'
+import { createJob } from '../api'
 
+// The Add Job pop-up. It is shown while the address is /stash/add, on top of
+// My Stash, and closing it just goes back to /stash.
+
+// The same rules the server checks in server/server.js, so mistakes get a
+// friendly message here before anything is sent.
 function validate({ postingUrl, companyName, jobTitle }) {
   const errors = {}
   const url = postingUrl.trim()
@@ -11,13 +17,13 @@ function validate({ postingUrl, companyName, jobTitle }) {
     errors.postingUrl = "That doesn't look like a web link. It should start with https://"
   }
 
-  if (!companyName.trim()){
+  if (!companyName.trim()) {
     errors.companyName = 'Add the company name.'
-  }else if (companyName.trim().length > 120){
+  } else if (companyName.trim().length > 120) {
     errors.companyName = 'Keep the company name under 120 characters.'
   }
 
-  if (jobTitle.trim().length > 160){
+  if (jobTitle.trim().length > 160) {
     errors.jobTitle = 'Keep the job title under 160 characters.'
   }
 
@@ -33,84 +39,181 @@ function isWebLink(text) {
   }
 }
 
-export default function AddJobDialog(){
-    const dialog = useRef(null)
+const inputClass =
+  'min-h-12 w-full rounded-lg border border-line bg-surface px-4 text-base placeholder:text-muted aria-invalid:border-error'
 
-    useEffect(()=> {
+export default function AddJobDialog() {
+  const dialog = useRef(null)
+  const urlInput = useRef(null)
+
+  // The browser's <dialog> dims the page, keeps Tab inside the pop-up and
+  // closes on Esc. showModal() is what switches all of that on. It also moves
+  // focus to the first button (the ✕), so the link box is focused after it,
+  // ready for a paste.
+  useEffect(() => {
     dialog.current.showModal()
+    urlInput.current.focus()
   }, [])
 
-    const navigate = useNavigate()
-    const [postingUrl, setPostingUrl] = useState('')
-    const [companyName, setCompanyName] = useState('')
-    const [jobTitle, setJobTitle] = useState('')
-    const [errors, setErrors] = useState({})
+  const navigate = useNavigate()
+  const { onJobSaved } = useOutletContext()
+  const [postingUrl, setPostingUrl] = useState('')
+  const [companyName, setCompanyName] = useState('')
+  const [jobTitle, setJobTitle] = useState('')
+  const [errors, setErrors] = useState({})
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
-    function close(){
-        navigate ('/stash')
+  function close() {
+    // Closing the dialog first puts keyboard focus back on + Add Job, where it
+    // was before the pop-up opened.
+    dialog.current?.close()
+    navigate('/stash')
+  }
+
+  // A click on the dimmed background lands on the <dialog> element itself;
+  // a click on the white box lands on something inside it.
+  function handleBackdropClick(event) {
+    if (event.target === dialog.current) close()
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    const found = validate({ postingUrl, companyName, jobTitle })
+    setErrors(found)
+    if (Object.keys(found).length > 0) return
+
+    setSaving(true)
+    setSaveError(null)
+    try {
+      const job = await createJob({
+        posting_url: postingUrl.trim(),
+        company_name: companyName.trim(),
+        job_title: jobTitle.trim(),
+      })
+      onJobSaved(job)
+      close()
+    } catch (caught) {
+      setSaveError(caught.message)
+    } finally {
+      setSaving(false)
     }
+  }
 
-    function handleSubmit(event){
-        event.preventDefault()
-        const found = validate({ postingUrl, companyName, jobTitle })
-        setErrors(found)
-        if (Object.keys(found).length > 0) return
-        console.log('All good, ready to save:', { postingUrl, companyName, jobTitle })
-    }
+  return (
+    <dialog
+      ref={dialog}
+      onCancel={close}
+      onClick={handleBackdropClick}
+      aria-labelledby="add-job-title"
+      className="m-auto w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40"
+    >
+      <div className="p-6 md:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="add-job-title" className="text-3xl font-bold">Add Job</h2>
+            <p className="mt-1 text-muted">Paste a job link to save it for later.</p>
+          </div>
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-subtle text-ink hover:bg-line"
+          >
+            <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M5 5l10 10M15 5L5 15" />
+            </svg>
+          </button>
+        </div>
 
-    return (
-    <dialog ref={dialog} onCancel={close}>
-      <h2>Add Job</h2>
-      <form onSubmit={handleSubmit} noValidate>
-        <label htmlFor="posting-url">Job posting URL *</label>
-        <input
-          id="posting-url"
-          type="url"
-          placeholder="https://"
-          value={postingUrl}
-          onChange={(event) => setPostingUrl(event.target.value)}
-          aria-invalid={errors.postingUrl ? 'true' : undefined}
-          aria-describedby={errors.postingUrl ? 'posting-url-error' : undefined}
-        />
+        <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-5">
+          <div>
+            <label htmlFor="posting-url" className="mb-2 block text-sm font-semibold">
+              Job posting URL <span className="text-error" aria-hidden="true">*</span>
+            </label>
+            <div className="relative">
+              <svg className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                <path d="M7 9a3 3 0 004.2.3l2-2a3 3 0 00-4.2-4.2l-.8.8M9 7a3 3 0 00-4.2-.3l-2 2a3 3 0 004.2 4.2l.8-.8" />
+              </svg>
+              <input
+                id="posting-url"
+                type="url"
+                placeholder="https://"
+                ref={urlInput}
+                aria-required="true"
+                value={postingUrl}
+                onChange={(event) => setPostingUrl(event.target.value)}
+                aria-invalid={errors.postingUrl ? 'true' : undefined}
+                aria-describedby={errors.postingUrl ? 'posting-url-error' : undefined}
+                className={`${inputClass} pl-12`}
+              />
+            </div>
+            {errors.postingUrl && (
+              <p id="posting-url-error" className="mt-2 text-sm text-error">{errors.postingUrl}</p>
+            )}
+          </div>
 
-        {errors.postingUrl && (
-          <p id="posting-url-error" className="text-sm text-error">{errors.postingUrl}</p>
-        )}
+          <div>
+            <label htmlFor="company-name" className="mb-2 block text-sm font-semibold">
+              Company name <span className="text-error" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="company-name"
+              type="text"
+              placeholder="e.g. NovaTech"
+              aria-required="true"
+              value={companyName}
+              onChange={(event) => setCompanyName(event.target.value)}
+              aria-invalid={errors.companyName ? 'true' : undefined}
+              aria-describedby={errors.companyName ? 'company-name-error' : undefined}
+              className={inputClass}
+            />
+            {errors.companyName && (
+              <p id="company-name-error" className="mt-2 text-sm text-error">{errors.companyName}</p>
+            )}
+          </div>
 
-        <label htmlFor="company-name">Company name *</label>
-        <input
-          id="company-name"
-          type="text"
-          placeholder="e.g. NovaTech"
-          value={companyName}
-          onChange={(event) => setCompanyName(event.target.value)}
-          aria-invalid={errors.companyName ? 'true' : undefined}
-          aria-describedby={errors.companyName ? 'company-name-error' : undefined}
-        />
+          <div>
+            <label htmlFor="job-title" className="mb-2 block text-sm font-semibold">Job title</label>
+            <input
+              id="job-title"
+              type="text"
+              placeholder="e.g. Data Analyst Intern"
+              value={jobTitle}
+              onChange={(event) => setJobTitle(event.target.value)}
+              aria-invalid={errors.jobTitle ? 'true' : undefined}
+              aria-describedby={errors.jobTitle ? 'job-title-error' : undefined}
+              className={inputClass}
+            />
+            {errors.jobTitle && (
+              <p id="job-title-error" className="mt-2 text-sm text-error">{errors.jobTitle}</p>
+            )}
+          </div>
 
-        {errors.companyName && (
-          <p id="company-name-error" className="text-sm text-error">{errors.companyName}</p>
-        )}
+          {saveError && (
+            <p role="alert" className="rounded-lg border border-line bg-subtle p-3 text-sm text-error">
+              Couldn't save: {saveError}
+            </p>
+          )}
 
-        <label htmlFor="job-title">Job title</label>
-        <input
-          id="job-title"
-          type="text"
-          placeholder="e.g. Data Analyst Intern"
-          value={jobTitle}
-          onChange={(event) => setJobTitle(event.target.value)}
-          aria-invalid={errors.jobTitle ? 'true' : undefined}
-          aria-describedby={errors.jobTitle ? 'job-title-error' : undefined}
-        />
-
-        {errors.jobTitle && (
-          <p id="job-title-error" className="text-sm text-error">{errors.jobTitle}</p>
-        )}
-
-
-        <button type="button" onClick={close}>Cancel</button>
-        <button type="submit">Save Job</button>
-      </form>
+          <div className="mt-2 flex gap-3 sm:justify-between">
+            <button
+              type="button"
+              onClick={close}
+              className="min-h-12 flex-1 rounded-lg bg-subtle px-8 font-semibold text-ink hover:bg-line sm:flex-none"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="min-h-12 flex-1 rounded-lg bg-brand-blue px-10 font-semibold text-white hover:bg-todo disabled:opacity-60 sm:flex-none"
+            >
+              {saving ? 'Saving…' : 'Save Job'}
+            </button>
+          </div>
+        </form>
+      </div>
     </dialog>
   )
 }
