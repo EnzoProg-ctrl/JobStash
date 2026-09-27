@@ -339,8 +339,8 @@ connects as the `postgres` user, which bypasses Row Level Security.
 
 ## Author
 
-_[Laurenzo Centeno]_ — [@EnzoProg-ctrl](https://github.com/EnzoProg-ctrl)
-_[APSI - CS401]_
+_Laurenzo Centeno_ — @EnzoProg-ctrl (https://github.com/EnzoProg-ctrl)
+_APSI - CS401_
 
 ## Licence
 
