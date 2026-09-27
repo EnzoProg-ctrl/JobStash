@@ -3,8 +3,8 @@
 A digital clipboard for job hunting. Save a job posting link on your phone the
 moment you find it, then open the same list on your laptop and actually apply.
 
-**Live site:** not deployed yet (planned: Vercel)
-**API:** not deployed yet
+**Live demo:** https://enzoprog-ctrl.github.io/JobStash/ (demo mode: no server or database behind it)
+**Full version:** not deployed yet (planned: Vercel for the website, a free Node host for the API)
 **Demo video:** not recorded yet
 
 > **This app runs in demo mode by default.** The screens are real, but unless
@@ -21,7 +21,7 @@ moment you find it, then open the same list on your laptop and actually apply.
 3. [How to run it](#3-how-to-run-it)
 4. [Features and usage](#4-features-and-usage)
 5. [Project structure](#5-project-structure)
-6. [Known issues and next steps](#7-known-issues-and-next-steps)
+6. [Known issues and next steps](#6-known-issues-and-next-steps)
 
 ## 1. Overview
 
@@ -164,20 +164,36 @@ now come from your database.
 ### The main flow
 
 1. **Landing page** (`/`) explains what JobStash is. The sign-in form is not
-   working yet (see [Known issues](#7-known-issues-and-next-steps)). Submitting
+   working yet (see [Known issues](#6-known-issues-and-next-steps)). Submitting
    it shows a link to the demo.
-2. **My Stash** (`/stash`) is the app's home. Every saved job is a card with:
+2. **Add a job:** click **+ Add Job** in the header. A pop-up opens on top of
+   My Stash (address `/stash/add`), with the cursor ready in the link box.
+   - **Job posting URL** (required): must be a real `http://` or `https://` link
+   - **Company name** (required): 120 characters at most
+   - **Job title** (optional): 160 characters at most
+
+   Mistakes show in red under the field before anything is sent. **Save Job**
+   shows *Saving…*; if saving fails, the message appears in the pop-up and
+   what you typed is kept. After saving, the pop-up closes, the page switches
+   to **To Apply**, and the new job is first in the list. Close it with ✕,
+   **Cancel**, **Esc**, or a click on the dimmed background. Old links to
+   `/add` still work.
+3. **My Stash** (`/stash`) is the app's home. Every saved job is a card with:
+   - a coloured letter circle for the company
    - the job title and company (if there's no title, the company is shown instead)
    - the website it's from (LinkedIn, Indeed and JobStreet by name, other sites
      by address) and how long ago it was saved
    - a **To Apply** or **Done** badge
    - **Open Posting**, which opens the job in a new tab
-3. **Tabs** (To Apply, Done, All) filter the list and show how many jobs each
+4. **Tabs** (To Apply, Done, All) filter the list and show how many jobs each
    has. The page opens on To Apply.
-4. **The ⋮ menu** on a card marks the job **done**, or moves a done job **back
+5. **Search** filters by job title or company as you type; capitals don't
+   matter. The tab counts change to show how many matches each tab has.
+   **Sort** orders the list by **Newest first**, **Oldest first** or
+   **Company A–Z**.
+6. **The ⋮ menu** on a card marks the job **done**, or moves a done job **back
    to To Apply**. The card updates straight away. If saving fails, it changes
    back and a message explains why.
-5. **Add Job** (`/add`) is a placeholder page for now.
 
 ### The API
 
@@ -249,15 +265,17 @@ JobStash/
 │       ├── styles.css         Tailwind and the design colours, font and sizes
 │       ├── pages/             one file per screen
 │       │   ├── HomePage.jsx       landing page  (/)
-│       │   ├── StashPage.jsx      My Stash      (/stash)
-│       │   └── AddJobPage.jsx     Add Job       (/add, placeholder)
+│       │   └── StashPage.jsx      My Stash      (/stash)
 │       ├── components/        pieces used by the pages
+│       │   ├── AppHeader.jsx      logo and + Add Job, on the app screens
+│       │   ├── AddJobDialog.jsx   the Add Job pop-up (/stash/add)
+│       │   ├── FilterTabs.jsx     To Apply / Done / All
+│       │   ├── StashToolbar.jsx   search and sort
 │       │   ├── JobCard.jsx        one saved job
 │       │   ├── CardMenu.jsx       the ⋮ menu on a card
-│       │   ├── FilterTabs.jsx     To Apply / Done / All
 │       │   ├── StatusBadge.jsx    the To Apply / Done pill
 │       │   ├── Logo.jsx           the JobStash wordmark
-│       │   └── DemoNotice.jsx     the demo-mode box
+│       │   └── DemoNotice.jsx     the demo-mode notice
 │       ├── lib/format.js      "LinkedIn", "2 days ago"
 │       ├── api/               the only code that fetches data
 │       │   ├── index.js           picks demo or real
@@ -284,26 +302,24 @@ JobStash/
   doesn't record who saved a job. Don't save anything private.
 - **The sign-in form doesn't sign you in.** It shows a "coming soon" message
   and a link to the demo. The email is not sent or stored.
-- **You can't add a job from the website yet.** The Add Job page is a
-  placeholder. Jobs can be added through the API (`POST /api/jobs`).
-- **Deleting and searching aren't built yet**, even though the API can delete.
-- **Marking a job done has only been tested in demo mode**, not yet against the
-  real database.
-- **Not deployed.** Everything runs locally for now.
+- **Deleting isn't built in the website yet**, even though the API can delete.
+- **Adding and marking done have only been tested in demo mode.** Listing jobs
+  has been tested against the real database; the two actions that change it
+  have not yet.
+- **Only the demo is online.** The GitHub Pages link runs in demo mode, so it
+  has no server or database behind it. The full version isn't deployed yet.
 - **`npm run db:seed` wipes the table.** See [Set up the database](#set-up-the-database).
 
 **Next steps**
 1. Delete a job, with an **Undo** button in case of a wrong tap
-2. The Add Job form
-3. Search
-4. Test every action against the real database
-5. Sign-in, and a `user_id` on each job so each person's list is private
-6. Deploy: the website on Vercel, the API on a free Node host, the database
-   already on Supabase
+2. Test every action against the real database
+3. Sign-in, and a `user_id` on each job so each person's list is private
+4. Deploy: the website on Vercel, the API on a free Node host, the database
+   already on Supabase. Then switch off the GitHub Pages demo
 
 ## Deploying
 
-Nothing is deployed yet. The plan:
+Only the demo is online, on GitHub Pages. The plan for the full version:
 
 | Piece | Where | Notes |
 |---|---|---|
@@ -311,13 +327,20 @@ Nothing is deployed yet. The plan:
 | API | a free Node host (Render or Railway) | Point it at `server/`, add the `server/.env` settings in its dashboard, and add the website's address to `CORS_ORIGINS` |
 | Database | Supabase | Already set up |
 
-The repository also contains a GitHub Pages workflow from the course template
-(`.github/workflows/deploy-pages.yml`). It isn't used while the plan is Vercel.
+**The demo on GitHub Pages** comes from the course template's workflow,
+`.github/workflows/deploy-pages.yml`. Every push to `main` that changes
+`client/` rebuilds the website in demo mode and republishes it. It stays until
+the Vercel version is live, then the workflow is deleted and Pages switched off.
+
+**Database security.** Supabase adds its own public web API to every table.
+`schema.sql` turns on Row Level Security for `saved_jobs` with no rules, which
+blocks that API completely. The Express server still works, because it
+connects as the `postgres` user, which bypasses Row Level Security.
 
 ## Author
 
-_[your name]_ — [@EnzoProg-ctrl](https://github.com/EnzoProg-ctrl)
-_[course and section]_
+_[Laurenzo Centeno]_ — [@EnzoProg-ctrl](https://github.com/EnzoProg-ctrl)
+_[APSI - CS401]_
 
 ## Licence
 

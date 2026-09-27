@@ -25,6 +25,12 @@ CREATE INDEX IF NOT EXISTS saved_jobs_to_apply_idx
   ON saved_jobs (added_at DESC)
   WHERE status = 'to_apply';
 
+-- Supabase puts a public web API on every table, reachable with the project's
+-- public key. Row Level Security with no policies blocks that API completely.
+-- The Express server is not affected: it connects as the postgres user, which
+-- bypasses RLS. All access goes through the server, where the input is checked.
+ALTER TABLE saved_jobs ENABLE ROW LEVEL SECURITY;
+
 -- TODO (once accounts exist): add user_id and make every query filter on it.
 --   ALTER TABLE saved_jobs ADD COLUMN user_id TEXT NOT NULL;
 --   CREATE INDEX saved_jobs_user_idx ON saved_jobs (user_id, added_at DESC);
