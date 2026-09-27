@@ -2,7 +2,7 @@ import { Navigate, Outlet, Route, Routes } from 'react-router'
 import AppHeader from './components/AppHeader.jsx'
 import HomePage from './pages/HomePage.jsx'
 import StashPage from './pages/StashPage.jsx'
-import AddJobPage from './pages/AddJobPage.jsx'
+import AddJobDialog from './components/AddJobDialog.jsx'
 
 // The three screens from the wireframes. Every other address goes back to Home.
 //
@@ -13,8 +13,10 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route element={<AppLayout />}>
-        <Route path="/stash" element={<StashPage />} />
-        <Route path="/add" element={<AddJobPage />} />
+        <Route path="/stash" element={<StashPage />}>
+        <Route path="add" element={<AddJobDialog />} />
+        </Route>
+        <Route path="/add" element={<Navigate to="/stash/add" replace/>}/>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

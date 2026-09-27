@@ -4,6 +4,7 @@ import DemoNotice from '../components/DemoNotice.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
 import StashToolbar from '../components/StashToolbar.jsx'
+import { Outlet } from 'react-router'
 
 // Shown when a tab has nothing in it. Different from the page having no jobs
 // at all, which gets its own message below.
@@ -152,6 +153,7 @@ export default function StashPage() {
           )}
         </>
       )}
+      <Outlet/>
     </section>
   )
 }
