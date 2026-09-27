@@ -44,7 +44,7 @@ export default function AddJobDialog(){
           onChange={(event) => setCompanyName(event.target.value)}
         />
 
-        <label htmlFor="job-title">Job Title *</label>
+        <label htmlFor="job-title">Job title</label>
         <input
           id="job-title"
           type="text"
