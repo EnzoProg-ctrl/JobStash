@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import { pool } from './db/pool.js'
 import * as jobs from './jobsRepo.js'
+import helmet from 'helmet'
 
 const app = express()
 
@@ -16,8 +17,19 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .map((origin) => origin.trim())
   .filter(Boolean)
 
+app.use(helmet())
 app.use(cors({ origin: allowedOrigins }))
 app.use(express.json({ limit: '100kb' }))
+
+// app.param runs before every route that has :id in its path.
+const WHOLE_NUMBER = /^[1-9][0-9]{0,17}$/
+
+app.param('id', (request, response, next, id) => {
+  if (!WHOLE_NUMBER.test(id)) {
+    return response.status(404).json({ error: 'Not found' })
+  }
+  next()
+})
 
 // Is the process alive?
 app.get('/healthz', (request, response) => {
