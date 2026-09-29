@@ -89,6 +89,7 @@ Copy-Item server/.env.example server/.env
 | Name | Example | What it is |
 |---|---|---|
 | `DATABASE_URL` | `postgresql://postgres.abcdefgh:YOUR-PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres` | Your database connection. In Supabase: **Connect > Connection string > Session pooler**, then put your database password in place of `[YOUR-PASSWORD]` (no brackets). **Contains a password: never commit it** |
+| `SUPABASE_URL` | `https://your-project-ref.supabase.co` | Your Supabase project's address, used to check sign-in passes. Not a secret. **Dashboard > Project Settings > API** |
 | `CORS_ORIGINS` | `http://localhost:5173` | Which websites may call the API. Comma-separated, no trailing slash |
 | `NODE_ENV` | `development` | Set to `production` on a host |
 | `PORT` | _(don't set it)_ | A host sets it for you. Locally the API uses 3000 |
@@ -108,13 +109,20 @@ Never put a password or key in one.
 Only needed for the full version. From `server/`:
 
 ```bash
-npm run db:schema   # creates the saved_jobs table (safe to run again)
-npm run db:seed     # adds 6 sample jobs
+npm run db:migrate  # creates or updates the tables (safe to run again)
+npm run db:seed     # adds 6 sample jobs (optional)
 ```
+
+**How database changes work.** Every change to the database is a numbered file
+in `server/db/migrations/` (`001_…`, `002_…`). `npm run db:migrate` runs only
+the files that haven't run yet, records each one, and runs each file all or
+nothing, so the database is never left half-changed. To change the database,
+add the next numbered file; never edit one that has already run.
 
 > ⚠️ **`db:seed` deletes every job in the table first**, then adds the samples.
 > Run it once on a new database, never on one with real jobs in it. The same
-> goes for `npm run db:reset`, which runs both.
+> goes for `npm run db:reset`, which runs both. As a safety net, both refuse to
+> run when `NODE_ENV=production`.
 
 ## 3. How to run it
 
@@ -146,7 +154,7 @@ the website:
 ```bash
 curl http://localhost:3000/healthz    # {"ok":true}  -> the API is running
 curl http://localhost:3000/readyz     # {"ok":true,"db":"up"}  -> the database is reachable
-curl http://localhost:3000/api/jobs   # a list of jobs
+curl http://localhost:3000/api/jobs   # {"error":"Sign in required"}  -> sign-in is being checked
 ```
 
 **2. Start the website.** In `client/.env` set `VITE_USE_MOCK_API=false`, then
@@ -199,13 +207,26 @@ now come from your database.
 
 All responses are JSON. Errors come back as `{"error": "what went wrong"}`.
 
+**Every `/api` request needs a sign-in pass.** The website signs people in with
+Google through Supabase Auth, and sends the pass it gets as
+`Authorization: Bearer <pass>`. The API checks it against the Supabase
+project's **public** keys (so the server holds no secret for this), and takes
+the user's id from it. Every query then includes `AND user_id = …`, so each
+person only ever sees and changes their own jobs.
+
+| Answer | When |
+|---|---|
+| `401` | No pass, a pass that isn't valid or has expired, or an account that was deleted |
+| `404` | The job doesn't exist, **or belongs to someone else** (the same answer, so nothing leaks) |
+| `503` | The API couldn't reach Supabase to check the pass |
+
 | Method | Path | What it does |
 |---|---|---|
-| `GET` | `/healthz` | Is the API running? `{"ok":true}` |
-| `GET` | `/readyz` | Can it reach the database? `{"ok":true,"db":"up"}`, or `503` if not |
-| `GET` | `/api/jobs` | Every job, newest first |
+| `GET` | `/healthz` | Is the API running? `{"ok":true}` (no sign-in needed) |
+| `GET` | `/readyz` | Can it reach the database? `{"ok":true,"db":"up"}`, or `503` if not (no sign-in needed) |
+| `GET` | `/api/jobs` | Your jobs, newest first |
 | `GET` | `/api/jobs?status=to_apply` | Only jobs still to apply for (`?status=done` for finished ones) |
-| `GET` | `/api/jobs/:id` | One job, or `404` |
+| `GET` | `/api/jobs/:id` | One of your jobs, or `404` |
 | `POST` | `/api/jobs` | Save a job. Returns `201` and the new job |
 | `PUT` | `/api/jobs/:id` | Replace a job's details |
 | `PATCH` | `/api/jobs/:id` | Change only the status. Body: `{"status":"done"}` |
@@ -224,11 +245,12 @@ A job looks like this:
 }
 ```
 
-To save one:
+To save one (with a pass copied from the signed-in website):
 
 ```bash
 curl -X POST http://localhost:3000/api/jobs \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your sign-in pass>" \
   -d '{"company_name":"Brightside Co.","job_title":"Frontend Intern","posting_url":"https://www.linkedin.com/jobs/view/4011223344"}'
 ```
 
@@ -308,7 +330,7 @@ JobStash/
   have not yet.
 - **Only the demo is online.** The GitHub Pages link runs in demo mode, so it
   has no server or database behind it. The full version isn't deployed yet.
-- **`npm run db:seed` wipes the table.** See [Set up the database](#set-up-the-database).
+- **`npm run db:seed` wipes the table** (it refuses in production). See [Set up the database](#set-up-the-database).
 
 **Next steps**
 1. Delete a job, with an **Undo** button in case of a wrong tap

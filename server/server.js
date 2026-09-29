@@ -1,8 +1,9 @@
 import express from 'express'
 import cors from 'cors'
-import { pool } from './db/pool.js'
-import * as jobs from './jobsRepo.js'
 import helmet from 'helmet'
+import { pool } from './db/pool.js'
+import { requireUser } from './auth.js'
+import * as jobs from './jobsRepo.js'
 
 const app = express()
 
@@ -47,6 +48,11 @@ app.get('/readyz', async (request, response) => {
     response.status(503).json({ ok: false, db: 'down' })
   }
 })
+
+// Everything under /api is someone's data, so every request there must carry a
+// valid sign-in pass (see auth.js). /healthz and /readyz above stay open, so a
+// host can check the server is up without signing in.
+app.use('/api', requireUser)
 
 const STATUSES = ['to_apply', 'done']
 
@@ -93,7 +99,7 @@ app.get('/api/jobs', async (request, response, next) => {
   }
 
   try {
-    response.json(await jobs.getAll(pool, { status }))
+    response.json(await jobs.getAll(pool, request.userId, { status }))
   } catch (error) {
     next(error)
   }
@@ -101,7 +107,7 @@ app.get('/api/jobs', async (request, response, next) => {
 
 app.get('/api/jobs/:id', async (request, response, next) => {
   try {
-    const row = await jobs.getById(pool, request.params.id)
+    const row = await jobs.getById(pool, request.userId, request.params.id)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -114,7 +120,7 @@ app.post('/api/jobs', async (request, response, next) => {
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    response.status(201).json(await jobs.create(pool, value))
+    response.status(201).json(await jobs.create(pool, request.userId, value))
   } catch (error) {
     next(error)
   }
@@ -125,7 +131,7 @@ app.put('/api/jobs/:id', async (request, response, next) => {
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    const row = await jobs.update(pool, request.params.id, value)
+    const row = await jobs.update(pool, request.userId, request.params.id, value)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -143,7 +149,7 @@ app.patch('/api/jobs/:id', async (request, response, next) => {
   }
 
   try {
-    const row = await jobs.setStatus(pool, request.params.id, status)
+    const row = await jobs.setStatus(pool, request.userId, request.params.id, status)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -153,7 +159,7 @@ app.patch('/api/jobs/:id', async (request, response, next) => {
 
 app.delete('/api/jobs/:id', async (request, response, next) => {
   try {
-    const removed = await jobs.remove(pool, request.params.id)
+    const removed = await jobs.remove(pool, request.userId, request.params.id)
     if (!removed) return response.status(404).json({ error: 'Not found' })
     response.status(204).end()
   } catch (error) {
@@ -168,6 +174,11 @@ app.use((request, response) => {
 // The detail goes in the logs; the visitor gets a plain message. Sending a
 // stack trace to a stranger tells them about the file layout and dependencies.
 app.use((error, request, response, next) => {
+  // A valid pass for an account that has since been deleted: the database
+  // refuses to link a job to a user who no longer exists.
+  if (error.code === '23503' && error.constraint === 'saved_jobs_user_id_fkey') {
+    return response.status(401).json({ error: 'Your account no longer exists. Please sign in again.' })
+  }
   console.error(error)
   response.status(500).json({ error: 'Something went wrong on the server' })
 })

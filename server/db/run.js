@@ -16,6 +16,14 @@ if (!file) {
   process.exit(1)
 }
 
+// This runs seed.sql, which empties the table first. That's fine on a laptop
+// and would wipe every real user's jobs on the live database, so it refuses
+// there. Schema changes go through `npm run db:migrate` instead.
+if (process.env.NODE_ENV === 'production') {
+  console.error('Refusing to run SQL files with NODE_ENV=production. Use npm run db:migrate for schema changes.')
+  process.exit(1)
+}
+
 try {
   await pool.query(readFileSync(file, 'utf8'))
   console.log(`ran ${file}`)

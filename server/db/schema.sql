@@ -1,9 +1,9 @@
--- The complete shape of the database. Safe to run against an empty database,
--- and safe to run twice.
+-- The complete shape of the database today, in one place, for reading.
 --
--- This file is committed on purpose. The schema is a fact about the
--- application, not a runtime concern: it should be readable by opening a file
--- rather than by connecting to a server.
+-- To CHANGE the database, don't edit this file: add a numbered file to
+-- db/migrations and run `npm run db:migrate`. Then update this file to match,
+-- so it stays an accurate picture. It is also what compose.yml uses to set up
+-- a brand-new self-hosted database.
 
 CREATE TABLE IF NOT EXISTS saved_jobs (
   id           BIGSERIAL PRIMARY KEY,
@@ -11,28 +11,19 @@ CREATE TABLE IF NOT EXISTS saved_jobs (
   job_title    TEXT        NOT NULL DEFAULT '' CHECK (length(job_title) <= 160),
   posting_url  TEXT        NOT NULL CHECK (posting_url ~* '^https?://' AND length(posting_url) <= 2000),
   status       TEXT        NOT NULL DEFAULT 'to_apply' CHECK (status IN ('to_apply', 'done')),
-  added_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+  added_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- Whose job this is: the id Supabase Auth gives a signed-in user. Empty for
+  -- the sample jobs, which belong to no one. On Supabase it is also linked to
+  -- auth.users, so deleting an account deletes its jobs (migration 002).
+  user_id      UUID
 );
 
--- My Stash always sorts newest first. Without this the database reads every row
--- and sorts it on each request.
-CREATE INDEX IF NOT EXISTS saved_jobs_added_at_idx
-  ON saved_jobs (added_at DESC);
-
--- The filter tabs query by status, and a partial index on the common case is
--- cheaper than one covering rows nobody filters for.
-CREATE INDEX IF NOT EXISTS saved_jobs_to_apply_idx
-  ON saved_jobs (added_at DESC)
-  WHERE status = 'to_apply';
+-- "One person's jobs, newest first" is the only list the app asks for.
+CREATE INDEX IF NOT EXISTS saved_jobs_user_added_idx
+  ON saved_jobs (user_id, added_at DESC);
 
 -- Supabase puts a public web API on every table, reachable with the project's
 -- public key. Row Level Security with no policies blocks that API completely.
 -- The Express server is not affected: it connects as the postgres user, which
 -- bypasses RLS. All access goes through the server, where the input is checked.
 ALTER TABLE saved_jobs ENABLE ROW LEVEL SECURITY;
-
--- TODO (once accounts exist): add user_id and make every query filter on it.
---   ALTER TABLE saved_jobs ADD COLUMN user_id TEXT NOT NULL;
---   CREATE INDEX saved_jobs_user_idx ON saved_jobs (user_id, added_at DESC);
--- Until then this table holds one shared list, so the deployed app must not be
--- described as private.

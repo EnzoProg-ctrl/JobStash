@@ -167,7 +167,9 @@ function HeroImage() {
         src={phoneImage}
         width="1024"
         height="1536"
-        fetchPriority="high"
+        // Lowercase on purpose: React 18 doesn't know the camelCase name and
+        // warns about it. It still reaches the browser as the real attribute.
+        fetchpriority="high"
         alt="JobStash on a phone, showing My Stash with saved jobs, next to the Add Job form"
         className="w-full"
       />
