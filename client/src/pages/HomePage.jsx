@@ -186,6 +186,11 @@ function SignIn() {
           Your sign-in expired. Please sign in again to get back to your stash.
         </p>
       )}
+      {note === 'signed-out' && (
+        <p className="mb-4 rounded-card border border-line bg-done-bg p-3 text-ink" role="status">
+          You've signed out. Your stash is safe, and nobody using this browser can open it.
+        </p>
+      )}
       <button
         type="button"
         onClick={signIn}
@@ -205,6 +210,9 @@ function SignIn() {
           No new password to remember. We only use your Google account to know it's you.
         </p>
       )}
+      <p className="mt-2 text-sm text-muted">
+        On a shared computer? Use <span className="font-semibold">Sign out</span> in My Stash when you're done.
+      </p>
     </div>
   )
 }

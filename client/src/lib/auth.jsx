@@ -59,8 +59,20 @@ export function RequireSignIn() {
   return <Outlet />
 }
 
-// Set when the API says a sign-in is no longer valid (see api/httpApi.js), so
-// the landing page can explain why the visitor ended up back there. Kept in
+// The Sign out button (components/AppHeader.jsx). Ends this browser's sign-in
+// only, so the person stays signed in on their other devices. Supabase forgets
+// the sign-in here even if it can't reach its server, so this can't leave a
+// shared computer signed in by mistake. RequireSignIn then sees nobody is
+// signed in and moves the visitor to the landing page, which says so.
+export async function signOut() {
+  if (!supabase) return
+  leaveSignInNote('signed-out')
+  await supabase.auth.signOut({ scope: 'local' })
+}
+
+// A short note for the landing page, so it can explain why the visitor ended
+// up back there: 'expired' when the API stopped accepting the sign-in (see
+// api/httpApi.js), or 'signed-out' after the Sign out button. Kept in
 // sessionStorage. Reading and clearing are separate steps because React may
 // read twice while drawing the page; clearing waits until it is on screen.
 const NOTE_KEY = 'jobstash:sign-in-note'
