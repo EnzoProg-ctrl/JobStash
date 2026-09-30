@@ -56,7 +56,7 @@ export default function HomePage() {
       <main className="mx-auto max-w-7xl px-4 md:px-8">
         <DemoNotice className="mb-6" />
 
-        <section className="grid items-center gap-12 py-8 lg:grid-cols-[1.35fr_1fr] lg:py-12">
+        <section className="grid items-center gap-12 py-8 lg:grid-cols-[1.35fr_1fr] lg:py-10">
           <div>
             <p className="inline-block rounded-full bg-todo-bg px-4 py-1.5 text-sm text-ink">
               A simpler way to job hunt
@@ -75,7 +75,7 @@ export default function HomePage() {
           <HeroImage />
         </section>
 
-        <section id="how-it-works" className="grid scroll-mt-8 gap-8 py-10 sm:grid-cols-3" aria-label="How it works">
+        <section id="how-it-works" className="grid scroll-mt-8 gap-8 py-5 sm:grid-cols-3" aria-label="How it works">
           {FEATURES.map((item) => (
             <div key={item.title}>
               <span className="flex size-14 items-center justify-center rounded-full bg-todo-bg text-brand-blue">
@@ -223,10 +223,10 @@ function HeroImage() {
     // handwritten notes on its right.
     <div className="relative isolate mx-auto w-full max-w-sm xl:mr-36">
       {/* The soft blob behind the phone. Decoration only. */}
-      <svg className="absolute inset-0 -z-10 size-full scale-125" viewBox="0 0 400 400" aria-hidden="true">
+      <svg className="absolute inset-0 -z-10 size-full scale-175" viewBox="0 0 400 400" aria-hidden="true">
         <path
           fill="#EAF1FF"
-          d="M312 72c38 33 58 88 50 141-8 54-44 106-96 132-51 26-118 26-163-6S34 245 40 187c6-57 44-111 95-140 51-30 139-8 177 25z"
+          d="M286 58C336 78 372 128 366 182C361 226 322 240 330 282C338 326 300 368 250 370C204 372 186 338 142 344C92 351 44 322 38 268C32 218 74 196 66 150C58 100 96 50 150 44C196 39 240 40 286 58Z"
         />
       </svg>
 
