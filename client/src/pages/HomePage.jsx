@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import DemoNotice from '../components/DemoNotice.jsx'
 import Logo from '../components/Logo.jsx'
+import { supabase } from '../lib/supabase.js'
+import { clearSignInNote, readSignInNote, useAuth } from '../lib/auth.jsx'
 import phoneImage from '../assets/landing-phone.webp'
 
 // The landing page. Its own header and footer, and full width, unlike the app
@@ -16,12 +18,14 @@ const FEATURES = [
 // "Your data stays private" belongs here once accounts exist. Until then every
 // visitor shares one list, so the page promises something true instead.
 const PROMISES = [
-  { icon: CapIcon, title: 'Built for students', text: 'Designed to make your job hunt simpler.' },
+  { icon: CapIcon, title: 'Built for everyone', text: 'Designed to make your job hunt simpler.' },
   { icon: TagIcon, title: 'Free to use', text: 'No ads, no fees.' },
   { icon: DevicesIcon, title: 'On any device', text: 'Save jobs from your phone or computer.' },
 ]
 
 export default function HomePage() {
+  const { session, demo } = useAuth()
+
   return (
     <div className="min-h-screen overflow-x-clip">
       <header className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 md:px-8">
@@ -31,12 +35,21 @@ export default function HomePage() {
         <nav className="flex items-center gap-6 md:gap-8" aria-label="Page sections">
           <a href="#how-it-works" className="hidden text-muted hover:text-ink md:inline">How it works</a>
           <a href="#features" className="hidden text-muted hover:text-ink md:inline">Features</a>
-          <a
-            href="#sign-in"
-            className="inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
-          >
-            Sign in
-          </a>
+          {session ? (
+            <Link
+              to="/stash"
+              className="inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
+            >
+              My Stash
+            </Link>
+          ) : (
+            <a
+              href="#sign-in"
+              className="inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
+            >
+              {demo ? 'Try the demo' : 'Sign in'}
+            </a>
+          )}
         </nav>
       </header>
 
@@ -56,7 +69,7 @@ export default function HomePage() {
               Save job postings, keep track of what to apply to, and stay one step
               closer to your future.
             </p>
-            <SignInForm />
+            <SignIn />
           </div>
 
           <HeroImage />
@@ -101,52 +114,98 @@ export default function HomePage() {
   )
 }
 
-// Sign-in is not built yet, so this form does not send or keep the email. It
-// says so, and points at the demo instead of pretending to work.
-function SignInForm() {
-  const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+// Sign in with Google, through Supabase Auth. The browser leaves for Google,
+// and Google sends it back to /stash with a one-time code, which the Supabase
+// client (lib/supabase.js) swaps for a sign-in session by itself.
+//
+// In demo mode there is no sign-in at all, so the same spot offers the demo.
+// Someone already signed in gets a way straight into their stash instead.
+function SignIn() {
+  const { session, loading } = useAuth()
+  const [status, setStatus] = useState('idle')   // idle | leaving | error
+  const [error, setError] = useState(null)
+  // Set when a sign-in stopped working mid-use (api/httpApi.js). Read it
+  // first, then clear it once the page is on screen, so it shows only once.
+  const [note] = useState(readSignInNote)
+  useEffect(clearSignInNote, [])
 
-  function handleSubmit(event) {
-    event.preventDefault()
-    setSubmitted(true)
+  if (!supabase) {
+    return (
+      <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
+        <Link
+          to="/stash"
+          className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
+        >
+          Try the demo
+          <ArrowIcon />
+        </Link>
+        <p className="mt-3 text-muted">This is the demo: no account needed, and your jobs stay in this browser.</p>
+      </div>
+    )
+  }
+
+  if (session) {
+    return (
+      <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
+        <Link
+          to="/stash"
+          className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
+        >
+          Go to My Stash
+          <ArrowIcon />
+        </Link>
+        <p className="mt-3 text-muted">
+          Signed in as <span className="font-semibold text-ink">{session.user.email}</span>
+        </p>
+      </div>
+    )
+  }
+
+  async function signIn() {
+    setStatus('leaving')
+    setError(null)
+    const { error: problem } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        // Come back to My Stash. BASE_URL keeps this right on any host.
+        redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}stash`,
+      },
+    })
+    // On success the browser is already on its way to Google, so only a
+    // failure (Supabase unreachable, sign-in switched off) gets this far.
+    if (problem) {
+      setError(problem.message)
+      setStatus('error')
+    }
   }
 
   return (
-    <form id="sign-in" onSubmit={handleSubmit} className="mt-8 max-w-md scroll-mt-8">
-      <label htmlFor="email" className="sr-only">Email address</label>
-      <div className="flex min-h-14 items-center gap-3 rounded-lg border border-line bg-surface px-4 focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-primary">
-        <MailIcon />
-        <input
-          id="email"
-          type="email"
-          required
-          autoComplete="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="w-full bg-transparent text-base outline-none placeholder:text-muted"
-        />
-      </div>
+    <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
+      {note === 'expired' && (
+        <p className="mb-4 rounded-card border border-line bg-todo-bg p-3 text-ink" role="status">
+          Your sign-in expired. Please sign in again to get back to your stash.
+        </p>
+      )}
       <button
-        type="submit"
-        className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
+        type="button"
+        onClick={signIn}
+        // While the sign-in is still being checked, don't offer it yet: the
+        // visitor may already be signed in.
+        disabled={loading || status === 'leaving'}
+        className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-lg border border-line bg-surface text-lg font-semibold text-ink shadow-sm hover:bg-subtle disabled:opacity-60"
       >
-        Email me a sign-in link
-        <ArrowIcon />
+        <GoogleIcon />
+        {status === 'leaving' ? 'Opening Google…' : 'Sign in with Google'}
       </button>
 
-      {submitted ? (
-        <p className="mt-3 text-ink" role="status">
-          Sign-in is coming soon. For now,{' '}
-          <Link to="/stash" className="font-semibold text-brand-blue underline">
-            try the demo →
-          </Link>
-        </p>
+      {status === 'error' ? (
+        <p className="mt-3 text-error" role="alert">Couldn't start signing in: {error}</p>
       ) : (
-        <p className="mt-3 text-muted">We'll send you a link to sign in. No password required.</p>
+        <p className="mt-3 text-muted">
+          No new password to remember. We only use your Google account to know it's you.
+        </p>
       )}
-    </form>
+    </div>
   )
 }
 
@@ -238,8 +297,17 @@ function DevicesIcon() {
   return <Icon className="size-9"><path d="M4 16V6a2 2 0 012-2h11a2 2 0 012 2v2M2 20h11M16 10h5a1 1 0 011 1v9a1 1 0 01-1 1h-5a1 1 0 01-1-1v-9a1 1 0 011-1zM18.5 18h.01" /></Icon>
 }
 
-function MailIcon() {
-  return <Icon className="size-6 shrink-0 text-muted"><path d="M3 6h18v12H3zM3 7l9 6 9-6" /></Icon>
+// Google's "G", in Google's own colours (their sign-in button guidelines ask
+// for the logo unchanged). Decoration: the button text already says Google.
+function GoogleIcon() {
+  return (
+    <svg className="size-6 shrink-0" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+    </svg>
+  )
 }
 
 function ArrowIcon() {

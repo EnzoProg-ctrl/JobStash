@@ -15,5 +15,13 @@ export const supabase = demoMode
   ? null
   : createClient(
       import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: {
+          // Google sends back a one-time code (not the sign-in pass itself),
+          // which this client swaps for the pass. The pass never appears in
+          // the address bar or the browser history.
+          flowType: 'pkce',
+        },
+      }
     )

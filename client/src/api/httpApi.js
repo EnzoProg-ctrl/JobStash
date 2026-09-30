@@ -3,12 +3,30 @@
 // This is the file that matters for your finals project. mockApi.js exists so
 // you can build the interface before this has anywhere to point.
 
+import { supabase } from '../lib/supabase.js'
+import { leaveSignInNote } from '../lib/auth.jsx'
+
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
 
-async function request(path, options) {
+// The API only answers people who are signed in (server/auth.js), so every
+// request carries the sign-in pass from Supabase Auth. getSession() hands back
+// the current pass, and swaps in a fresh one first if it has run out, so a
+// page left open for hours keeps working.
+async function signInHeader() {
+  if (!supabase) return {}
+  const { data } = await supabase.auth.getSession()
+  const pass = data.session?.access_token
+  return pass ? { Authorization: `Bearer ${pass}` } : {}
+}
+
+async function request(path, options = {}) {
   const response = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(await signInHeader()),
+      ...options.headers,
+    },
   })
 
   if (!response.ok) {
@@ -20,7 +38,20 @@ async function request(path, options) {
     } catch {
       // The body was not JSON. The status line is all we have.
     }
-    throw new Error(message)
+    // 401: the API no longer accepts this sign-in (it expired, or the account
+    // was deleted). Forget it on this device. RequireSignIn then notices
+    // nobody is signed in and moves the visitor to the landing page, which
+    // reads the note and says why.
+    if (response.status === 401 && supabase) {
+      leaveSignInNote('expired')
+      await supabase.auth.signOut({ scope: 'local' })
+    }
+
+    // Keep the status too, so the pages can tell "please sign in" (401)
+    // apart from other problems.
+    const error = new Error(message)
+    error.status = response.status
+    throw error
   }
 
   return response.status === 204 ? null : response.json()
