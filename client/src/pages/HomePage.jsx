@@ -15,11 +15,12 @@ const FEATURES = [
   { icon: BoltIcon, title: 'Focus on what matters', text: 'Your future, on your terms.' },
 ]
 
-// "Your data stays private" belongs here once accounts exist. Until then every
-// visitor shares one list, so the page promises something true instead.
+// Each person only sees their own jobs: the API checks who is signed in and
+// only returns that person's jobs (server/jobsRepo.js). In demo mode the jobs
+// never leave the browser, so the promise holds there too.
 const PROMISES = [
   { icon: CapIcon, title: 'Built for everyone', text: 'Designed to make your job hunt simpler.' },
-  { icon: TagIcon, title: 'Free to use', text: 'No ads, no fees.' },
+  { icon: LockIcon, title: 'Your data stays private', text: 'Only you can see your saved jobs.' },
   { icon: DevicesIcon, title: 'On any device', text: 'Save jobs from your phone or computer.' },
 ]
 
@@ -210,9 +211,6 @@ function SignIn() {
           No new password to remember. We only use your Google account to know it's you.
         </p>
       )}
-      <p className="mt-2 text-sm text-muted">
-        On a shared computer? Use <span className="font-semibold">Sign out</span> in My Stash when you're done.
-      </p>
     </div>
   )
 }
@@ -297,8 +295,8 @@ function CapIcon() {
   return <Icon className="size-9"><path d="M2 9l10-5 10 5-10 5zM6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5M22 9v6" /></Icon>
 }
 
-function TagIcon() {
-  return <Icon className="size-9"><path d="M3 12V3h9l9 9-9 9zM7.5 7.5h.01" /></Icon>
+function LockIcon() {
+  return <Icon className="size-9"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4M12 15v2" /></Icon>
 }
 
 function DevicesIcon() {
