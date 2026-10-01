@@ -19,24 +19,55 @@ async function signInHeader() {
   return pass ? { Authorization: `Bearer ${pass}` } : {}
 }
 
+// A free host puts the API to sleep when nobody has used it for a while, and
+// the first request then waits up to a minute while it wakes up. So only give
+// up after 90 seconds, long enough for that, but not forever.
+const GIVE_UP_AFTER = 90 * 1000
+
+// An Error that also says what went wrong: the HTTP status, or 0 when the API
+// never answered at all.
+function problem(message, status) {
+  const error = new Error(message)
+  error.status = status
+  return error
+}
+
 async function request(path, options = {}) {
-  const response = await fetch(`${BASE}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(await signInHeader()),
-      ...options.headers,
-    },
-  })
+  let response
+  try {
+    response = await fetch(`${BASE}${path}`, {
+      ...options,
+      signal: AbortSignal.timeout(GIVE_UP_AFTER),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(await signInHeader()),
+        ...options.headers,
+      },
+    })
+  } catch (caught) {
+    // The API never answered. The browser's own words for this ("Failed to
+    // fetch", "Load failed") mean nothing to a visitor, so say it plainly.
+    if (caught.name === 'TimeoutError') {
+      throw problem('JobStash is taking too long to answer. Please try again in a moment.', 0)
+    }
+    if (!navigator.onLine) {
+      throw problem("You're offline. Check your internet connection and try again.", 0)
+    }
+    throw problem("Can't reach JobStash right now. Please try again in a moment.", 0)
+  }
 
   if (!response.ok) {
-    // Try to use the API's own message; fall back to the status line.
-    let message = `${response.status} ${response.statusText}`
+    // The API's own message is written for people, so use it when there is
+    // one: "Too many requests…", "You have 1,000 saved jobs…". Without one, the
+    // answer came from the host in front of the API (it is restarting or
+    // down), and a status line like "502 Bad Gateway" means nothing to a
+    // visitor.
+    let message = "JobStash isn't answering properly right now. Please try again in a moment."
     try {
       const body = await response.json()
       if (body?.error) message = body.error
     } catch {
-      // The body was not JSON. The status line is all we have.
+      // The body was not JSON. Keep the plain message above.
     }
     // 401: the API no longer accepts this sign-in (it expired, or the account
     // was deleted). Forget it on this device. RequireSignIn then notices
@@ -49,9 +80,7 @@ async function request(path, options = {}) {
 
     // Keep the status too, so the pages can tell "please sign in" (401)
     // apart from other problems.
-    const error = new Error(message)
-    error.status = response.status
-    throw error
+    throw problem(message, response.status)
   }
 
   return response.status === 204 ? null : response.json()

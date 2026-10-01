@@ -3,6 +3,8 @@ import cors from 'cors'
 import helmet from 'helmet'
 import { pool } from './db/pool.js'
 import { requireUser } from './auth.js'
+import { newJobsPerAccount, perDevice } from './limits.js'
+import { logRequests } from './logging.js'
 import * as jobs from './jobsRepo.js'
 
 const app = express()
@@ -18,8 +20,20 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .map((origin) => origin.trim())
   .filter(Boolean)
 
+// On a host (Render, Railway), every request reaches the API through the
+// host's own proxy, so the visitor's real address is in a header the proxy
+// adds. TRUST_PROXY=1 tells Express to read it; without that, every visitor
+// would look like the same device to the rate limits. It stays off locally,
+// where there is no proxy and anyone could fake that header.
+app.set('trust proxy', Number(process.env.TRUST_PROXY) || false)
+
+// First, so every request is logged, even ones turned away further down.
+app.use(logRequests)
 app.use(helmet())
 app.use(cors({ origin: allowedOrigins }))
+// After CORS, so a "too many requests" answer still reaches the website
+// instead of looking like a CORS error.
+app.use(perDevice)
 app.use(express.json({ limit: '100kb' }))
 
 // app.param runs before every route that has :id in its path.
@@ -115,12 +129,18 @@ app.get('/api/jobs/:id', async (request, response, next) => {
   }
 })
 
-app.post('/api/jobs', async (request, response, next) => {
+app.post('/api/jobs', newJobsPerAccount, async (request, response, next) => {
   const { errors, value } = validate(request.body ?? {})
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    response.status(201).json(await jobs.create(pool, request.userId, value))
+    const row = await jobs.create(pool, request.userId, value)
+    if (!row) {
+      return response.status(409).json({
+        error: `You have ${jobs.MAX_JOBS.toLocaleString('en-US')} saved jobs, the most one account can keep.`,
+      })
+    }
+    response.status(201).json(row)
   } catch (error) {
     next(error)
   }
@@ -180,14 +200,35 @@ app.use((error, request, response, next) => {
     return response.status(401).json({ error: 'Your account no longer exists. Please sign in again.' })
   }
   console.error(error)
-  response.status(500).json({ error: 'Something went wrong on the server' })
+  response.status(500).json({ error: 'Something went wrong on our side. Please try again.' })
 })
 
 // The host chooses the port and tells you through PORT. Hardcoding 3000 is the
 // commonest reason a first deploy is marked unhealthy and killed.
 const port = process.env.PORT || 3000
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`API listening on http://localhost:${port}`)
   console.log(`CORS allows: ${allowedOrigins.join(', ')}`)
 })
+
+// Safe restarts. A host stops the API with SIGTERM on every deploy and
+// restart, and Ctrl+C sends SIGINT. Instead of dropping whatever is in
+// progress, stop taking new requests, let the open ones finish, close the
+// database connections, then exit. If something hangs, give up after 10
+// seconds, because the host will force it soon after anyway.
+function shutDown(signal) {
+  console.log(`${signal} received: finishing open requests, then stopping`)
+  server.close(async () => {
+    await pool.end()
+    console.log('Stopped cleanly')
+    process.exit(0)
+  })
+  setTimeout(() => {
+    console.error('Still busy after 10 seconds, stopping anyway')
+    process.exit(1)
+  }, 10_000).unref()
+}
+
+process.once('SIGTERM', () => shutDown('SIGTERM'))
+process.once('SIGINT', () => shutDown('SIGINT'))

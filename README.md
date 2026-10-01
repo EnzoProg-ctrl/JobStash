@@ -92,6 +92,7 @@ Copy-Item server/.env.example server/.env
 | `SUPABASE_URL` | `https://your-project-ref.supabase.co` | Your Supabase project's address, used to check sign-in passes. Not a secret. **Dashboard > Project Settings > API** |
 | `CORS_ORIGINS` | `http://localhost:5173` | Which websites may call the API. Comma-separated, no trailing slash |
 | `NODE_ENV` | `development` | Set to `production` on a host |
+| `TRUST_PROXY` | _(leave out locally)_ | Set to `1` on Render or Railway, so the rate limits see each visitor's real address |
 | `PORT` | _(don't set it)_ | A host sets it for you. Locally the API uses 3000 |
 
 **`client/.env`**
@@ -178,6 +179,11 @@ curl http://localhost:3000/readyz     # {"ok":true,"db":"up"}  -> the database i
 curl http://localhost:3000/api/jobs   # {"error":"Sign in required"}  -> sign-in is being checked
 ```
 
+While it runs, each request prints one line, like
+`2026-10-01T09:14:03.112Z GET /api/jobs 200 34ms`. The log never includes
+sign-in passes, emails, job links or job numbers. **Ctrl+C** (or a host
+restarting it) lets requests in progress finish before it stops.
+
 **2. Start the website.** In `client/.env` set `VITE_USE_MOCK_API=false` and
 fill in the two `VITE_SUPABASE_` settings, then in a second terminal, from
 `client/`:
@@ -229,7 +235,12 @@ is gone, and the jobs now come from your database.
 7. **The ⋮ menu** on a card marks the job **done**, or moves a done job **back
    to To Apply**. The card updates straight away. If saving fails, it changes
    back and a message explains why.
-8. **Sign out** in the header ends the sign-in on this browser only, and the
+8. **When something goes wrong,** the message says so in plain words: the
+   API can't be reached, you're offline, too many requests, or the 1,000-job
+   limit. If loading takes more than 5 seconds, My Stash explains that the
+   server may be waking up (free hosts sleep when nobody uses them), and if
+   loading fails there's a **Try again** button.
+9. **Sign out** in the header ends the sign-in on this browser only, and the
    landing page confirms it. Your other devices stay signed in. On a shared
    computer, sign out when you're done. JobStash's Sign out doesn't sign you
    out of Google itself.
@@ -250,6 +261,8 @@ person only ever sees and changes their own jobs.
 | `401` | No pass, a pass that isn't valid or has expired, or an account that was deleted |
 | `404` | The job doesn't exist, **or belongs to someone else** (the same answer, so nothing leaks) |
 | `503` | The API couldn't reach Supabase to check the pass |
+| `409` | Saving a new job when the account already has 1,000, the most one account can keep |
+| `429` | Too many requests: more than 100 a minute from one device, or more than 50 new jobs an hour from one account. The `RateLimit` header says how many seconds to wait |
 
 | Method | Path | What it does |
 |---|---|---|
@@ -342,6 +355,8 @@ JobStash/
 ├── server/                    the API
 │   ├── server.js              the routes and their checks
 │   ├── auth.js                checks the sign-in pass on every /api request
+│   ├── limits.js              rate limits (too many requests get a 429)
+│   ├── logging.js             one log line per request, with nothing private in it
 │   ├── jobsRepo.js            the database queries (always for one user)
 │   └── db/
 │       ├── migrations/        numbered database changes
@@ -362,18 +377,14 @@ JobStash/
 - **The Google app is in Testing mode**, so only the test users listed in
   Google Cloud can sign in until it's published.
 - **Deleting isn't built in the website yet**, even though the API can delete.
-- **If the API is off,** My Stash shows a plain "Failed to fetch" message
-  instead of a friendly one.
 - **Only the demo is online.** The GitHub Pages link runs in demo mode, so it
   has no server or database behind it. The full version isn't deployed yet.
 - **`npm run db:seed` wipes the table** (it refuses in production). See [Set up the database](#set-up-the-database).
 
 **Next steps**
-1. Hardening before real users: a limit on how many requests one person can
-   send, a limit on list size, friendlier error messages, and logging
-2. Delete a job, with an **Undo** button in case of a wrong tap
-3. Deploy: the website on Vercel, the API on a free Node host, the database
+1. Deploy: the website on Vercel, the API on a free Node host, the database
    already on Supabase. Then switch off the GitHub Pages demo
+2. Delete a job, with an **Undo** button in case of a wrong tap
 
 ## Deploying
 
@@ -382,7 +393,7 @@ Only the demo is online, on GitHub Pages. The plan for the full version:
 | Piece | Where | Notes |
 |---|---|---|
 | Website | Vercel | Set `VITE_USE_MOCK_API=false`, `VITE_API_BASE_URL` and the two `VITE_SUPABASE_` settings in Vercel's settings, then redeploy. A `vercel.json` rewrite will be needed so refreshing `/stash` doesn't give a 404 |
-| API | a free Node host (Render or Railway) | Point it at `server/`, add the `server/.env` settings in its dashboard, and add the website's address to `CORS_ORIGINS` |
+| API | a free Node host (Render or Railway) | Point it at `server/`, add the `server/.env` settings in its dashboard plus `TRUST_PROXY=1`, and add the website's address to `CORS_ORIGINS` |
 | Database | Supabase | Already set up |
 | Sign-in | Google Cloud and Supabase | Add the website's new address to the Google OAuth client's JavaScript origins and to Supabase's Site URL and redirect URLs, then **Publish app** in Google so anyone can sign in |
 

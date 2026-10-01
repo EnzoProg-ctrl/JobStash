@@ -27,6 +27,13 @@ export const pool = new pg.Pool({
   max: 5,                          // free tiers allow far fewer than you think
   idleTimeoutMillis: 10_000,       // hand connections back quickly
   connectionTimeoutMillis: 5_000,  // fail fast rather than hanging the request
+  // No query may run longer than 5 seconds. Every query here takes a few
+  // milliseconds, so one that runs longer is stuck, and it would otherwise hold
+  // one of the 5 connections and make everyone else wait. The database stops
+  // it and the visitor gets a 500. This is set on each new connection, because
+  // Supabase's pooler ignores it when it is passed as a connection setting.
+  // db/migrate.js switches it off for itself, since migrations can be slow.
+  onConnect: (client) => client.query('SET statement_timeout = 5000'),
 })
 
 // A pool whose server goes away should say so once, loudly, not take the

@@ -29,14 +29,21 @@ export async function getById(pool, userId, id) {
   return result.rows[0] ?? null
 }
 
+// The most jobs one account can keep. Far more than anyone job hunting needs,
+// and it means My Stash can always load the whole list in one go.
+export const MAX_JOBS = 1000
+
+// Returns null when the account already has MAX_JOBS jobs. The count and the
+// insert are one query, so there's no gap between checking and saving.
 export async function create(pool, userId, { company_name, job_title, posting_url, status }) {
   const result = await pool.query(
     `INSERT INTO saved_jobs (user_id, company_name, job_title, posting_url, status)
-     VALUES ($1, $2, $3, $4, $5)
+     SELECT $1::uuid, $2::text, $3::text, $4::text, $5::text
+     WHERE (SELECT count(*) FROM saved_jobs WHERE user_id = $1::uuid) < $6
      RETURNING *`,
-    [userId, company_name, job_title ?? '', posting_url, status ?? 'to_apply']
+    [userId, company_name, job_title ?? '', posting_url, status ?? 'to_apply', MAX_JOBS]
   )
-  return result.rows[0]
+  return result.rows[0] ?? null
 }
 
 export async function update(pool, userId, id, { company_name, job_title, posting_url, status }) {

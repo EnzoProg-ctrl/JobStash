@@ -40,18 +40,38 @@ export default function StashPage() {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState('newest')        // newest | oldest | company
   const [actionError, setActionError] = useState(null)
+  // Loading is taking a while (see below). Try again bumps attempt to reload.
+  const [slow, setSlow] = useState(false)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
+    // Only the latest load may change the page: one that finishes after the
+    // visitor left, or after they clicked Try again, is ignored.
+    let latest = true
+    setStatus('loading')
+    setSlow(false)
+    // After 5 seconds, explain the wait. On a free host the API sleeps when
+    // nobody uses it, and waking up takes up to a minute.
+    const timer = setTimeout(() => setSlow(true), 5000)
+
     listJobs()
       .then((rows) => {
+        if (!latest) return
         setJobs(rows)
         setStatus('ready')
       })
       .catch((caught) => {
+        if (!latest) return
         setError(caught)
         setStatus('error')
       })
-  }, [])
+      .finally(() => clearTimeout(timer))
+
+    return () => {
+      latest = false
+      clearTimeout(timer)
+    }
+  }, [attempt])
 
   // The card changes straight away, then the change is saved. If saving fails
   // the card goes back to how it was, so the screen never shows something that
@@ -106,10 +126,29 @@ export default function StashPage() {
 
       {/* Four states, and each looks different. An empty list means "nothing
           here yet"; an error means "we could not find out". */}
-      {status === 'loading' && <p className="mt-6 text-muted">Loading...</p>}
+      {status === 'loading' && (
+        <div className="mt-6 text-muted" role="status">
+          <p>Loading...</p>
+          {slow && (
+            <p className="mt-2">
+              Still loading. If JobStash hasn't been used for a while, its server takes up to a
+              minute to wake up.
+            </p>
+          )}
+        </div>
+      )}
 
       {status === 'error' && (
-        <p className="mt-6 text-error" role="alert">{error.message}</p>
+        <div className="mt-6 rounded-card border border-line bg-surface p-6" role="alert">
+          <p className="text-error">{error.message}</p>
+          <button
+            type="button"
+            onClick={() => setAttempt((count) => count + 1)}
+            className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-line px-4 font-semibold text-ink hover:bg-subtle"
+          >
+            Try again
+          </button>
+        </div>
       )}
 
       {status === 'ready' && jobs.length === 0 && (
