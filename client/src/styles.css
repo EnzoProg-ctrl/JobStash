@@ -47,4 +47,43 @@
     outline: 3px solid var(--color-primary);
     outline-offset: 2px;
   }
+
+  /* Click feedback. Colour changes on hover and click fade instead of
+     snapping, and buttons press in a little while held down, like a real
+     button. Short on purpose: 0.15s feels quick, not slow. Links that look
+     like buttons get the same press with the "press" class below. */
+  a, button, input, select, textarea {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+    /* Phones draw a grey box on tap. The press above replaces it. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+}
+
+/* For links styled as buttons ("Add Job", "Open Posting"…). */
+@utility press {
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* People who ask their device for less motion (often because movement makes
+   them dizzy) get no animation at all: everything changes straight away, as
+   before. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  button:not(:disabled):active, .press:active {
+    transform: none;
+  }
 }

@@ -39,14 +39,14 @@ export default function HomePage() {
           {session ? (
             <Link
               to="/stash"
-              className="inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
             >
               My Stash
             </Link>
           ) : (
             <a
               href="#sign-in"
-              className="inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
             >
               {demo ? 'Try the demo' : 'Sign in'}
             </a>
@@ -136,7 +136,7 @@ function SignIn() {
       <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
         <Link
           to="/stash"
-          className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
+          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
         >
           Try the demo
           <ArrowIcon />
@@ -151,7 +151,7 @@ function SignIn() {
       <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
         <Link
           to="/stash"
-          className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
+          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
         >
           Go to My Stash
           <ArrowIcon />

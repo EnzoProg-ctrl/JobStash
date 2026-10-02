@@ -65,7 +65,7 @@ export default function JobCard({ job, onSetStatus }) {
           href={job.posting_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-surface px-4 text-sm font-semibold text-brand-blue hover:bg-subtle"
+          className="press inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-surface px-4 text-sm font-semibold text-brand-blue hover:bg-subtle"
         >
           Open Posting
           <svg className="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
