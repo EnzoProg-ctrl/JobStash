@@ -221,8 +221,11 @@ function HeroImage() {
     // On wide screens the phone shifts left (xl:mr-36) to leave room for the
     // handwritten notes on its right.
     <div className="relative isolate mx-auto w-full max-w-sm xl:mr-36">
-      {/* The soft blob behind the phone. Decoration only. */}
-      <svg className="absolute inset-0 -z-10 size-full scale-175" viewBox="0 0 400 400" aria-hidden="true">
+      {/* The soft blob behind the phone. Decoration only. It is bigger than
+          the picture, and on phones the picture sits under the sign-in
+          button, so the blob reaches over the button: pointer-events-none
+          lets taps go through it to the button. */}
+      <svg className="pointer-events-none absolute inset-0 -z-10 size-full scale-175" viewBox="0 0 400 400" aria-hidden="true">
         <path
           fill="#EAF1FF"
           d="M286 58C336 78 372 128 366 182C361 226 322 240 330 282C338 326 300 368 250 370C204 372 186 338 142 344C92 351 44 322 38 268C32 218 74 196 66 150C58 100 96 50 150 44C196 39 240 40 286 58Z"
