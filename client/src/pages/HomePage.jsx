@@ -110,6 +110,7 @@ export default function HomePage() {
       <footer className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 sm:flex-row sm:items-center sm:gap-6 md:px-8">
         <Logo className="text-2xl" />
         <p className="text-sm text-muted">Stash today. A brighter tomorrow.</p>
+        <Link to="/privacy" className="text-sm text-muted underline hover:text-ink sm:ml-auto">Privacy</Link>
       </footer>
     </div>
   )

@@ -2,11 +2,12 @@ import { Navigate, Outlet, Route, Routes } from 'react-router'
 import AppHeader from './components/AppHeader.jsx'
 import HomePage from './pages/HomePage.jsx'
 import StashPage from './pages/StashPage.jsx'
+import PrivacyPage from './pages/PrivacyPage.jsx'
 import AddJobDialog from './components/AddJobDialog.jsx'
 import { AuthProvider, RequireSignIn } from './lib/auth.jsx'
 
-// The landing page, My Stash, and the Add Job pop-up on top of My Stash.
-// Every other address goes back to Home.
+// The landing page, the privacy notice, My Stash, and the Add Job pop-up on
+// top of My Stash. Every other address goes back to Home.
 //
 // The landing page has its own header and full-width layout. The app screens
 // share AppLayout, so they keep the same header and width, and they sit inside
@@ -16,6 +17,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route element={<RequireSignIn />}>
           <Route element={<AppLayout />}>
             <Route path="/stash" element={<StashPage />}>

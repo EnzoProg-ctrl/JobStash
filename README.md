@@ -240,7 +240,10 @@ is gone, and the jobs now come from your database.
    limit. If loading takes more than 5 seconds, My Stash explains that the
    server may be waking up (free hosts sleep when nobody uses them), and if
    loading fails there's a **Try again** button.
-9. **Sign out** in the header ends the sign-in on this browser only, and the
+9. **Privacy** (`/privacy`, linked from the landing page footer and from
+   Google's sign-in screen) says in plain words what JobStash keeps, what it
+   doesn't do, and how to have your data deleted.
+10. **Sign out** in the header ends the sign-in on this browser only, and the
    landing page confirms it. Your other devices stay signed in. On a shared
    computer, sign out when you're done. JobStash's Sign out doesn't sign you
    out of Google itself.
@@ -332,6 +335,7 @@ JobStash/
 │       ├── styles.css         Tailwind and the design colours, font and sizes
 │       ├── pages/             one file per screen
 │       │   ├── HomePage.jsx       landing page  (/)
+│       │   ├── PrivacyPage.jsx    privacy notice (/privacy)
 │       │   └── StashPage.jsx      My Stash      (/stash)
 │       ├── components/        pieces used by the pages
 │       │   ├── AppHeader.jsx      logo, + Add Job and Sign out, on the app screens
