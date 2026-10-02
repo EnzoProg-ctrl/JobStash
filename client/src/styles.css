@@ -104,6 +104,24 @@ dialog[data-closing]::backdrop {
   from { opacity: 0; transform: translateY(-4px) scale(0.95); }
 }
 
+/* The job list moving (lib/motion.js). Each card slides to its new place in
+   0.2s, and cards leaving or arriving fade. */
+::view-transition-group(*) {
+  animation-duration: 200ms;
+  animation-timing-function: ease-out;
+}
+/* Only the cards move. The rest of the page (tabs, search box, counts) just
+   changes, and stays live underneath, so typing in the search box shows
+   straight away and clicks are never blocked during the 0.2s. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition {
+  pointer-events: none;
+}
+
 /* For links styled as buttons ("Add Job", "Open Posting"…). */
 @utility press {
   &:active {
@@ -124,5 +142,11 @@ dialog[data-closing]::backdrop {
 
   button:not(:disabled):active, .press:active {
     transform: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

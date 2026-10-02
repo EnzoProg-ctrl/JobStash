@@ -36,7 +36,10 @@ export default function JobCard({ job, onSetStatus }) {
   const site = siteName(job.posting_url)
 
   return (
-    <li className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-3 rounded-card border border-line bg-surface p-4 shadow-sm md:grid-cols-[auto_1fr_auto_auto] md:gap-x-6 md:px-6 md:py-5">
+    <li
+      // Lets this card slide on its own when the list changes (lib/motion.js).
+      data-transition-name={`job-${job.id}`}
+      className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-3 rounded-card border border-line bg-surface p-4 shadow-sm md:grid-cols-[auto_1fr_auto_auto] md:gap-x-6 md:px-6 md:py-5">
       {/* The company name is right beside it, so screen readers skip this. */}
       <span
         className={`col-start-1 row-start-1 flex size-12 items-center justify-center self-start rounded-full text-lg font-bold md:size-14 md:self-center ${avatarColour(job.company_name)}`}

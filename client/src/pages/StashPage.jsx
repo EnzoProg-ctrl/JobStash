@@ -4,6 +4,7 @@ import DemoNotice from '../components/DemoNotice.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
 import StashToolbar from '../components/StashToolbar.jsx'
+import { smoothly } from '../lib/motion.js'
 import { Outlet } from 'react-router'
 
 // Shown when a tab has nothing in it. Different from the page having no jobs
@@ -38,6 +39,9 @@ export default function StashPage() {
   const [error, setError] = useState(null)
   const [tab, setTab] = useState('to_apply')        // to_apply | done | all
   const [query, setQuery] = useState('')
+  // What the list is filtered by. It follows query, but through smoothly(), so
+  // the cards can slide; the search box itself always updates straight away.
+  const [shownQuery, setShownQuery] = useState('')
   const [sort, setSort] = useState('newest')        // newest | oldest | company
   const [actionError, setActionError] = useState(null)
   // Loading is taking a while (see below). Try again bumps attempt to reload.
@@ -81,11 +85,13 @@ export default function StashPage() {
       setJobs((current) => current.map((row) => (row.id === changed.id ? changed : row)))
 
     setActionError(null)
-    replace({ ...job, status: next })
+    // Smoothly: on the To Apply tab, a job marked done fades out and the ones
+    // below slide up into its place.
+    smoothly(() => replace({ ...job, status: next }))
     try {
       replace(await setJobStatus(job.id, next))
     } catch (caught) {
-      replace(job)
+      smoothly(() => replace(job))
       setActionError(`Couldn't update "${job.job_title || job.company_name}": ${caught.message}`)
     }
   }
@@ -93,17 +99,29 @@ export default function StashPage() {
   // Called by the Add Job pop-up after it saves. The new job goes first because
   // it is the newest, and the tab and search are reset so it is always visible.
   function handleJobSaved(job) {
-    setJobs((current) => [job, ...current])
-    setTab('to_apply')
-    setQuery('')
+    smoothly(() => {
+      setJobs((current) => [job, ...current])
+      setTab('to_apply')
+      setQuery('')
+      setShownQuery('')
+    })
   }
+
+  // Changing the tab, the search or the sort only rearranges the cards, so the
+  // cards slide into their new places instead of the list jumping.
+  const showTab = (value) => smoothly(() => setTab(value))
+  const search = (value) => {
+    setQuery(value)
+    smoothly(() => setShownQuery(value))
+  }
+  const sortBy = (value) => smoothly(() => setSort(value))
 
   // All jobs are already loaded, so the tabs, search and sort only rearrange
   // what is here. No extra request.
   //
   // The counts follow the search, so searching "intern" shows how many matches
   // each tab has.
-  const matches = jobs.filter((job) => matchesSearch(job, query))
+  const matches = jobs.filter((job) => matchesSearch(job, shownQuery))
   const counts = {
     to_apply: matches.filter((job) => job.status === 'to_apply').length,
     done: matches.filter((job) => job.status === 'done').length,
@@ -161,11 +179,11 @@ export default function StashPage() {
       {status === 'ready' && jobs.length > 0 && (
         <>
           <div className="mt-8">
-            <FilterTabs value={tab} counts={counts} onChange={setTab} />
+            <FilterTabs value={tab} counts={counts} onChange={showTab} />
           </div>
 
           <div className="mt-6">
-            <StashToolbar query={query} onQueryChange={setQuery} sort={sort} onSortChange={setSort} />
+            <StashToolbar query={query} onQueryChange={search} sort={sort} onSortChange={sortBy} />
           </div>
 
           {actionError && (
@@ -174,14 +192,14 @@ export default function StashPage() {
             </p>
           )}
 
-          {visible.length === 0 && query.trim() ? (
+          {visible.length === 0 && shownQuery.trim() ? (
             <div className="mt-6 rounded-card border border-line bg-surface p-8 text-center">
               <p className="font-bold">
-                No {tab === 'all' ? 'jobs' : 'jobs on this tab'} match "{query.trim()}".
+                No {tab === 'all' ? 'jobs' : 'jobs on this tab'} match "{shownQuery.trim()}".
               </p>
               <button
                 type="button"
-                onClick={() => setQuery('')}
+                onClick={() => search('')}
                 className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-4 font-semibold text-brand-blue hover:bg-subtle"
               >
                 Clear search
