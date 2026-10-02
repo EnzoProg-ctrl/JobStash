@@ -63,12 +63,33 @@ export default function AddJobDialog() {
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
+  // True while the closing animation plays (dialog[data-closing] in styles.css).
+  const [closing, setClosing] = useState(false)
+  const closed = useRef(false)
 
+  // Start closing: play the animation first, then really close. People who
+  // ask their device for less motion get no animation, so no wait either.
   function close() {
-    // Closing the dialog first puts keyboard focus back on + Add Job, where it
-    // was before the pop-up opened.
+    setClosing(true)
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setTimeout(finishClosing, reduceMotion ? 0 : 150)
+  }
+
+  // Really close, once only: the timer above and the dialog's own close
+  // event can both get here. Closing the dialog first puts keyboard focus
+  // back on + Add Job, where it was before the pop-up opened.
+  function finishClosing() {
+    if (closed.current) return
+    closed.current = true
     dialog.current?.close()
     navigate('/stash')
+  }
+
+  // Esc. The browser would close the pop-up straight away; stop that, so the
+  // closing animation can play first.
+  function handleCancel(event) {
+    event.preventDefault()
+    close()
   }
 
   // A click on the dimmed background lands on the <dialog> element itself;
@@ -103,7 +124,11 @@ export default function AddJobDialog() {
   return (
     <dialog
       ref={dialog}
-      onCancel={close}
+      onCancel={handleCancel}
+      // If the browser closes the pop-up by itself anyway (some do on a second
+      // Esc press), still go back to /stash.
+      onClose={finishClosing}
+      data-closing={closing || undefined}
       onClick={handleBackdropClick}
       aria-labelledby="add-job-title"
       className="m-auto w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40"
@@ -206,7 +231,8 @@ export default function AddJobDialog() {
             </button>
             <button
               type="submit"
-              disabled={saving}
+              // Also while closing, so a quick second click can't save it twice.
+              disabled={saving || closing}
               className="min-h-12 flex-1 rounded-lg bg-brand-blue px-10 font-semibold text-white hover:bg-todo disabled:opacity-60 sm:flex-none"
             >
               {saving ? 'Saving…' : 'Save Job'}

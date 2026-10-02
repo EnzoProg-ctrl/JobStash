@@ -65,6 +65,45 @@
   }
 }
 
+/* Pop-ups. The Add Job pop-up rises a little and fades in while the page
+   behind it dims, instead of appearing all at once. data-closing (set by the
+   pop-up while it closes) plays the same thing backwards. */
+dialog[open] {
+  animation: pop-up-in 200ms ease-out;
+}
+dialog[open]::backdrop {
+  animation: fade-in 200ms ease-out;
+}
+dialog[data-closing] {
+  animation: pop-up-out 150ms ease-in forwards;
+}
+dialog[data-closing]::backdrop {
+  animation: fade-out 150ms ease-in forwards;
+}
+
+@keyframes pop-up-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+}
+@keyframes pop-up-out {
+  to { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+
+/* Small menus (the ⋮ menu on a job card) grow out of the button that opened
+   them. Put it on the menu with the "menu-in" class; origin-top-right (or
+   another corner) says where the button is. */
+@utility menu-in {
+  animation: menu-in 120ms ease-out;
+}
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.95); }
+}
+
 /* For links styled as buttons ("Add Job", "Open Posting"…). */
 @utility press {
   &:active {

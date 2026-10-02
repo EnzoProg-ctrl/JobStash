@@ -55,7 +55,7 @@ export default function CardMenu({ label, status, onSetStatus }) {
         <div
           role="menu"
           aria-label={`Actions for ${label}`}
-          className="absolute top-full right-0 z-10 mt-1 w-60 rounded-card border border-line bg-surface p-1 shadow-lg"
+          className="menu-in absolute top-full right-0 z-10 mt-1 w-60 origin-top-right rounded-card border border-line bg-surface p-1 shadow-lg"
         >
           <button
             type="button"
