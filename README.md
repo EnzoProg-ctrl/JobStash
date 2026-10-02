@@ -92,7 +92,7 @@ Copy-Item server/.env.example server/.env
 | `SUPABASE_URL` | `https://your-project-ref.supabase.co` | Your Supabase project's address, used to check sign-in passes. Not a secret. **Dashboard > Project Settings > API** |
 | `CORS_ORIGINS` | `http://localhost:5173` | Which websites may call the API. Comma-separated, no trailing slash |
 | `NODE_ENV` | `development` | Set to `production` on a host |
-| `TRUST_PROXY` | _(leave out locally)_ | Set to `1` on Render or Railway, so the rate limits see each visitor's real address |
+| `TRUST_PROXY` | _(leave out locally)_ | Set to `3` on Render, so the rate limits see each visitor's real address (another host may need a different number) |
 | `PORT` | _(don't set it)_ | A host sets it for you. Locally the API uses 3000 |
 
 **`client/.env`**
@@ -325,6 +325,7 @@ and it's a fallback if the API is asleep during a demo.
 JobStash/
 ├── client/                    the website
 │   ├── index.html             page title, fonts
+│   ├── vercel.json            lets Vercel open /stash directly
 │   └── src/
 │       ├── main.jsx           starts the app and the router
 │       ├── App.jsx            which page shows at which address
@@ -392,8 +393,8 @@ Only the demo is online, on GitHub Pages. The plan for the full version:
 
 | Piece | Where | Notes |
 |---|---|---|
-| Website | Vercel | Set `VITE_USE_MOCK_API=false`, `VITE_API_BASE_URL` and the two `VITE_SUPABASE_` settings in Vercel's settings, then redeploy. A `vercel.json` rewrite will be needed so refreshing `/stash` doesn't give a 404 |
-| API | a free Node host (Render or Railway) | Point it at `server/`, add the `server/.env` settings in its dashboard plus `TRUST_PROXY=1`, and add the website's address to `CORS_ORIGINS` |
+| Website | Vercel | Set `VITE_USE_MOCK_API=false`, `VITE_API_BASE_URL` and the two `VITE_SUPABASE_` settings in Vercel's settings, then redeploy. `client/vercel.json` sends every address to the app, so refreshing `/stash` doesn't give a 404 |
+| API | a free Node host (Render or Railway) | Point it at `server/`, add the `server/.env` settings in its dashboard plus `TRUST_PROXY=3`, and add the website's address to `CORS_ORIGINS` |
 | Database | Supabase | Already set up |
 | Sign-in | Google Cloud and Supabase | Add the website's new address to the Google OAuth client's JavaScript origins and to Supabase's Site URL and redirect URLs, then **Publish app** in Google so anyone can sign in |
 

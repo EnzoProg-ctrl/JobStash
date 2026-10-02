@@ -20,11 +20,14 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .map((origin) => origin.trim())
   .filter(Boolean)
 
-// On a host (Render, Railway), every request reaches the API through the
-// host's own proxy, so the visitor's real address is in a header the proxy
-// adds. TRUST_PROXY=1 tells Express to read it; without that, every visitor
-// would look like the same device to the rate limits. It stays off locally,
-// where there is no proxy and anyone could fake that header.
+// On a host, every request reaches the API through the host's own servers,
+// and each one adds the address it got the request from to a header.
+// TRUST_PROXY is how many of those to skip to reach the visitor's real
+// address. Too low, and the rate limits count one of the host's servers
+// instead of the visitor; too high, and a visitor can write a fake address
+// into the header and dodge the limits. On Render it is 3 (tested: counts
+// stay steady across connections, and fake addresses don't reset them). It
+// stays off locally, where there is no host in between.
 app.set('trust proxy', Number(process.env.TRUST_PROXY) || false)
 
 // First, so every request is logged, even ones turned away further down.
