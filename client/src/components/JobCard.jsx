@@ -62,7 +62,10 @@ export default function JobCard({ job, onSetStatus }) {
         </p>
       </div>
 
-      <div className="col-span-2 col-start-2 row-start-2 flex flex-wrap items-center gap-3 md:col-span-1 md:col-start-3 md:row-start-1 md:gap-6">
+      {/* Phones: the badge lines up with the card's left edge and Open Posting
+          with its right, under everything else. From 768px both sit in the
+          row, before the ⋮. */}
+      <div className="col-span-3 col-start-1 row-start-2 flex flex-wrap items-center justify-between gap-3 md:col-span-1 md:col-start-3 md:row-start-1 md:justify-start md:gap-6">
         <StatusBadge status={job.status} />
         <a
           href={job.posting_url}

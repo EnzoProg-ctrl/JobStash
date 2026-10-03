@@ -11,7 +11,7 @@ export const SORTS = [
 
 export default function StashToolbar({ query, onQueryChange, sort, onSortChange }) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row">
+    <div className="flex flex-col gap-1 md:flex-row md:gap-3">
       <div className="relative flex-1">
         <label htmlFor="job-search" className="sr-only">Search jobs or companies</label>
         <svg className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -44,22 +44,24 @@ export default function StashToolbar({ query, onQueryChange, sort, onSortChange 
 
       {/* The browser's own dropdown, restyled: it already works with a
           keyboard, on phones and with screen readers. */}
-      <div className="relative md:w-56">
+      {/* Phones: plain text under the search box ("⇅ Newest first ⌄"), as in
+          the phone design. From 768px: a box beside the search, like it. */}
+      <div className="relative self-start md:w-56 md:self-auto">
         <label htmlFor="job-sort" className="sr-only">Sort jobs</label>
-        <svg className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-ink" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg className="pointer-events-none absolute top-1/2 left-1 size-5 -translate-y-1/2 text-ink md:left-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M6 3v14M3 14l3 3 3-3M14 17V3M11 6l3-3 3 3" />
         </svg>
         <select
           id="job-sort"
           value={sort}
           onChange={(event) => onSortChange(event.target.value)}
-          className="min-h-12 w-full appearance-none rounded-card border border-line bg-surface pr-10 pl-12 text-base font-semibold text-ink"
+          className="min-h-11 w-full appearance-none rounded-card border border-transparent bg-transparent pr-8 pl-8 text-base font-semibold text-ink md:min-h-12 md:border-line md:bg-surface md:pr-10 md:pl-12"
         >
           {SORTS.map((option) => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
-        <svg className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-ink" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg className="pointer-events-none absolute top-1/2 right-2 size-4 -translate-y-1/2 text-ink md:right-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 6l4 4 4-4" />
         </svg>
       </div>

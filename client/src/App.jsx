@@ -1,5 +1,6 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router'
 import AppHeader from './components/AppHeader.jsx'
+import BottomNav from './components/BottomNav.jsx'
 import HomePage from './pages/HomePage.jsx'
 import StashPage from './pages/StashPage.jsx'
 import PrivacyPage from './pages/PrivacyPage.jsx'
@@ -37,9 +38,11 @@ function AppLayout() {
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto max-w-5xl px-4 py-8 md:px-8 md:py-10">
+      {/* pb-32 on phones keeps the last card clear of the bottom bar. */}
+      <main className="mx-auto max-w-5xl px-4 pt-8 pb-32 md:px-8 md:py-10">
         <Outlet />
       </main>
+      <BottomNav />
     </div>
   )
 }

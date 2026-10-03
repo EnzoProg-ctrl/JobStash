@@ -21,28 +21,32 @@ export default function FilterTabs({ value, counts, onChange }) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(tab.value)}
-            className={`flex flex-col items-start gap-2 rounded-card border p-3 text-left md:flex-row md:items-center md:gap-4 md:p-4 ${
+            // Phones: a plain icon beside the label and count, as in the phone
+            // design (on the narrowest phones, under 360px, the icon goes above
+            // so "To Apply" still fits on one line). From 768px the icon sits in
+            // a circle and the count in a pill.
+            className={`flex items-center gap-1.5 rounded-card border px-2 py-3 text-left max-[359px]:flex-col max-[359px]:items-start md:gap-4 md:p-4 ${
               active
                 ? 'border-brand-blue bg-todo-bg'
                 : 'border-line bg-surface hover:border-accent'
             }`}
           >
             <span
-              className={`flex size-9 shrink-0 items-center justify-center rounded-full md:size-12 ${
-                active ? 'bg-white text-brand-blue' : 'bg-subtle text-ink'
+              className={`flex shrink-0 items-center justify-center rounded-full md:size-12 ${
+                active ? 'text-brand-blue md:bg-white' : 'text-ink md:bg-subtle'
               }`}
             >
               <tab.icon />
             </span>
             <span>
-              <span className={`block font-semibold ${active ? 'text-brand-blue' : 'text-ink'}`}>
+              <span className={`block text-sm font-semibold whitespace-nowrap md:text-base ${active ? 'text-brand-blue' : 'text-ink'}`}>
                 {tab.label}
               </span>
               {/* Dark text on grey, never grey on grey: that pair failed the
                   contrast check in the design system. */}
               <span
-                className={`mt-1 inline-block rounded-full px-2 text-sm ${
-                  active ? 'bg-white text-brand-blue' : 'bg-subtle text-ink'
+                className={`inline-block rounded-full text-sm md:mt-1 md:px-2 ${
+                  active ? 'text-brand-blue md:bg-white' : 'text-ink md:bg-subtle'
                 }`}
               >
                 {counts[tab.value]}
@@ -57,7 +61,7 @@ export default function FilterTabs({ value, counts, onChange }) {
 
 function Icon({ children }) {
   return (
-    <svg className="size-5 md:size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       {children}
     </svg>
   )

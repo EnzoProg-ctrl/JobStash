@@ -131,9 +131,11 @@ export default function AddJobDialog() {
       data-closing={closing || undefined}
       onClick={handleBackdropClick}
       aria-labelledby="add-job-title"
-      className="m-auto w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40"
+      className="mt-auto mb-0 w-full max-w-none max-h-[90dvh] rounded-t-3xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 
+  md:m-auto md:w-[calc(100%-2rem)] md:max-w-xl md:max-h-[calc(100%-2rem)] md:rounded-2xl"
     >
-      <div className="p-6 md:p-8">
+      <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:p-8">
+        <div className="mx-auto -mt-2 mb-4 h-1.5 w-12 rounded-full bg-line md:hidden" aria-hidden="true"/>
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="add-job-title" className="text-3xl font-bold">Add Job</h2>
@@ -155,7 +157,7 @@ export default function AddJobDialog() {
           <div>
             <label htmlFor="posting-url" className="mb-2 block text-sm font-semibold">
               Job posting URL <span className="text-error" aria-hidden="true">*</span>
-            </label>
+            </label>  
             <div className="relative">
               <svg className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
                 <path d="M7 9a3 3 0 004.2.3l2-2a3 3 0 00-4.2-4.2l-.8.8M9 7a3 3 0 00-4.2-.3l-2 2a3 3 0 004.2 4.2l.8-.8" />
@@ -221,11 +223,11 @@ export default function AddJobDialog() {
             </p>
           )}
 
-          <div className="mt-2 flex gap-3 sm:justify-between">
+          <div className="mt-2 flex gap-3 md:justify-between">
             <button
               type="button"
               onClick={close}
-              className="min-h-12 flex-1 rounded-lg bg-subtle px-8 font-semibold text-ink hover:bg-line sm:flex-none"
+              className="hidden min-h-12 flex-1 rounded-lg bg-subtle px-8 font-semibold text-ink hover:bg-line md:block md:flex-none"
             >
               Cancel
             </button>
@@ -233,7 +235,7 @@ export default function AddJobDialog() {
               type="submit"
               // Also while closing, so a quick second click can't save it twice.
               disabled={saving || closing}
-              className="min-h-12 flex-1 rounded-lg bg-brand-blue px-10 font-semibold text-white hover:bg-todo disabled:opacity-60 sm:flex-none"
+              className="min-h-12 flex-1 rounded-lg bg-brand-blue px-10 font-semibold text-white hover:bg-todo disabled:opacity-60 md:flex-none"
             >
               {saving ? 'Saving…' : 'Save Job'}
             </button>

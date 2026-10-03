@@ -1,35 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useMenu } from '../lib/useMenu.js'
 
 // The ⋮ button on a job card and the small menu it opens.
 //
-// It closes when you pick something, press Esc, or click anywhere outside it.
-// Esc also puts focus back on the ⋮ button, so keyboard users are not left
-// stranded somewhere on the page.
+// It closes when you pick something, press Esc, or click anywhere outside it
+// (lib/useMenu.js).
 export default function CardMenu({ label, status, onSetStatus }) {
-  const [open, setOpen] = useState(false)
-  const wrapper = useRef(null)
-  const button = useRef(null)
-
-  useEffect(() => {
-    if (!open) return
-
-    function handlePointer(event) {
-      if (!wrapper.current.contains(event.target)) setOpen(false)
-    }
-    function handleKey(event) {
-      if (event.key === 'Escape') {
-        setOpen(false)
-        button.current.focus()
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointer)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      document.removeEventListener('mousedown', handlePointer)
-      document.removeEventListener('keydown', handleKey)
-    }
-  }, [open])
+  const { open, setOpen, wrapper, button } = useMenu()
 
   const next = status === 'done' ? 'to_apply' : 'done'
 

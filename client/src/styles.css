@@ -39,6 +39,11 @@
     background-color: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
+    /* index.html lets the page reach under the iPhone's notch and home line
+       (viewport-fit=cover, for the bottom bar). Keep it clear of the notch
+       when the phone is turned sideways. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   /* Never remove a focus outline without replacing it. Keyboard users need to
@@ -79,6 +84,24 @@ dialog[data-closing] {
 }
 dialog[data-closing]::backdrop {
   animation: fade-out 150ms ease-in forwards;
+}
+
+/* On phones the pop-up is a bottom sheet (AddJobDialog.jsx), so it slides up
+   from the bottom edge and back down, instead of rising a little. */
+@media (width < 48rem) {
+  dialog[open] {
+    animation: sheet-in 250ms ease-out;
+  }
+  dialog[data-closing] {
+    animation: sheet-out 150ms ease-in forwards;
+  }
+}
+
+@keyframes sheet-in {
+  from { transform: translateY(100%); }
+}
+@keyframes sheet-out {
+  to { transform: translateY(100%); }
 }
 
 @keyframes pop-up-in {
