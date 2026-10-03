@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import DemoNotice from '../components/DemoNotice.jsx'
+import LandingMenu from '../components/LandingMenu.jsx'
 import Logo from '../components/Logo.jsx'
 import { supabase } from '../lib/supabase.js'
 import { clearSignInNote, readSignInNote, useAuth } from '../lib/auth.jsx'
@@ -29,28 +30,36 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen overflow-x-clip">
-      <header className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 md:px-8">
+      <header className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-5 min-[360px]:gap-4 md:px-8">
         <Link to="/" aria-label="JobStash home">
-          <Logo className="text-2xl md:text-3xl" />
+          {/* On the narrowest phones (under 360px) only the mark shows, so the
+              mark, the button and the ⋮ menu fit on one line. The link's label
+              still says "JobStash home" for screen readers. */}
+          <Logo className="text-2xl md:text-3xl" wordClassName="max-[359px]:sr-only" />
         </Link>
-        <nav className="flex items-center gap-6 md:gap-8" aria-label="Page sections">
+        <nav className="flex items-center gap-2 md:gap-8" aria-label="Page sections">
           <a href="#how-it-works" className="hidden text-muted hover:text-ink md:inline">How it works</a>
           <a href="#features" className="hidden text-muted hover:text-ink md:inline">Features</a>
           {session ? (
             <Link
               to="/stash"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-todo md:px-8"
             >
               My Stash
             </Link>
           ) : (
             <a
               href="#sign-in"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-todo md:px-8"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-todo md:px-8"
             >
               {demo ? 'Try the demo' : 'Sign in'}
             </a>
           )}
+          {/* Phones: How it works and Features don't fit beside the button, so
+              they're in this ⋮ menu instead. */}
+          <div className="md:hidden">
+            <LandingMenu />
+          </div>
         </nav>
       </header>
 

@@ -353,6 +353,7 @@ JobStash/
 │       │   ├── JobCard.jsx        one saved job
 │       │   ├── CardMenu.jsx       the ⋮ menu on a card (mark done, delete)
 │       │   ├── UndoToast.jsx      the "Deleted … · Undo" message
+│       │   ├── LandingMenu.jsx    the ⋮ menu on the landing page (phones)
 │       │   ├── StatusBadge.jsx    the To Apply / Done pill
 │       │   ├── Logo.jsx           the JobStash wordmark
 │       │   └── DemoNotice.jsx     the demo-mode notice
