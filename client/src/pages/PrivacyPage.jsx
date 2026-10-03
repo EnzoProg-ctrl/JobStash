@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router'
 import Logo from '../components/Logo.jsx'
+import { usePageTitle } from '../lib/usePageTitle.js'
 
 // The privacy notice, at /privacy. Open to everyone, signed in or not, because
 // Google links to it from its sign-in screen. Written in plain words, and it
@@ -11,6 +12,7 @@ const CONTACT = 'centenoenzo054@gmail.com'
 const UPDATED = '3 October 2026'
 
 export default function PrivacyPage() {
+  usePageTitle('Privacy')
   // Links keep the scroll position of the page they came from (the landing
   // footer is at the very bottom), so start this page at the top. Instantly:
   // the site scrolls smoothly (styles.css), and gliding up from the bottom of

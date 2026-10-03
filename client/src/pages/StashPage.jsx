@@ -6,6 +6,7 @@ import JobCard from '../components/JobCard.jsx'
 import StashToolbar from '../components/StashToolbar.jsx'
 import UndoToast from '../components/UndoToast.jsx'
 import { smoothly } from '../lib/motion.js'
+import { usePageTitle } from '../lib/usePageTitle.js'
 import { Outlet } from 'react-router'
 
 // Shown when a tab has nothing in it. Different from the page having no jobs
@@ -35,6 +36,7 @@ function matchesSearch(job, query) {
 // My Stash: every saved job, filtered by the tabs and the search, sorted, with
 // a menu on each card to mark it done. Delete comes next.
 export default function StashPage() {
+  usePageTitle('My Stash')
   const [status, setStatus] = useState('loading')   // loading | ready | error
   const [jobs, setJobs] = useState([])
   const [error, setError] = useState(null)

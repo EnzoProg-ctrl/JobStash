@@ -360,6 +360,7 @@ JobStash/
 │       ├── lib/
 │       │   ├── auth.jsx           who is signed in, sign out, locks My Stash
 │       │   ├── supabase.js        the Supabase sign-in connection (none in demo mode)
+│       │   ├── usePageTitle.js    the browser tab's name, per page ("My Stash · JobStash-ph")
 │       │   └── format.js          "LinkedIn", "2 days ago"
 │       ├── api/               the only code that fetches data
 │       │   ├── index.js           picks demo or real

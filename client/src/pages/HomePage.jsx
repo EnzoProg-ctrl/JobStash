@@ -5,6 +5,7 @@ import LandingMenu from '../components/LandingMenu.jsx'
 import Logo from '../components/Logo.jsx'
 import { supabase } from '../lib/supabase.js'
 import { clearSignInNote, readSignInNote, useAuth } from '../lib/auth.jsx'
+import { usePageTitle } from '../lib/usePageTitle.js'
 import phoneImage from '../assets/landing-phone.webp'
 
 // The landing page. Its own header and footer, and full width, unlike the app
@@ -27,6 +28,7 @@ const PROMISES = [
 
 export default function HomePage() {
   const { session, demo } = useAuth()
+  usePageTitle()
 
   return (
     <div className="min-h-screen overflow-x-clip">
