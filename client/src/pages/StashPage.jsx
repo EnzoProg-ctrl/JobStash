@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { deleteJob, listJobs, setJobStatus } from '../api'
+import { deleteJob, setJobStatus } from '../api'
 import DemoNotice from '../components/DemoNotice.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
@@ -7,6 +7,7 @@ import StashToolbar from '../components/StashToolbar.jsx'
 import UndoToast from '../components/UndoToast.jsx'
 import { smoothly } from '../lib/motion.js'
 import { usePageTitle } from '../lib/usePageTitle.js'
+import { useJobs } from '../lib/useJobs.js'
 import { Outlet } from 'react-router'
 
 // Shown when a tab has nothing in it. Different from the page having no jobs
@@ -34,12 +35,12 @@ function matchesSearch(job, query) {
 }
 
 // My Stash: every saved job, filtered by the tabs and the search, sorted, with
-// a menu on each card to mark it done. Delete comes next.
+// a menu on each card to mark it done or delete it.
 export default function StashPage() {
   usePageTitle('My Stash')
-  const [status, setStatus] = useState('loading')   // loading | ready | error
-  const [jobs, setJobs] = useState([])
-  const [error, setError] = useState(null)
+  // Loading the list, the "waking up" note and Try again live in lib/useJobs.js,
+  // shared with the Overview page.
+  const { status, jobs, setJobs, error, slow, retry } = useJobs()
   const [tab, setTab] = useState('to_apply')        // to_apply | done | all
   const [query, setQuery] = useState('')
   // What the list is filtered by. It follows query, but through smoothly(), so
@@ -47,43 +48,11 @@ export default function StashPage() {
   const [shownQuery, setShownQuery] = useState('')
   const [sort, setSort] = useState('newest')        // newest | oldest | company
   const [actionError, setActionError] = useState(null)
-  // Loading is taking a while (see below). Try again bumps attempt to reload.
-  const [slow, setSlow] = useState(false)
-  const [attempt, setAttempt] = useState(0)
   // The job just deleted, while its Undo message shows (5 seconds).
   const [deleted, setDeleted] = useState(null)
   // The same job, plus the 5-second timer, kept where the timer can read them.
   const pending = useRef(null)
   const timer = useRef(null)
-
-  useEffect(() => {
-    // Only the latest load may change the page: one that finishes after the
-    // visitor left, or after they clicked Try again, is ignored.
-    let latest = true
-    setStatus('loading')
-    setSlow(false)
-    // After 5 seconds, explain the wait. On a free host the API sleeps when
-    // nobody uses it, and waking up takes up to a minute.
-    const timer = setTimeout(() => setSlow(true), 5000)
-
-    listJobs()
-      .then((rows) => {
-        if (!latest) return
-        setJobs(rows)
-        setStatus('ready')
-      })
-      .catch((caught) => {
-        if (!latest) return
-        setError(caught)
-        setStatus('error')
-      })
-      .finally(() => clearTimeout(timer))
-
-    return () => {
-      latest = false
-      clearTimeout(timer)
-    }
-  }, [attempt])
 
   // The card changes straight away, then the change is saved. If saving fails
   // the card goes back to how it was, so the screen never shows something that
@@ -220,7 +189,7 @@ export default function StashPage() {
           <p className="text-error">{error.message}</p>
           <button
             type="button"
-            onClick={() => setAttempt((count) => count + 1)}
+            onClick={retry}
             className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-line px-4 font-semibold text-ink hover:bg-subtle"
           >
             Try again

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import AccountMenu from './AccountMenu.jsx'
 import Logo from './Logo.jsx'
 import { signOut, useAuth } from '../lib/auth.jsx'
@@ -28,6 +28,28 @@ export default function AppHeader() {
           <Logo className="text-2xl md:text-3xl" />
         </Link>
         <div className="flex items-center gap-2 md:gap-3">
+            <NavLink
+            to="/overview"
+            className={({ isActive }) =>
+              `hidden min-h-11 items-center px-3 font-semibold md:inline-flex ${
+                isActive ? 'text-brand-blue' : 'text-muted hover:text-ink'
+              }`
+            }
+          >
+            Overview
+          </NavLink>
+
+            <NavLink
+            to="/stash"
+            className={({ isActive }) =>
+              `hidden min-h-11 items-center px-3 font-semibold md:inline-flex ${
+                isActive ? 'text-brand-blue' : 'text-muted hover:text-ink'
+              }`
+            }
+          >
+            My Stash
+            </NavLink>
+            
           <Link
             to="/stash/add"
             className="press hidden min-h-11 items-center gap-2 rounded-lg bg-brand-blue px-6 font-semibold text-white hover:bg-todo md:inline-flex"

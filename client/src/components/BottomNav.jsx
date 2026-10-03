@@ -12,9 +12,9 @@ export default function BottomNav() {
       aria-label="Main"
       className="bottom-nav fixed inset-x-0 bottom-0 z-10 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgb(15_23_42/0.06)] md:hidden"
     >
-      <div className="mx-auto grid max-w-md grid-cols-2">
+      <div className="mx-auto grid max-w-md grid-cols-3">
         <NavLink
-          to="/stash"
+          to="/overview"
           className={({ isActive }) =>
             `flex min-h-16 flex-col items-center justify-center gap-1 text-sm font-semibold ${
               isActive ? 'text-brand-blue' : 'text-muted hover:text-ink'
@@ -22,9 +22,9 @@ export default function BottomNav() {
           }
         >
           <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z" />
+            <path d="M4 20h16M7 16v-5M12 16V6M17 16v-8" />
           </svg>
-          My Stash
+          Overview
         </NavLink>
 
         <Link
@@ -40,6 +40,19 @@ export default function BottomNav() {
           </span>
           Add Job
         </Link>
+                <NavLink
+          to="/stash"
+          className={({ isActive }) =>
+            `flex min-h-16 flex-col items-center justify-center gap-1 text-sm font-semibold ${
+              isActive ? 'text-brand-blue' : 'text-muted hover:text-ink'
+            }`
+          }
+        >
+          <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />
+          </svg>
+          My Stash
+        </NavLink>
       </div>
     </nav>
   )

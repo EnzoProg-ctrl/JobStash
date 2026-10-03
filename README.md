@@ -246,10 +246,15 @@ is gone, and the jobs now come from your database.
    limit. If loading takes more than 5 seconds, My Stash explains that the
    server may be waking up (free hosts sleep when nobody uses them), and if
    loading fails there's a **Try again** button.
-9. **Privacy** (`/privacy`, linked from the landing page footer and from
+9. **Overview** (`/overview`) sums up the job hunt: how many jobs are saved,
+   to apply and done, a progress bar ("2 of 6 applied"), how many were added
+   this week, and which job sites they come from. On phones it's the left
+   button in the bottom bar (Overview · + Add Job · My Stash); on laptops a
+   link in the header. My Stash stays the start page.
+10. **Privacy** (`/privacy`, linked from the landing page footer and from
    Google's sign-in screen) says in plain words what JobStash keeps, what it
    doesn't do, and how to have your data deleted.
-10. **Sign out** in the header ends the sign-in on this browser only, and the
+11. **Sign out** in the header ends the sign-in on this browser only, and the
    landing page confirms it. Your other devices stay signed in. On a shared
    computer, sign out when you're done. JobStash's Sign out doesn't sign you
    out of Google itself.
@@ -343,6 +348,7 @@ JobStash/
 │       ├── styles.css         Tailwind and the design colours, font and sizes
 │       ├── pages/             one file per screen
 │       │   ├── HomePage.jsx       landing page  (/)
+│       │   ├── OverviewPage.jsx   Overview      (/overview): numbers, progress, job sites
 │       │   ├── PrivacyPage.jsx    privacy notice (/privacy)
 │       │   └── StashPage.jsx      My Stash      (/stash)
 │       ├── components/        pieces used by the pages
@@ -360,6 +366,7 @@ JobStash/
 │       ├── lib/
 │       │   ├── auth.jsx           who is signed in, sign out, locks My Stash
 │       │   ├── supabase.js        the Supabase sign-in connection (none in demo mode)
+│       │   ├── useJobs.js         loads your jobs (shared by My Stash and Overview)
 │       │   ├── usePageTitle.js    the browser tab's name, per page ("My Stash · JobStash-ph")
 │       │   └── format.js          "LinkedIn", "2 days ago"
 │       ├── api/               the only code that fetches data

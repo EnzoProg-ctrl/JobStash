@@ -4,6 +4,7 @@ import BottomNav from './components/BottomNav.jsx'
 import HomePage from './pages/HomePage.jsx'
 import StashPage from './pages/StashPage.jsx'
 import PrivacyPage from './pages/PrivacyPage.jsx'
+import OverviewPage from './pages/OverviewPage.jsx'
 import AddJobDialog from './components/AddJobDialog.jsx'
 import { AuthProvider, RequireSignIn } from './lib/auth.jsx'
 
@@ -24,6 +25,7 @@ export default function App() {
             <Route path="/stash" element={<StashPage />}>
               <Route path="add" element={<AddJobDialog />} />
             </Route>
+              <Route path="/overview" element={<OverviewPage />} />
             {/* Old links to /add still work. */}
             <Route path="/add" element={<Navigate to="/stash/add" replace />} />
           </Route>
