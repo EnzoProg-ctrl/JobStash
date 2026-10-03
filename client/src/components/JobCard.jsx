@@ -28,7 +28,7 @@ function avatarColour(name) {
 //   phone:    [circle] [text        ] [⋮]
 //                      [badge] [Open]
 //   768px up: [circle] [text] [badge] [Open] [⋮]
-export default function JobCard({ job, onSetStatus }) {
+export default function JobCard({ job, onSetStatus, onDelete }) {
   // The title is optional, so a link can be saved before you know what the
   // role is called. Without one, the company moves up to the bold line.
   const heading = job.job_title || job.company_name
@@ -86,6 +86,7 @@ export default function JobCard({ job, onSetStatus }) {
           label={heading}
           status={job.status}
           onSetStatus={(status) => onSetStatus(job, status)}
+          onDelete={() => onDelete(job)}
         />
       </div>
     </li>

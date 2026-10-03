@@ -33,6 +33,7 @@ function problem(message, status) {
 }
 
 async function request(path, options = {}) {
+  const pass = await signInHeader()
   let response
   try {
     response = await fetch(`${BASE}${path}`, {
@@ -40,7 +41,7 @@ async function request(path, options = {}) {
       signal: AbortSignal.timeout(GIVE_UP_AFTER),
       headers: {
         'Content-Type': 'application/json',
-        ...(await signInHeader()),
+        ...pass,
         ...options.headers,
       },
     })
@@ -73,7 +74,11 @@ async function request(path, options = {}) {
     // was deleted). Forget it on this device. RequireSignIn then notices
     // nobody is signed in and moves the visitor to the landing page, which
     // reads the note and says why.
-    if (response.status === 401 && supabase) {
+    //
+    // Only when a sign-in was actually sent: a request made just after signing
+    // out (a delete still waiting for its Undo time, say) has none, and that
+    // isn't an expired sign-in, so it mustn't replace "You've signed out".
+    if (response.status === 401 && supabase && pass.Authorization) {
       leaveSignInNote('expired')
       await supabase.auth.signOut({ scope: 'local' })
     }

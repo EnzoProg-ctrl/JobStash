@@ -97,7 +97,8 @@ export default function PrivacyPage() {
 
         <Section title="Deleting your data">
           <p>
-            To delete your account and every job you've saved, email{' '}
+            You can delete any saved job yourself, from its ⋮ menu in My Stash. To delete
+            your account and every job you've saved, email{' '}
             <a href={`mailto:${CONTACT}`} className="font-semibold text-brand-blue underline">{CONTACT}</a>{' '}
             from the Google account you sign in with. It's done within 7 days, and it can't be
             undone.

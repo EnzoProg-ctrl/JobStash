@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { listJobs, setJobStatus } from '../api'
+import { useEffect, useRef, useState } from 'react'
+import { deleteJob, listJobs, setJobStatus } from '../api'
 import DemoNotice from '../components/DemoNotice.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
 import StashToolbar from '../components/StashToolbar.jsx'
+import UndoToast from '../components/UndoToast.jsx'
 import { smoothly } from '../lib/motion.js'
 import { Outlet } from 'react-router'
 
@@ -47,6 +48,11 @@ export default function StashPage() {
   // Loading is taking a while (see below). Try again bumps attempt to reload.
   const [slow, setSlow] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  // The job just deleted, while its Undo message shows (5 seconds).
+  const [deleted, setDeleted] = useState(null)
+  // The same job, plus the 5-second timer, kept where the timer can read them.
+  const pending = useRef(null)
+  const timer = useRef(null)
 
   useEffect(() => {
     // Only the latest load may change the page: one that finishes after the
@@ -95,6 +101,55 @@ export default function StashPage() {
       setActionError(`Couldn't update "${job.job_title || job.company_name}": ${caught.message}`)
     }
   }
+
+    // Delete: the card disappears straight away, and the Undo message shows for
+  // 5 seconds. Only when the time is up is the job really deleted, so Undo can
+  // bring it back exactly as it was.
+  function handleDelete(job) {
+    // A job still waiting from an earlier Delete is deleted for real now.
+    clearTimeout(timer.current)
+    if (pending.current) reallyDelete(pending.current)
+
+    setActionError(null)
+    smoothly(() => setJobs((current) => current.filter((row) => row.id !== job.id)))
+    pending.current = job
+    setDeleted(job)
+    timer.current = setTimeout(() => {
+      reallyDelete(job)
+      pending.current = null
+      setDeleted(null)
+    }, 5000)
+  }
+
+  // Undo: stop the timer and put the job back. The list is sorted, so it lands
+  // in its old place by itself.
+  function handleUndo() {
+    clearTimeout(timer.current)
+    const job = pending.current
+    pending.current = null
+    setDeleted(null)
+    smoothly(() => setJobs((current) => [job, ...current]))
+  }
+
+  // The real delete, on the server. If it fails, the job comes back with a
+  // message, so nothing disappears that wasn't really deleted.
+  async function reallyDelete(job) {
+    try {
+      await deleteJob(job.id)
+    } catch (caught) {
+      smoothly(() => setJobs((current) => [job, ...current]))
+      setActionError(`Couldn't delete "${job.job_title || job.company_name}": ${caught.message}`)
+    }
+  }
+
+  // Leaving My Stash within the 5 seconds: the waiting job is deleted on the
+  // way out, instead of being forgotten when the timer disappears with the page.
+  useEffect(() => {
+    return () => {
+      clearTimeout(timer.current)
+      if (pending.current) deleteJob(pending.current.id).catch(() => {})
+    }
+  }, [])
 
   // Called by the Add Job pop-up after it saves. The new job goes first because
   // it is the newest, and the tab and search are reset so it is always visible.
@@ -212,11 +267,17 @@ export default function StashPage() {
           ) : (
             <ul className="mt-6 flex flex-col gap-4">
               {visible.map((job) => (
-                <JobCard key={job.id} job={job} onSetStatus={handleSetStatus} />
+                <JobCard key={job.id} job={job} onSetStatus={handleSetStatus} onDelete={handleDelete} />
               ))}
             </ul>
           )}
         </>
+      )}
+          {deleted && (
+        <UndoToast
+          message={`Deleted "${deleted.job_title || deleted.company_name}"`}
+          onUndo={handleUndo}
+        />
       )}
       <Outlet context={{ onJobSaved: handleJobSaved }} />
     </section>

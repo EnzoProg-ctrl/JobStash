@@ -235,6 +235,12 @@ is gone, and the jobs now come from your database.
 7. **The ⋮ menu** on a card marks the job **done**, or moves a done job **back
    to To Apply**. The card updates straight away. If saving fails, it changes
    back and a message explains why.
+   **Delete** (in red) removes the card straight away and shows
+   *"Deleted "…" · Undo"* for 5 seconds. Only then is the job really deleted,
+   so **Undo** brings it back exactly as it was. Deleting another job, or
+   leaving My Stash, within the 5 seconds deletes the waiting one at once;
+   closing the tab or signing out leaves it in your stash. If deleting fails,
+   the card comes back with a message.
 8. **When something goes wrong,** the message says so in plain words: the
    API can't be reached, you're offline, too many requests, or the 1,000-job
    limit. If loading takes more than 5 seconds, My Stash explains that the
@@ -345,7 +351,8 @@ JobStash/
 │       │   ├── FilterTabs.jsx     To Apply / Done / All
 │       │   ├── StashToolbar.jsx   search and sort
 │       │   ├── JobCard.jsx        one saved job
-│       │   ├── CardMenu.jsx       the ⋮ menu on a card
+│       │   ├── CardMenu.jsx       the ⋮ menu on a card (mark done, delete)
+│       │   ├── UndoToast.jsx      the "Deleted … · Undo" message
 │       │   ├── StatusBadge.jsx    the To Apply / Done pill
 │       │   ├── Logo.jsx           the JobStash wordmark
 │       │   └── DemoNotice.jsx     the demo-mode notice
@@ -384,7 +391,6 @@ JobStash/
   sender with its own domain, which the project doesn't have yet.
 - **The Google app is in Testing mode**, so only the test users listed in
   Google Cloud can sign in until it's published.
-- **Deleting isn't built in the website yet**, even though the API can delete.
 - **Only the demo is online.** The GitHub Pages link runs in demo mode, so it
   has no server or database behind it. The full version isn't deployed yet.
 - **`npm run db:seed` wipes the table** (it refuses in production). See [Set up the database](#set-up-the-database).
@@ -392,7 +398,6 @@ JobStash/
 **Next steps**
 1. Deploy: the website on Vercel, the API on a free Node host, the database
    already on Supabase. Then switch off the GitHub Pages demo
-2. Delete a job, with an **Undo** button in case of a wrong tap
 
 ## Deploying
 

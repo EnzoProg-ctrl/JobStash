@@ -4,7 +4,7 @@ import { useMenu } from '../lib/useMenu.js'
 //
 // It closes when you pick something, press Esc, or click anywhere outside it
 // (lib/useMenu.js).
-export default function CardMenu({ label, status, onSetStatus }) {
+export default function CardMenu({ label, status, onSetStatus, onDelete }) {
   const { open, setOpen, wrapper, button } = useMenu()
 
   const next = status === 'done' ? 'to_apply' : 'done'
@@ -59,6 +59,21 @@ export default function CardMenu({ label, status, onSetStatus }) {
                 Move back to To Apply
               </>
             )}
+          </button>
+          <div className="my-1 border-t border-line" />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false)
+              onDelete()
+            }}
+            className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm font-semibold text-error hover:bg-red-50"
+          >
+            <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.75 6.5v4.5M9.25 6.5v4.5" />
+            </svg>
+            Delete
           </button>
         </div>
       )}
