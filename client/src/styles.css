@@ -33,6 +33,10 @@
      form controls and scrollbars when the computer is in dark mode. */
   :root {
     color-scheme: light;
+    /* Links to a part of the same page (How it works, Features, Sign in on
+       the landing page) glide there instead of jumping. Switched off for
+       reduced motion by the block at the end of this file. */
+    scroll-behavior: smooth;
   }
 
   body {

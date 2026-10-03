@@ -12,9 +12,11 @@ const UPDATED = '3 October 2026'
 
 export default function PrivacyPage() {
   // Links keep the scroll position of the page they came from (the landing
-  // footer is at the very bottom), so start this page at the top.
+  // footer is at the very bottom), so start this page at the top. Instantly:
+  // the site scrolls smoothly (styles.css), and gliding up from the bottom of
+  // a page you just opened would look odd.
   useEffect(() => {
-    window.scrollTo(0, 0)
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
 
   return (
