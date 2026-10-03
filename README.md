@@ -329,7 +329,8 @@ JobStash/
 ├── client/                    the website
 │   ├── index.html             page title, fonts
 │   ├── vercel.json            lets Vercel open /stash directly
-│   ├── public/                served as-is: tab icon, home-screen icons, site.webmanifest
+│   ├── public/                served as-is: tab icon, home-screen icons, site.webmanifest,
+│   │                          and og-image.png (the picture in shared-link previews)
 │   └── src/
 │       ├── main.jsx           starts the app and the router
 │       ├── App.jsx            which page shows at which address
