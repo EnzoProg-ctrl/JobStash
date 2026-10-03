@@ -187,6 +187,39 @@ dialog[data-closing]::backdrop {
   pointer-events: none;
 }
 
+/* Switching between List and Board (StashPage's changeView). Only the cards
+   move, in a quarter of a second, slowing down smoothly at the end with no
+   bounce; the columns and the rest of the page are simply there.
+   A list row and a board card have different shapes, so each card's old and
+   new pictures keep their real size and are trimmed to the moving box
+   (instead of being squashed or stretched) while one fades into the other. */
+:root.switching-view::view-transition-group(*) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+:root.switching-view::view-transition-old(*),
+:root.switching-view::view-transition-new(*) {
+  width: 100%;
+  height: 100%;
+  object-fit: none;
+  object-position: left top;
+  overflow: clip;
+}
+/* Jobs in only one of the two views (the list shows one tab, the board shows
+   them all) fade in or out with a tiny shift. */
+:root.switching-view::view-transition-new(*):only-child {
+  animation: switch-card-in 250ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+:root.switching-view::view-transition-old(*):only-child {
+  animation: switch-card-out 150ms ease-in both;
+}
+@keyframes switch-card-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+@keyframes switch-card-out {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
 /* While the cards move, each one is drawn as its own picture on top of the
    page, so cards sliding past the bottom of the screen would cover the bottom
    bar and the Undo message: they'd blink out and back. Naming them makes them

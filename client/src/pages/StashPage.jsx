@@ -192,8 +192,11 @@ export default function StashPage() {
   }
   const sortBy = (value) => smoothly(() => setSort(value))
   const showFavoritesOnly = (value) => smoothly(() => setFavoritesOnly(value))
+  // Each job card glides from its place in the list to its place on the
+  // board, and back (the cards in both views share a name, lib/motion.js).
   const changeView = (value) => {
-    setView(value)
+    if (value === view) return
+    smoothly(() => setView(value), { className: 'switching-view' })
     try {
       localStorage.setItem(VIEW_KEY, value)
     } catch {

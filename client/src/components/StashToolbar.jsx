@@ -75,8 +75,14 @@ export default function StashToolbar({
             <span className="max-md:sr-only">Favourites</span>
           </button>
 
-          {/* List | Board */}
-          <div className="flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="View">
+          {/* List | Board. The blue highlight behind the chosen button slides
+              across when you switch (each button is 40px wide). */}
+          <div className="relative flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="View">
+            <span
+              aria-hidden="true"
+              className="absolute top-0.5 left-0.5 size-10 rounded-md bg-todo-bg transition-transform duration-200 ease-out"
+              style={{ transform: `translateX(${Math.max(0, VIEWS.findIndex((option) => option.value === view)) * 40}px)` }}
+            />
             {VIEWS.map((option) => (
               <button
                 key={option.value}
@@ -85,8 +91,8 @@ export default function StashToolbar({
                 aria-label={option.label}
                 title={option.label}
                 onClick={() => onViewChange(option.value)}
-                className={`flex size-10 items-center justify-center rounded-md ${
-                  view === option.value ? 'bg-todo-bg text-brand-blue' : 'text-accent hover:text-ink'
+                className={`relative flex size-10 items-center justify-center rounded-md ${
+                  view === option.value ? 'text-brand-blue' : 'text-accent hover:text-ink'
                 }`}
               >
                 <option.icon />

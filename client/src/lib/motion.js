@@ -24,8 +24,12 @@ function nameCards(on) {
 }
 
 let latest = null
+let latestClass = null
 
-export function smoothly(update) {
+// smoothly(update, { className }) also puts className on <html> while the
+// cards move, so styles.css can give that kind of change its own timing
+// (switching-view: List ↔ Board).
+export function smoothly(update, { className } = {}) {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   // A page in a background tab isn't being drawn, so the browser would hold
   // the change back until you look at it again. Nobody sees an animation
@@ -45,6 +49,11 @@ export function smoothly(update) {
     // new page right now, to compare it with the picture it took.
     flushSync(update)
   }
+
+  const root = document.documentElement
+  if (latestClass) root.classList.remove(latestClass)
+  latestClass = className
+  if (className) root.classList.add(className)
 
   nameCards(true)
   const transition = document.startViewTransition(() => {
@@ -70,8 +79,12 @@ export function smoothly(update) {
   transition.ready.catch(() => {})
 
   // A quick second change cuts the first one short. Only the latest one
-  // switches the names off, so it doesn't pull them away from the new one.
+  // switches the names (and its class) off, so it doesn't pull them away
+  // from the new one.
   transition.finished.finally(() => {
-    if (latest === transition) nameCards(false)
+    if (latest !== transition) return
+    nameCards(false)
+    if (className) root.classList.remove(className)
+    latestClass = null
   })
 }
