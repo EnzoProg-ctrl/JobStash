@@ -131,6 +131,44 @@ dialog[data-closing]::backdrop {
   from { opacity: 0; transform: translateY(-4px) scale(0.95); }
 }
 
+/* The sort dropdown (SortMenu.jsx). The list drops down from the button and
+   grows a little past its size before settling; the options slide in one
+   after another (each gets its own animation-delay); the ✓ on the chosen one
+   draws itself; closing folds it back up. --sort-shift is which way it
+   moves in: down from the button, or up when the list opens upward. */
+@utility sort-menu-in {
+  animation: sort-menu-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+@keyframes sort-menu-in {
+  from { opacity: 0; transform: translateY(var(--sort-shift, -6px)) scaleY(0.85); }
+}
+@utility sort-menu-out {
+  animation: sort-menu-out 150ms ease-in forwards;
+}
+@keyframes sort-menu-out {
+  to { opacity: 0; transform: translateY(calc(var(--sort-shift, -6px) * 0.66)) scaleY(0.9); }
+}
+@utility sort-option-in {
+  animation: sort-option-in 200ms ease-out backwards;
+}
+@keyframes sort-option-in {
+  from { opacity: 0; transform: translateX(-8px); }
+}
+@utility sort-check-draw {
+  stroke-dasharray: 14;
+  animation: sort-check-draw 250ms ease-out 180ms backwards;
+}
+@keyframes sort-check-draw {
+  from { stroke-dashoffset: 14; }
+}
+/* The button's text ("Oldest first") after choosing: it rises into place. */
+@utility sort-label-in {
+  animation: sort-label-in 200ms ease-out;
+}
+@keyframes sort-label-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
 /* The job list moving (lib/motion.js). Each card slides to its new place in
    0.2s, and cards leaving or arriving fade. */
 ::view-transition-group(*) {
@@ -181,6 +219,7 @@ div[role="status"].fixed {
   *, *::before, *::after {
     transition-duration: 0s !important;
     animation-duration: 0s !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
   }
