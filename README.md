@@ -329,6 +329,7 @@ JobStash/
 ├── client/                    the website
 │   ├── index.html             page title, fonts
 │   ├── vercel.json            lets Vercel open /stash directly
+│   ├── public/                served as-is: tab icon, home-screen icons, site.webmanifest
 │   └── src/
 │       ├── main.jsx           starts the app and the router
 │       ├── App.jsx            which page shows at which address
@@ -370,7 +371,8 @@ JobStash/
 │       ├── seed.sql           sample jobs (deletes existing ones first)
 │       ├── pool.js            the database connection
 │       └── run.js             runs a .sql file
-├── docs/                      planning documents, weekly reports, screenshots
+├── docs/                      planning documents, weekly reports, screenshots,
+│                              and the logo (docs/assets/logo: SVG + PNG sizes)
 └── AI-USAGE.md                how AI was used in this project
 ```
 
