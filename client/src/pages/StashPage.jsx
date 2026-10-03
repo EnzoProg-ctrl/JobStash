@@ -162,9 +162,11 @@ export default function StashPage() {
     })
   }
 
-  // Changing the tab, the search or the sort only rearranges the cards, so the
-  // cards slide into their new places instead of the list jumping.
-  const showTab = (value) => smoothly(() => setTab(value))
+  // Changing the search or the sort only rearranges the cards, so the cards
+  // slide into their new places instead of the list jumping. Changing the tab
+  // swaps almost every card at once: the old ones fading out over the new ones
+  // looked like flicker, so tabs switch straight away, like in most apps.
+  const showTab = (value) => setTab(value)
   const search = (value) => {
     setQuery(value)
     smoothly(() => setShownQuery(value))
