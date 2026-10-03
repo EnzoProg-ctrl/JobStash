@@ -149,6 +149,24 @@ dialog[data-closing]::backdrop {
   pointer-events: none;
 }
 
+/* While the cards move, each one is drawn as its own picture on top of the
+   page, so cards sliding past the bottom of the screen would cover the bottom
+   bar and the Undo message: they'd blink out and back. Naming them makes them
+   pictures of their own too, drawn above the cards (they come later in the
+   page). The bar doesn't change, so it doesn't animate at all: it stays still. */
+.bottom-nav {
+  view-transition-name: bottom-nav;
+}
+/* The Undo message (UndoToast.jsx), found by its role so its file needn't change. */
+div[role="status"].fixed {
+  view-transition-name: undo-toast;
+}
+::view-transition-group(bottom-nav),
+::view-transition-old(bottom-nav),
+::view-transition-new(bottom-nav) {
+  animation: none;
+}
+
 /* For links styled as buttons ("Add Job", "Open Posting"…). */
 @utility press {
   &:active {
