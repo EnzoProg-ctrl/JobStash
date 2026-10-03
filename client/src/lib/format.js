@@ -45,3 +45,23 @@ export function timeAgo(date, now = Date.now()) {
   }
   return 'just now'
 }
+
+// Letter-circle colours. Each pair passes the 4.5 : 1 contrast check. A company
+// always gets the same colour, because it is picked from its name.
+const AVATAR_COLOURS = [
+  'bg-blue-100 text-blue-700',
+  'bg-emerald-100 text-emerald-700',
+  'bg-violet-100 text-violet-700',
+  'bg-rose-100 text-rose-700',
+  'bg-amber-100 text-amber-700',
+  'bg-teal-100 text-teal-700',
+]
+
+// Mixes the letters (×31 each step) rather than just adding them, so similar
+// names still spread across the colours. With six colours some companies will
+// share one; that is expected.
+export function avatarColour(name) {
+  let hash = 0
+  for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  return AVATAR_COLOURS[hash % AVATAR_COLOURS.length]
+}

@@ -22,9 +22,16 @@ const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 // Demo data saved in a browser before outcomes existed has done jobs with no
 // outcome. Treat those as pending, the same as the database did when the
 // outcome column was added (server migration 003).
+// The same for favourites (migration 004): not starred unless it says so.
 function withOutcome(row) {
-  if (row.status === 'done') return { ...row, outcome: row.outcome ?? 'pending' }
-  return { ...row, outcome: null }
+  const favorite = row.favorite === true
+  if (row.status === 'done') return { ...row, outcome: row.outcome ?? 'pending', favorite }
+  return { ...row, outcome: null, favorite }
+}
+
+// The real API answers a favourite that isn't true or false with a 400.
+function checkFavorite(favorite) {
+  if (typeof favorite !== 'boolean') throw new Error('favorite must be true or false')
 }
 
 function read() {
@@ -92,6 +99,7 @@ export async function createJob(input) {
     ...input,
     status,
     outcome,
+    favorite: input.favorite ?? false,
     id: crypto.randomUUID(),
     added_at: new Date().toISOString(),
   }
@@ -107,7 +115,9 @@ export async function updateJob(id, input) {
   const status = input.status ?? 'to_apply'
   checkStatus(status)
   const outcome = checkOutcome(status, input.outcome)
-  rows[index] = { ...rows[index], ...input, status, outcome }
+  if (input.favorite !== undefined) checkFavorite(input.favorite)
+  // Favourite left out: keep the star as it is, like the real API.
+  rows[index] = { ...rows[index], ...input, status, outcome, favorite: input.favorite ?? rows[index].favorite }
   write(rows)
   return rows[index]
 }
@@ -123,6 +133,18 @@ export async function setJobStatus(id, status, outcome) {
   const index = rows.findIndex((row) => String(row.id) === String(id))
   if (index === -1) throw new Error('Not found')
   rows[index] = { ...rows[index], status, outcome: checked }
+  write(rows)
+  return rows[index]
+}
+
+// setFavorite(id, true) stars a job, setFavorite(id, false) unstars it.
+export async function setFavorite(id, favorite) {
+  await delay()
+  checkFavorite(favorite)
+  const rows = read()
+  const index = rows.findIndex((row) => String(row.id) === String(id))
+  if (index === -1) throw new Error('Not found')
+  rows[index] = { ...rows[index], favorite }
   write(rows)
   return rows[index]
 }

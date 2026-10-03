@@ -30,7 +30,7 @@ person only ever sees and changes their own jobs.
 | `GET` | `/api/jobs/:id` | One of your jobs, or `404` |
 | `POST` | `/api/jobs` | Save a job. Returns `201` and the new job |
 | `PUT` | `/api/jobs/:id` | Replace a job's details |
-| `PATCH` | `/api/jobs/:id` | Change only the status and outcome. Body: `{"status":"done"}` (gives `pending`), `{"status":"done","outcome":"accepted"}`, or `{"status":"to_apply"}` |
+| `PATCH` | `/api/jobs/:id` | Change only the status and outcome. Body: `{"status":"done"}` (gives `pending`), `{"status":"done","outcome":"accepted"}`, or `{"status":"to_apply"}`. Or, on its own, the star: `{"favorite":true}` / `{"favorite":false}` |
 | `DELETE` | `/api/jobs/:id` | Delete a job. Returns `204` |
 
 A job looks like this:
@@ -43,6 +43,7 @@ A job looks like this:
   "posting_url": "https://www.linkedin.com/jobs/view/4011223344",
   "status": "to_apply",
   "outcome": null,
+  "favorite": false,
   "added_at": "2026-09-20T09:15:00.000Z"
 }
 ```
@@ -66,3 +67,5 @@ curl -X POST http://localhost:3000/api/jobs \
   `accepted` or `rejected`. It must be empty (`null`) while `status` is
   `to_apply`, and a done job always has one: sending `"status":"done"`
   without an outcome gives `pending`
+- `favorite` is `true` (starred) or `false` (the default for a new job). When
+  changing a whole job with `PUT`, leaving it out keeps the star as it is

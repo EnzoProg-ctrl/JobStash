@@ -36,5 +36,6 @@ export const {
   createJob,
   updateJob,
   setJobStatus,
+  setFavorite,
   deleteJob,
 } = implementation

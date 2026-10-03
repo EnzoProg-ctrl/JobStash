@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS saved_jobs (
   -- How a done job turned out: 'pending' (applied, waiting), 'accepted' or
   -- 'rejected'. Empty while the job is still to apply for (migration 003).
   outcome      TEXT        CHECK (outcome IN ('pending', 'accepted', 'rejected')),
+  -- Starred by its owner, for the Favourites filter (migration 004).
+  favorite     BOOLEAN     NOT NULL DEFAULT false,
   added_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   -- Whose job this is: the id Supabase Auth gives a signed-in user. Empty for
   -- the sample jobs, which belong to no one. On Supabase it is also linked to

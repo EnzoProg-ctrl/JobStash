@@ -123,7 +123,12 @@ function validate(body) {
   const checked = checkOutcome(status, body.outcome)
   if (STATUSES.includes(status) && checked.error) errors.push(checked.error)
 
-  return { errors, value: { company_name, job_title, posting_url, status, outcome: checked.outcome } }
+  // Favourite is optional: left out means "not starred" for a new job and
+  // "leave it as it is" when changing one (null).
+  const favorite = body.favorite ?? null
+  if (favorite !== null && typeof favorite !== 'boolean') errors.push('favorite must be true or false')
+
+  return { errors, value: { company_name, job_title, posting_url, status, outcome: checked.outcome, favorite } }
 }
 
 // GET /api/jobs            everything, newest first
@@ -188,8 +193,23 @@ app.put('/api/jobs/:id', async (request, response, next) => {
 //   { "status": "done" }                          -> done, pending
 //   { "status": "done", "outcome": "accepted" }   -> done, accepted
 //   { "status": "to_apply" }                      -> to apply, no outcome
+//   { "favorite": true }                          -> starred (on its own)
 app.patch('/api/jobs/:id', async (request, response, next) => {
-  const { status, outcome } = request.body ?? {}
+  const { status, outcome, favorite } = request.body ?? {}
+
+  // Starring or unstarring: a request of its own, separate from status.
+  if (status === undefined && favorite !== undefined) {
+    if (typeof favorite !== 'boolean') {
+      return response.status(400).json({ error: 'favorite must be true or false' })
+    }
+    try {
+      const row = await jobs.setFavorite(pool, request.userId, request.params.id, favorite)
+      if (!row) return response.status(404).json({ error: 'Not found' })
+      return response.json(row)
+    } catch (error) {
+      return next(error)
+    }
+  }
 
   if (!STATUSES.includes(status)) {
     return response.status(400).json({ error: `status must be one of: ${STATUSES.join(', ')}` })

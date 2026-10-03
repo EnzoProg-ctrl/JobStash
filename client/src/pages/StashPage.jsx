@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { deleteJob, setJobStatus } from '../api'
+import { deleteJob, setFavorite, setJobStatus } from '../api'
 import DemoNotice from '../components/DemoNotice.jsx'
 import DoneFilter from '../components/DoneFilter.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
+import StashBoard from '../components/StashBoard.jsx'
 import StashToolbar from '../components/StashToolbar.jsx'
 import UndoToast from '../components/UndoToast.jsx'
 import { smoothly } from '../lib/motion.js'
@@ -28,6 +29,17 @@ const COMPARE = {
   oldest: (a, b) => a.added_at.localeCompare(b.added_at),
   // "base" ignores capitals and accents, so "acme" sits next to "Acme".
   company: (a, b) => a.company_name.localeCompare(b.company_name, undefined, { sensitivity: 'base' }),
+}
+
+// List or Board, remembered in this browser for next time. Storage can be
+// blocked (private windows), so a failure just means starting on the list.
+const VIEW_KEY = 'jobstash:view'
+function savedView() {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'board' ? 'board' : 'list'
+  } catch {
+    return 'list'
+  }
 }
 
 // Capitals don't matter, and spaces around the search are ignored.
@@ -55,6 +67,9 @@ export default function StashPage() {
   const [sort, setSort] = useState('newest')        // newest | oldest | company
   // The All | Accepted | Rejected filter, used on the Done tab.
   const [doneFilter, setDoneFilter] = useState('all') // all | accepted | rejected
+  // Only starred jobs (the ★ Favourites button), and List or Board.
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
+  const [view, setView] = useState(savedView)
   const [actionError, setActionError] = useState(null)
   // The job just deleted, while its Undo message shows (5 seconds).
   const [deleted, setDeleted] = useState(null)
@@ -69,7 +84,10 @@ export default function StashPage() {
   // nextStatus is 'done' or 'to_apply'; nextOutcome is how a done job turned
   // out: 'pending' (Mark as Done), 'accepted' or 'rejected'. Moving back to
   // To Apply clears it.
-  async function handleSetStatus(job, nextStatus, nextOutcome) {
+  //
+  // { instant: true } skips the slide, for a card dropped on the board, which
+  // is already where it was dropped.
+  async function handleSetStatus(job, nextStatus, nextOutcome, { instant = false } = {}) {
     const replace = (changed) =>
       setJobs((current) => current.map((row) => (row.id === changed.id ? changed : row)))
     const outcome = nextStatus === 'done' ? (nextOutcome ?? 'pending') : null
@@ -77,7 +95,8 @@ export default function StashPage() {
     setActionError(null)
     // Smoothly: on the To Apply tab, a job marked done, accepted or rejected
     // fades out and the ones below slide up into its place.
-    smoothly(() => replace({ ...job, status: nextStatus, outcome }))
+    const change = instant ? (update) => update() : smoothly
+    change(() => replace({ ...job, status: nextStatus, outcome }))
     try {
       replace(await setJobStatus(job.id, nextStatus, outcome))
     } catch (caught) {
@@ -86,7 +105,23 @@ export default function StashPage() {
     }
   }
 
-    // Delete: the card disappears straight away, and the Undo message shows for
+  // The star. Like marking done: the card changes straight away, then the
+  // change is saved, and if saving fails the star goes back with a message.
+  async function handleToggleFavorite(job) {
+    const replace = (changed) =>
+      setJobs((current) => current.map((row) => (row.id === changed.id ? changed : row)))
+
+    setActionError(null)
+    replace({ ...job, favorite: !job.favorite })
+    try {
+      replace(await setFavorite(job.id, !job.favorite))
+    } catch (caught) {
+      replace(job)
+      setActionError(`Couldn't ${job.favorite ? 'unstar' : 'star'} "${job.job_title || job.company_name}": ${caught.message}`)
+    }
+  }
+
+  // Delete: the card disappears straight away, and the Undo message shows for
   // 5 seconds. Only when the time is up is the job really deleted, so Undo can
   // bring it back exactly as it was.
   function handleDelete(job) {
@@ -156,13 +191,25 @@ export default function StashPage() {
     smoothly(() => setShownQuery(value))
   }
   const sortBy = (value) => smoothly(() => setSort(value))
+  const showFavoritesOnly = (value) => smoothly(() => setFavoritesOnly(value))
+  const changeView = (value) => {
+    setView(value)
+    try {
+      localStorage.setItem(VIEW_KEY, value)
+    } catch {
+      // Not remembered this time; nothing else changes.
+    }
+  }
 
   // All jobs are already loaded, so the tabs, search and sort only rearrange
   // what is here. No extra request.
   //
   // The counts follow the search, so searching "intern" shows how many matches
   // each tab has.
-  const matches = jobs.filter((job) => matchesSearch(job, shownQuery))
+  // The counts follow the Favourites filter in the same way.
+  const matches = jobs.filter(
+    (job) => matchesSearch(job, shownQuery) && (!favoritesOnly || job.favorite)
+  )
   const counts = {
     to_apply: matches.filter((job) => job.status === 'to_apply').length,
     done: matches.filter((job) => job.status === 'done').length,
@@ -226,18 +273,31 @@ export default function StashPage() {
 
       {status === 'ready' && jobs.length > 0 && (
         <>
-          <div className="mt-8">
-            <FilterTabs value={tab} counts={counts} onChange={showTab} />
-          </div>
+          {/* On the board the columns do the tabs' job, so the tabs and the
+              Done filter only show in the list. */}
+          {view === 'list' && (
+            <div className="mt-8">
+              <FilterTabs value={tab} counts={counts} onChange={showTab} />
+            </div>
+          )}
 
-          {tab === 'done' && (
+          {view === 'list' && tab === 'done' && (
             <div className="mt-3">
               <DoneFilter value={doneFilter} counts={doneCounts} onChange={setDoneFilter} />
             </div>
           )}
 
-          <div className="mt-6">
-            <StashToolbar query={query} onQueryChange={search} sort={sort} onSortChange={sortBy} />
+          <div className={view === 'list' ? 'mt-6' : 'mt-8'}>
+            <StashToolbar
+              query={query}
+              onQueryChange={search}
+              sort={sort}
+              onSortChange={sortBy}
+              favoritesOnly={favoritesOnly}
+              onFavoritesOnlyChange={showFavoritesOnly}
+              view={view}
+              onViewChange={changeView}
+            />
           </div>
 
           {actionError && (
@@ -246,10 +306,31 @@ export default function StashPage() {
             </p>
           )}
 
-          {visible.length === 0 && shownQuery.trim() ? (
+          {matches.length === 0 && favoritesOnly && !shownQuery.trim() ? (
+            <div className="mt-6 rounded-card border border-line bg-surface p-8 text-center">
+              <p className="font-bold">No favourites yet.</p>
+              <p className="mt-1 text-muted">Tap the ☆ on a job to add it here.</p>
+              <button
+                type="button"
+                onClick={() => showFavoritesOnly(false)}
+                className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-4 font-semibold text-brand-blue hover:bg-subtle"
+              >
+                Show all jobs
+              </button>
+            </div>
+          ) : view === 'board' && matches.length > 0 ? (
+            <div className="mt-6">
+              <StashBoard
+                jobs={[...matches].sort(COMPARE[sort])}
+                onSetStatus={handleSetStatus}
+                onDelete={handleDelete}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            </div>
+          ) : (view === 'board' ? matches.length === 0 : visible.length === 0) && shownQuery.trim() ? (
             <div className="mt-6 rounded-card border border-line bg-surface p-8 text-center">
               <p className="font-bold">
-                No {tab === 'all' ? 'jobs' : 'jobs on this tab'} match "{shownQuery.trim()}".
+                No {tab === 'all' || view === 'board' ? 'jobs' : 'jobs on this tab'} match "{shownQuery.trim()}".
               </p>
               <button
                 type="button"
@@ -266,7 +347,7 @@ export default function StashPage() {
           ) : (
             <ul className="mt-6 flex flex-col gap-4">
               {visible.map((job) => (
-                <JobCard key={job.id} job={job} onSetStatus={handleSetStatus} onDelete={handleDelete} />
+                <JobCard key={job.id} job={job} onSetStatus={handleSetStatus} onDelete={handleDelete} onToggleFavorite={handleToggleFavorite} />
               ))}
             </ul>
           )}

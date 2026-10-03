@@ -35,24 +35,25 @@ export const MAX_JOBS = 1000
 
 // Returns null when the account already has MAX_JOBS jobs. The count and the
 // insert are one query, so there's no gap between checking and saving.
-export async function create(pool, userId, { company_name, job_title, posting_url, status, outcome }) {
+export async function create(pool, userId, { company_name, job_title, posting_url, status, outcome, favorite }) {
   const result = await pool.query(
-    `INSERT INTO saved_jobs (user_id, company_name, job_title, posting_url, status, outcome)
-     SELECT $1::uuid, $2::text, $3::text, $4::text, $5::text, $7::text
+    `INSERT INTO saved_jobs (user_id, company_name, job_title, posting_url, status, outcome, favorite)
+     SELECT $1::uuid, $2::text, $3::text, $4::text, $5::text, $7::text, $8::boolean
      WHERE (SELECT count(*) FROM saved_jobs WHERE user_id = $1::uuid) < $6
      RETURNING *`,
-    [userId, company_name, job_title ?? '', posting_url, status ?? 'to_apply', MAX_JOBS, outcome ?? null]
+    [userId, company_name, job_title ?? '', posting_url, status ?? 'to_apply', MAX_JOBS, outcome ?? null, favorite ?? false]
   )
   return result.rows[0] ?? null
 }
 
-export async function update(pool, userId, id, { company_name, job_title, posting_url, status, outcome }) {
+export async function update(pool, userId, id, { company_name, job_title, posting_url, status, outcome, favorite }) {
   const result = await pool.query(
     `UPDATE saved_jobs
-     SET company_name = $1, job_title = $2, posting_url = $3, status = $4, outcome = $7
+     SET company_name = $1, job_title = $2, posting_url = $3, status = $4, outcome = $7,
+         favorite = COALESCE($8::boolean, favorite)
      WHERE id = $5 AND user_id = $6
      RETURNING *`,
-    [company_name, job_title ?? '', posting_url, status, id, userId, outcome ?? null]
+    [company_name, job_title ?? '', posting_url, status, id, userId, outcome ?? null, favorite ?? null]
   )
   return result.rows[0] ?? null
 }
@@ -78,4 +79,17 @@ export async function remove(pool, userId, id) {
     [id, userId]
   )
   return result.rowCount > 0
+}
+
+// Starring or unstarring a job (the ☆ on a card). Only for the owner, like
+// every query here.
+export async function setFavorite(pool, userId, id, favorite) {
+  const result = await pool.query(
+    `UPDATE saved_jobs
+     SET favorite = $1
+     WHERE id = $2 AND user_id = $3
+     RETURNING *`,
+    [favorite, id, userId]
+  )
+  return result.rows[0] ?? null
 }

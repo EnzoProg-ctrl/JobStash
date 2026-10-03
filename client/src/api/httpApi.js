@@ -112,5 +112,9 @@ export const updateJob = (id, input) =>
 export const setJobStatus = (id, status, outcome) =>
   request(`/api/jobs/${id}`, { method: 'PATCH', body: JSON.stringify({ status, outcome }) })
 
+// The star on a card: setFavorite(id, true) or setFavorite(id, false).
+export const setFavorite = (id, favorite) =>
+  request(`/api/jobs/${id}`, { method: 'PATCH', body: JSON.stringify({ favorite }) })
+
 export const deleteJob = (id) =>
   request(`/api/jobs/${id}`, { method: 'DELETE' })

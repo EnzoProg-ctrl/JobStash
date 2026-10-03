@@ -1,26 +1,7 @@
 import CardMenu from './CardMenu.jsx'
+import FavoriteButton from './FavoriteButton.jsx'
 import StatusBadge from './StatusBadge.jsx'
-import { siteName, timeAgo } from '../lib/format.js'
-
-// Letter-circle colours. Each pair passes the 4.5 : 1 contrast check. A company
-// always gets the same colour, because it is picked from its name.
-const AVATAR_COLOURS = [
-  'bg-blue-100 text-blue-700',
-  'bg-emerald-100 text-emerald-700',
-  'bg-violet-100 text-violet-700',
-  'bg-rose-100 text-rose-700',
-  'bg-amber-100 text-amber-700',
-  'bg-teal-100 text-teal-700',
-]
-
-// Mixes the letters (×31 each step) rather than just adding them, so similar
-// names still spread across the colours. With six colours some companies will
-// share one; that is expected.
-function avatarColour(name) {
-  let hash = 0
-  for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
-  return AVATAR_COLOURS[hash % AVATAR_COLOURS.length]
-}
+import { avatarColour, siteName, timeAgo } from '../lib/format.js'
 
 // One saved job. Drawn once here and repeated for every row in My Stash.
 //
@@ -28,7 +9,7 @@ function avatarColour(name) {
 //   phone:    [circle] [text        ] [⋮]
 //                      [badge] [Open]
 //   768px up: [circle] [text] [badge] [Open] [⋮]
-export default function JobCard({ job, onSetStatus, onDelete }) {
+export default function JobCard({ job, onSetStatus, onDelete, onToggleFavorite }) {
   // The title is optional, so a link can be saved before you know what the
   // role is called. Without one, the company moves up to the bold line.
   const heading = job.job_title || job.company_name
@@ -81,7 +62,8 @@ export default function JobCard({ job, onSetStatus, onDelete }) {
         </a>
       </div>
 
-      <div className="col-start-3 row-start-1 self-start md:col-start-4 md:self-center">
+      <div className="col-start-3 row-start-1 flex items-center self-start md:col-start-4 md:self-center">
+        <FavoriteButton on={job.favorite} label={heading} onToggle={() => onToggleFavorite(job)} />
         <CardMenu
           label={heading}
           status={job.status}

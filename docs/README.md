@@ -15,7 +15,7 @@ repository, so it is versioned alongside the thing it describes.
 | [deploying.md](deploying.md) | how the live version is set up (Vercel, Render, Supabase, Google) | reference |
 
 Put images in `assets/`. The main README shows `landing.png`, `my-stash.png`,
-`add-job.png`, `overview.png` and `phone.png` from there, and a README with an image reads as finished in a way one
+`add-job.png`, `overview.png`, `board.png` and `phone.png` from there, and a README with an image reads as finished in a way one
 without an image does not.
 
 **Write these as you go.** A weekly report written on the last day is obvious to
