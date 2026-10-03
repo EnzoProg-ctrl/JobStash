@@ -1,8 +1,8 @@
 [
-  { "id": "seed-1", "company_name": "Brightside Co.", "job_title": "Frontend Intern", "posting_url": "https://www.linkedin.com/jobs/view/4011223344", "status": "to_apply", "added_at": "2026-09-20T09:15:00.000Z" },
-  { "id": "seed-2", "company_name": "Northwind Labs", "job_title": "IT Support Associate", "posting_url": "https://northwind.example.com/careers/it-support-associate", "status": "to_apply", "added_at": "2026-09-18T13:40:00.000Z" },
-  { "id": "seed-3", "company_name": "Harbour Analytics", "job_title": "Data Analyst Intern", "posting_url": "https://ph.indeed.com/viewjob?jk=9f2c1a77bd40e510", "status": "to_apply", "added_at": "2026-09-16T02:05:00.000Z" },
-  { "id": "seed-4", "company_name": "Quill & Type", "job_title": "Marketing Assistant (Work From Home, 20 hours a week, open to students taking evening classes)", "posting_url": "https://www.jobstreet.com.ph/job/78451236", "status": "to_apply", "added_at": "2026-09-14T11:30:00.000Z" },
-  { "id": "seed-5", "company_name": "Meridian Software", "job_title": "Junior QA Tester", "posting_url": "https://careers.meridian.example.org/postings/junior-qa-tester", "status": "done", "added_at": "2026-09-11T07:20:00.000Z" },
-  { "id": "seed-6", "company_name": "Cassava Studio", "job_title": "", "posting_url": "https://cassava.example.net/jobs/1042", "status": "done", "added_at": "2026-09-08T05:50:00.000Z" }
+  { "id": "seed-1", "company_name": "Brightside Co.", "job_title": "Frontend Intern", "posting_url": "https://www.linkedin.com/jobs/view/4011223344", "status": "to_apply", "outcome": null, "added_at": "2026-09-20T09:15:00.000Z" },
+  { "id": "seed-2", "company_name": "Northwind Labs", "job_title": "IT Support Associate", "posting_url": "https://northwind.example.com/careers/it-support-associate", "status": "to_apply", "outcome": null, "added_at": "2026-09-18T13:40:00.000Z" },
+  { "id": "seed-3", "company_name": "Harbour Analytics", "job_title": "Data Analyst Intern", "posting_url": "https://ph.indeed.com/viewjob?jk=9f2c1a77bd40e510", "status": "to_apply", "outcome": null, "added_at": "2026-09-16T02:05:00.000Z" },
+  { "id": "seed-4", "company_name": "Quill & Type", "job_title": "Marketing Assistant (Work From Home, 20 hours a week, open to students taking evening classes)", "posting_url": "https://www.jobstreet.com.ph/job/78451236", "status": "done", "outcome": "pending", "added_at": "2026-09-14T11:30:00.000Z" },
+  { "id": "seed-5", "company_name": "Meridian Software", "job_title": "Junior QA Tester", "posting_url": "https://careers.meridian.example.org/postings/junior-qa-tester", "status": "done", "outcome": "accepted", "added_at": "2026-09-11T07:20:00.000Z" },
+  { "id": "seed-6", "company_name": "Cassava Studio", "job_title": "", "posting_url": "https://cassava.example.net/jobs/1042", "status": "done", "outcome": "rejected", "added_at": "2026-09-08T05:50:00.000Z" }
 ]

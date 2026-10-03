@@ -14,7 +14,13 @@ const WEEK = 7 * 24 * 60 * 60 * 1000
 const TOP_SITES = 5
 
 function summarise(jobs, now = Date.now()) {
-  const done = jobs.filter((job) => job.status === 'done').length
+  const doneJobs = jobs.filter((job) => job.status === 'done')
+  const done = doneJobs.length
+  const outcomes = {
+    pending: doneJobs.filter((job) => job.outcome !== 'accepted' && job.outcome !== 'rejected').length,
+    accepted: doneJobs.filter((job) => job.outcome === 'accepted').length,
+    rejected: doneJobs.filter((job) => job.outcome === 'rejected').length,
+  }
   const thisWeek = jobs.filter((job) => now - new Date(job.added_at).getTime() < WEEK).length
 
   const perSite = new Map()
@@ -28,7 +34,7 @@ function summarise(jobs, now = Date.now()) {
   const others = sites.slice(TOP_SITES).reduce((sum, [, count]) => sum + count, 0)
   if (others > 0) shown.push(['Other sites', others])
 
-  return { saved: jobs.length, toApply: jobs.length - done, done, thisWeek, sites: shown }
+  return { saved: jobs.length, toApply: jobs.length - done, done, outcomes, thisWeek, sites: shown }
 }
 
 export default function OverviewPage() {
@@ -84,7 +90,7 @@ export default function OverviewPage() {
   )
 }
 
-function Summary({ saved, toApply, done, thisWeek, sites }) {
+function Summary({ saved, toApply, done, outcomes, thisWeek, sites }) {
   const percent = Math.round((done / saved) * 100)
   const biggest = sites[0][1]
 
@@ -116,7 +122,13 @@ function Summary({ saved, toApply, done, thisWeek, sites }) {
         >
           <div className="h-full rounded-full bg-done" style={{ width: `${percent}%` }} />
         </div>
-        <p className="mt-3 text-sm text-muted">
+        {/* How the applications turned out, in the chip colours from My Stash. */}
+        <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+          <span>Pending <span className="font-semibold text-slate-700">{outcomes.pending}</span></span>
+          <span>Accepted <span className="font-semibold text-done">{outcomes.accepted}</span></span>
+          <span>Rejected <span className="font-semibold text-error">{outcomes.rejected}</span></span>
+        </p>
+        <p className="mt-1 text-sm text-muted">
           Added this week: <span className="font-semibold text-ink">{thisWeek}</span>
         </p>
       </div>

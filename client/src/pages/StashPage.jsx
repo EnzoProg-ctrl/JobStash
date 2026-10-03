@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { deleteJob, setJobStatus } from '../api'
 import DemoNotice from '../components/DemoNotice.jsx'
+import DoneFilter from '../components/DoneFilter.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
 import StashToolbar from '../components/StashToolbar.jsx'
@@ -15,6 +16,11 @@ import { Outlet } from 'react-router'
 const EMPTY_TAB = {
   to_apply: 'Nothing left to apply for. Nice work!',
   done: 'Nothing marked as done yet.',
+}
+// The same, for the Accepted and Rejected filters on the Done tab.
+const EMPTY_OUTCOME = {
+  accepted: 'No accepted jobs yet.',
+  rejected: 'No rejected jobs yet.',
 }
 
 const COMPARE = {
@@ -47,6 +53,8 @@ export default function StashPage() {
   // the cards can slide; the search box itself always updates straight away.
   const [shownQuery, setShownQuery] = useState('')
   const [sort, setSort] = useState('newest')        // newest | oldest | company
+  // The All | Accepted | Rejected filter, used on the Done tab.
+  const [doneFilter, setDoneFilter] = useState('all') // all | accepted | rejected
   const [actionError, setActionError] = useState(null)
   // The job just deleted, while its Undo message shows (5 seconds).
   const [deleted, setDeleted] = useState(null)
@@ -57,16 +65,21 @@ export default function StashPage() {
   // The card changes straight away, then the change is saved. If saving fails
   // the card goes back to how it was, so the screen never shows something that
   // was not saved.
-  async function handleSetStatus(job, next) {
+  //
+  // nextStatus is 'done' or 'to_apply'; nextOutcome is how a done job turned
+  // out: 'pending' (Mark as Done), 'accepted' or 'rejected'. Moving back to
+  // To Apply clears it.
+  async function handleSetStatus(job, nextStatus, nextOutcome) {
     const replace = (changed) =>
       setJobs((current) => current.map((row) => (row.id === changed.id ? changed : row)))
+    const outcome = nextStatus === 'done' ? (nextOutcome ?? 'pending') : null
 
     setActionError(null)
-    // Smoothly: on the To Apply tab, a job marked done fades out and the ones
-    // below slide up into its place.
-    smoothly(() => replace({ ...job, status: next }))
+    // Smoothly: on the To Apply tab, a job marked done, accepted or rejected
+    // fades out and the ones below slide up into its place.
+    smoothly(() => replace({ ...job, status: nextStatus, outcome }))
     try {
-      replace(await setJobStatus(job.id, next))
+      replace(await setJobStatus(job.id, nextStatus, outcome))
     } catch (caught) {
       smoothly(() => replace(job))
       setActionError(`Couldn't update "${job.job_title || job.company_name}": ${caught.message}`)
@@ -155,9 +168,16 @@ export default function StashPage() {
     done: matches.filter((job) => job.status === 'done').length,
     all: matches.length,
   }
+  const doneMatches = matches.filter((job) => job.status === 'done')
+  const doneCounts = {
+    all: doneMatches.length,
+    accepted: doneMatches.filter((job) => job.outcome === 'accepted').length,
+    rejected: doneMatches.filter((job) => job.outcome === 'rejected').length,
+  }
   // filter() already makes a new array, so sorting it leaves `jobs` untouched.
   const visible = matches
     .filter((job) => tab === 'all' || job.status === tab)
+    .filter((job) => tab !== 'done' || doneFilter === 'all' || job.outcome === doneFilter)
     .sort(COMPARE[sort])
 
   return (
@@ -210,6 +230,12 @@ export default function StashPage() {
             <FilterTabs value={tab} counts={counts} onChange={showTab} />
           </div>
 
+          {tab === 'done' && (
+            <div className="mt-3">
+              <DoneFilter value={doneFilter} counts={doneCounts} onChange={setDoneFilter} />
+            </div>
+          )}
+
           <div className="mt-6">
             <StashToolbar query={query} onQueryChange={search} sort={sort} onSortChange={sortBy} />
           </div>
@@ -235,7 +261,7 @@ export default function StashPage() {
             </div>
           ) : visible.length === 0 ? (
             <p className="mt-6 rounded-card border border-line bg-surface p-8 text-center text-muted">
-              {EMPTY_TAB[tab]}
+              {tab === 'done' && doneFilter !== 'all' ? EMPTY_OUTCOME[doneFilter] : EMPTY_TAB[tab]}
             </p>
           ) : (
             <ul className="mt-6 flex flex-col gap-4">

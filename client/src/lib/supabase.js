@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 // The one connection to Supabase Auth that the whole website shares. It only
 // handles signing in: all job data still goes through the Express API.
 //
-// Sign-in only exists in the full version. In demo mode (the default, and the
-// GitHub Pages site) there are no Supabase settings, so there is no client.
+// Sign-in only exists in the full version. In demo mode (the default when
+// running it locally) there are no Supabase settings, so there is no client.
 //
 // This reads the setting itself instead of importing USING_MOCK_API from
 // ../api, because api/httpApi.js imports this file, and the two importing each

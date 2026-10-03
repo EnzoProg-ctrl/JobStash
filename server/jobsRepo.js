@@ -35,38 +35,39 @@ export const MAX_JOBS = 1000
 
 // Returns null when the account already has MAX_JOBS jobs. The count and the
 // insert are one query, so there's no gap between checking and saving.
-export async function create(pool, userId, { company_name, job_title, posting_url, status }) {
+export async function create(pool, userId, { company_name, job_title, posting_url, status, outcome }) {
   const result = await pool.query(
-    `INSERT INTO saved_jobs (user_id, company_name, job_title, posting_url, status)
-     SELECT $1::uuid, $2::text, $3::text, $4::text, $5::text
+    `INSERT INTO saved_jobs (user_id, company_name, job_title, posting_url, status, outcome)
+     SELECT $1::uuid, $2::text, $3::text, $4::text, $5::text, $7::text
      WHERE (SELECT count(*) FROM saved_jobs WHERE user_id = $1::uuid) < $6
      RETURNING *`,
-    [userId, company_name, job_title ?? '', posting_url, status ?? 'to_apply', MAX_JOBS]
+    [userId, company_name, job_title ?? '', posting_url, status ?? 'to_apply', MAX_JOBS, outcome ?? null]
   )
   return result.rows[0] ?? null
 }
 
-export async function update(pool, userId, id, { company_name, job_title, posting_url, status }) {
+export async function update(pool, userId, id, { company_name, job_title, posting_url, status, outcome }) {
   const result = await pool.query(
     `UPDATE saved_jobs
-     SET company_name = $1, job_title = $2, posting_url = $3, status = $4
+     SET company_name = $1, job_title = $2, posting_url = $3, status = $4, outcome = $7
      WHERE id = $5 AND user_id = $6
      RETURNING *`,
-    [company_name, job_title ?? '', posting_url, status, id, userId]
+    [company_name, job_title ?? '', posting_url, status, id, userId, outcome ?? null]
   )
   return result.rows[0] ?? null
 }
 
-// The status toggle is the commonest write in the app: one tap on a card. It
-// gets its own query so the client does not have to send the whole row back
-// just to tick a box.
-export async function setStatus(pool, userId, id, status) {
+// Marking a job (done, accepted, rejected, back to to apply) is the commonest
+// write in the app: one tap on a card. It gets its own query so the client
+// does not have to send the whole row back. server.js has already checked that
+// status and outcome agree; the database checks again (migration 003).
+export async function setStatus(pool, userId, id, status, outcome = null) {
   const result = await pool.query(
     `UPDATE saved_jobs
-     SET status = $1
-     WHERE id = $2 AND user_id = $3
+     SET status = $1, outcome = $2
+     WHERE id = $3 AND user_id = $4
      RETURNING *`,
-    [status, id, userId]
+    [status, outcome, id, userId]
   )
   return result.rows[0] ?? null
 }

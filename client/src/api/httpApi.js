@@ -104,9 +104,13 @@ export const createJob = (input) =>
 export const updateJob = (id, input) =>
   request(`/api/jobs/${id}`, { method: 'PUT', body: JSON.stringify(input) })
 
-// The Done checkbox. Sends only the new status, not the whole job.
-export const setJobStatus = (id, status) =>
-  request(`/api/jobs/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) })
+// Marking a job. Sends only the new status and outcome, not the whole job.
+// setJobStatus(id, 'done')              -> done, pending
+// setJobStatus(id, 'done', 'accepted')   -> done, accepted
+// setJobStatus(id, 'to_apply')           -> to apply, no outcome
+// (An outcome left out isn't sent, so the API uses its default.)
+export const setJobStatus = (id, status, outcome) =>
+  request(`/api/jobs/${id}`, { method: 'PATCH', body: JSON.stringify({ status, outcome }) })
 
 export const deleteJob = (id) =>
   request(`/api/jobs/${id}`, { method: 'DELETE' })

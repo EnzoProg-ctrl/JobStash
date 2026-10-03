@@ -66,7 +66,7 @@ export default function JobCard({ job, onSetStatus, onDelete }) {
           with its right, under everything else. From 768px both sit in the
           row, before the ⋮. */}
       <div className="col-span-3 col-start-1 row-start-2 flex flex-wrap items-center justify-between gap-3 md:col-span-1 md:col-start-3 md:row-start-1 md:justify-start md:gap-6">
-        <StatusBadge status={job.status} />
+        <StatusBadge status={job.status} outcome={job.outcome} />
         <a
           href={job.posting_url}
           target="_blank"
@@ -85,7 +85,8 @@ export default function JobCard({ job, onSetStatus, onDelete }) {
         <CardMenu
           label={heading}
           status={job.status}
-          onSetStatus={(status) => onSetStatus(job, status)}
+          outcome={job.outcome}
+          onSetStatus={(status, outcome) => onSetStatus(job, status, outcome)}
           onDelete={() => onDelete(job)}
         />
       </div>

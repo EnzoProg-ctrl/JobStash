@@ -72,6 +72,24 @@ app.get('/readyz', async (request, response) => {
 app.use('/api', requireUser)
 
 const STATUSES = ['to_apply', 'done']
+const OUTCOMES = ['pending', 'accepted', 'rejected']
+
+// How a done job turned out (db/migrations/003_add_outcome.sql). It must agree
+// with status: a job to apply for has none, a done job always has one, and
+// "done" on its own means applied and waiting, so it becomes 'pending'.
+// Returns the outcome to save, or an error message.
+function checkOutcome(status, outcome) {
+  const given = outcome ?? null
+  if (status === 'to_apply') {
+    return given === null
+      ? { outcome: null }
+      : { error: 'outcome must be empty while status is to_apply' }
+  }
+  if (given === null) return { outcome: 'pending' }
+  return OUTCOMES.includes(given)
+    ? { outcome: given }
+    : { error: `outcome must be one of: ${OUTCOMES.join(', ')}` }
+}
 
 // A saved job is only useful if its link actually opens, so the URL is checked
 // rather than just measured. mailto: and javascript: parse fine as URLs, which
@@ -102,8 +120,10 @@ function validate(body) {
   else if (posting_url.length > 2000) errors.push('posting_url must be 2000 characters or fewer')
   else if (!validUrl(posting_url)) errors.push('posting_url must start with http:// or https://')
   if (!STATUSES.includes(status)) errors.push(`status must be one of: ${STATUSES.join(', ')}`)
+  const checked = checkOutcome(status, body.outcome)
+  if (STATUSES.includes(status) && checked.error) errors.push(checked.error)
 
-  return { errors, value: { company_name, job_title, posting_url, status } }
+  return { errors, value: { company_name, job_title, posting_url, status, outcome: checked.outcome } }
 }
 
 // GET /api/jobs            everything, newest first
@@ -162,17 +182,23 @@ app.put('/api/jobs/:id', async (request, response, next) => {
   }
 })
 
-// Ticking "Done" changes one column. PATCH says exactly that, and means the
-// client does not have to send a whole job back to toggle a checkbox.
+// Marking a job (done, accepted, rejected, back to to apply) changes only its
+// status and outcome. PATCH says exactly that, and means the client does not
+// have to send a whole job back for one tap.
+//   { "status": "done" }                          -> done, pending
+//   { "status": "done", "outcome": "accepted" }   -> done, accepted
+//   { "status": "to_apply" }                      -> to apply, no outcome
 app.patch('/api/jobs/:id', async (request, response, next) => {
-  const { status } = request.body ?? {}
+  const { status, outcome } = request.body ?? {}
 
   if (!STATUSES.includes(status)) {
     return response.status(400).json({ error: `status must be one of: ${STATUSES.join(', ')}` })
   }
+  const checked = checkOutcome(status, outcome)
+  if (checked.error) return response.status(400).json({ error: checked.error })
 
   try {
-    const row = await jobs.setStatus(pool, request.userId, request.params.id, status)
+    const row = await jobs.setStatus(pool, request.userId, request.params.id, status, checked.outcome)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
