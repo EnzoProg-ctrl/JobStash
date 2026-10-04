@@ -205,6 +205,21 @@ dialog[data-closing]::backdrop {
   object-position: left top;
   overflow: clip;
 }
+/* …but only the cards. The page itself, the bottom bar (whose round + Add
+   Job button sticks out above it) and the Undo message keep the browser's
+   usual pictures, or the top of the + would be cut off during the switch. */
+:root.switching-view::view-transition-old(root),
+:root.switching-view::view-transition-new(root),
+:root.switching-view::view-transition-old(bottom-nav),
+:root.switching-view::view-transition-new(bottom-nav),
+:root.switching-view::view-transition-old(undo-toast),
+:root.switching-view::view-transition-new(undo-toast) {
+  width: revert;
+  height: revert;
+  object-fit: revert;
+  object-position: revert;
+  overflow: revert;
+}
 /* Jobs in only one of the two views (the list shows one tab, the board shows
    them all) fade in or out with a tiny shift. */
 :root.switching-view::view-transition-new(*):only-child {

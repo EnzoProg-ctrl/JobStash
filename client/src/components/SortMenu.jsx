@@ -103,9 +103,14 @@ export default function SortMenu({ value, options, onChange }) {
     <div
       ref={wrapper}
       className="relative md:w-56"
-      // Clicking or tabbing somewhere else closes it.
+      // Tabbing to something else on the page closes it. Only when focus
+      // went somewhere: on phones (Safari especially) tapping a button doesn't
+      // focus it, so tapping the sort button to close the list looked like
+      // focus going nowhere; the list closed, then the tap reopened it.
+      // Taps and clicks outside are handled by useMenu.
       onBlur={(event) => {
-        if (open && !wrapper.current.contains(event.relatedTarget)) setOpen(false)
+        const to = event.relatedTarget
+        if (open && to && !wrapper.current.contains(to)) setOpen(false)
       }}
     >
       <button
