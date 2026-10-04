@@ -8,6 +8,12 @@ moment you find it, then open the same list on your laptop and actually apply.
 without visitors, so the first visit after that can take about a minute)
 **Demo video:** not recorded yet
 
+[![Built with Claude Code](https://img.shields.io/badge/AI--assisted-Claude%20Code-2563EB)](AI-USAGE.md)
+
+**AI help:** this project was built with **Claude Code** (By Anthropic). Read
+[AI-USAGE.md](AI-USAGE.md) to see what the AI did, where it was wrong, and what I
+wrote myself.
+
 > **Run on your own computer, it starts in demo mode.** The screens are real,
 > but your data is kept in your own browser until you connect it to the API.
 > See [Demo mode](#demo-mode).
