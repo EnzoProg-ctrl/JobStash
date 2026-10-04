@@ -104,12 +104,15 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
   }, [attempt])
 
   return (
-    <div className="relative flex min-h-14 items-center justify-center">
+    // Lined up on the left, like the headline and text above it. Google's
+    // button is at most 400px wide and 40px tall, and only Google can draw
+    // inside it, so the space around it is sized to match.
+    <div className="relative min-h-10 w-full max-w-[400px]">
       {/* Google draws its button in here. */}
-      <div ref={slot} className={`w-full max-w-[400px] ${ready ? '' : 'invisible'}`} />
+      <div ref={slot} className={`w-full ${ready ? '' : 'invisible'}`} />
       {/* Until then, a grey stand-in the same size, so nothing jumps. */}
       {!ready && (
-        <div className="absolute inset-x-0 top-1/2 mx-auto h-10 max-w-[400px] -translate-y-1/2 animate-pulse rounded-md bg-subtle" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 h-10 animate-pulse rounded-md bg-subtle" aria-hidden="true" />
       )}
     </div>
   )
