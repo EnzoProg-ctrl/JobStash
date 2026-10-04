@@ -3,13 +3,14 @@
 A digital clipboard for job hunting. Save a job posting link on your phone the
 moment you find it, then open the same list on your laptop and actually apply.
 
-**Live demo:** https://enzoprog-ctrl.github.io/JobStash/ (demo mode: no server or database behind it)
-**Full version:** not deployed yet (planned: Vercel for the website, a free Node host for the API)
+**Live site:** https://jobstash-ph.vercel.app (sign in with Google)
+**API:** https://jobstash-api.onrender.com (free plan: it sleeps after 15 minutes
+without visitors, so the first visit after that can take about a minute)
 **Demo video:** not recorded yet
 
-> **This app runs in demo mode by default.** The screens are real, but unless
-> you connect it to the API, your data is kept in your own browser. See
-> [Demo mode](#demo-mode).
+> **Run on your own computer, it starts in demo mode.** The screens are real,
+> but your data is kept in your own browser until you connect it to the API.
+> See [Demo mode](#demo-mode).
 
 ![My Stash: saved jobs with To Apply, Done and All tabs](docs/assets/my-stash.png)
 
@@ -21,7 +22,9 @@ moment you find it, then open the same list on your laptop and actually apply.
 3. [How to run it](#3-how-to-run-it)
 4. [Features and usage](#4-features-and-usage)
 5. [Project structure](#5-project-structure)
-6. [Known issues and next steps](#6-known-issues-and-next-steps)
+6. [Screenshots](#6-screenshots)
+7. [Known issues and next steps](#7-known-issues-and-next-steps)
+8. [Deploying](#deploying)
 
 ## 1. Overview
 
@@ -103,6 +106,7 @@ Copy-Item server/.env.example server/.env
 | `VITE_API_BASE_URL` | `http://localhost:3000` | Where the API is. Ignored in demo mode. No trailing slash |
 | `VITE_SUPABASE_URL` | `https://your-project-ref.supabase.co` | Your Supabase project's address, for signing in. Ignored in demo mode |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Supabase's **publishable** key, which is safe to show. **Dashboard > Project Settings > API Keys**. Ignored in demo mode |
+| `VITE_GOOGLE_CLIENT_ID` | `1234…apps.googleusercontent.com` | The Google OAuth client ID (public). Shows Google's own sign-in button, so Google's screen names this site instead of Supabase's address. Without it, the older redirect button is used |
 
 Every `VITE_` value ends up inside the website's code, where anyone can read it.
 Never put a password or a secret in one. The publishable key is made to be
@@ -136,7 +140,8 @@ JobStash never stores a password.
 1. **Google Cloud** ([console.cloud.google.com](https://console.cloud.google.com)):
    create a project, then in **Google Auth Platform** set up the consent screen
    (External) and create an **OAuth client** of type *Web application*:
-   - **Authorised JavaScript origins:** `http://localhost:5173`
+   - **Authorised JavaScript origins:** `http://localhost` and `http://localhost:5173`
+     (Google's sign-in button only works on addresses listed here)
    - **Authorised redirect URIs:** `https://your-project-ref.supabase.co/auth/v1/callback`
 2. **Supabase > Authentication > Sign In / Providers > Google:** switch it on
    and paste the client ID and client secret from Google. The secret only goes
@@ -224,100 +229,83 @@ is gone, and the jobs now come from your database.
    - the job title and company (if there's no title, the company is shown instead)
    - the website it's from (LinkedIn, Indeed and JobStreet by name, other sites
      by address) and how long ago it was saved
-   - a **To Apply** or **Done** badge
+   - a status chip: **To Apply** (blue), or for done jobs **Pending** (applied,
+     waiting; blue-grey), **Accepted** (green) or **Rejected** (red)
    - **Open Posting**, which opens the job in a new tab
 5. **Tabs** (To Apply, Done, All) filter the list and show how many jobs each
-   has. The page opens on To Apply.
+   has. The page opens on To Apply. On **Done**, a second row filters by
+   result: **All** (including Pending), **Accepted** or **Rejected**.
 6. **Search** filters by job title or company as you type; capitals don't
    matter. The tab counts change to show how many matches each tab has.
    **Sort** orders the list by **Newest first**, **Oldest first** or
    **Company A–Z**.
-7. **The ⋮ menu** on a card marks the job **done**, or moves a done job **back
-   to To Apply**. The card updates straight away. If saving fails, it changes
-   back and a message explains why.
-   **Delete** (in red) removes the card straight away and shows
+7. **Favourites.** The ☆ on a card stars the job (★, gold); press it again to
+   unstar. **★ Favourites** above the list shows only starred jobs, and the
+   tab counts follow, like they do for search. Stars are saved, so they're
+   still there next time and on your other devices.
+8. **Board view.** The **List | Board** switch above the list turns My Stash
+   into a Kanban board with four columns: **To Apply**, **Pending**,
+   **Accepted** and **Rejected**, each with its count. Move a job by dragging
+   its card to another column:
+   - **mouse:** drag the card
+   - **phone:** press and hold the card for a moment, then drag (a quick
+     swipe still scrolls the page)
+   - **keyboard:** Tab to the card's ⠿ button, press **Space**, use the
+     **arrow keys** to pick a column, and press **Space** again (**Esc**
+     cancels). Screen readers say what's happening at each step.
+
+   Dropping a card saves the change, just like the ⋮ menu (which works on
+   board cards too). Search, sort and Favourites still apply; the tabs are
+   hidden because the columns replace them. On phones the columns sit side by
+   side and scroll sideways; on tablets they're two by two. JobStash remembers
+   which view you used last.
+9. **The ⋮ menu** on a card records how it's going:
+
+   | Card | Menu |
+   |---|---|
+   | To Apply | Mark as Done (→ Pending) · Mark as Accepted · Mark as Rejected · Delete Job |
+   | Pending | Mark as Accepted · Mark as Rejected · Move back to To Apply · Delete Job |
+   | Accepted | Mark as Rejected · Move back to To Apply · Delete Job |
+   | Rejected | Mark as Accepted · Move back to To Apply · Delete Job |
+
+   Accepted and Rejected can be picked straight from To Apply; the job moves
+   to Done with that result. The card updates straight away. If saving fails,
+   it changes back and a message explains why.
+   **Delete Job** (in red) removes the card straight away and shows
    *"Deleted "…" · Undo"* for 5 seconds. Only then is the job really deleted,
    so **Undo** brings it back exactly as it was. Deleting another job, or
    leaving My Stash, within the 5 seconds deletes the waiting one at once;
    closing the tab or signing out leaves it in your stash. If deleting fails,
    the card comes back with a message.
-8. **When something goes wrong,** the message says so in plain words: the
+10. **When something goes wrong,** the message says so in plain words: the
    API can't be reached, you're offline, too many requests, or the 1,000-job
    limit. If loading takes more than 5 seconds, My Stash explains that the
    server may be waking up (free hosts sleep when nobody uses them), and if
    loading fails there's a **Try again** button.
-9. **Overview** (`/overview`) sums up the job hunt: how many jobs are saved,
+11. **Overview** (`/overview`) sums up the job hunt: how many jobs are saved,
    to apply and done, a progress bar ("2 of 6 applied"), how many were added
-   this week, and which job sites they come from. On phones it's the left
+   this week, how many are Pending, Accepted and Rejected, and which job sites
+   they come from. On phones it's the left
    button in the bottom bar (Overview · + Add Job · My Stash); on laptops a
    link in the header. My Stash stays the start page.
-10. **Privacy** (`/privacy`, linked from the landing page footer and from
+12. **Privacy** (`/privacy`, linked from the landing page footer and from
    Google's sign-in screen) says in plain words what JobStash keeps, what it
    doesn't do, and how to have your data deleted.
-11. **Sign out** in the header ends the sign-in on this browser only, and the
+13. **Sign out** in the header ends the sign-in on this browser only, and the
    landing page confirms it. Your other devices stay signed in. On a shared
    computer, sign out when you're done. JobStash's Sign out doesn't sign you
    out of Google itself.
 
 ### The API
 
-All responses are JSON. Errors come back as `{"error": "what went wrong"}`.
+The website talks only to JobStash's own Express API, which talks to the
+database. Every `/api` request needs a Google sign-in, and each person only
+ever sees and changes their own jobs. Main routes: `GET /api/jobs` (your
+list), `POST /api/jobs` (save), `PATCH /api/jobs/:id` (mark done, accepted,
+rejected, or star it), `DELETE /api/jobs/:id`.
 
-**Every `/api` request needs a sign-in pass.** The website signs people in with
-Google through Supabase Auth, and sends the pass it gets as
-`Authorization: Bearer <pass>`. The API checks it against the Supabase
-project's **public** keys (so the server holds no secret for this), and takes
-the user's id from it. Every query then includes `AND user_id = …`, so each
-person only ever sees and changes their own jobs.
-
-| Answer | When |
-|---|---|
-| `401` | No pass, a pass that isn't valid or has expired, or an account that was deleted |
-| `404` | The job doesn't exist, **or belongs to someone else** (the same answer, so nothing leaks) |
-| `503` | The API couldn't reach Supabase to check the pass |
-| `409` | Saving a new job when the account already has 1,000, the most one account can keep |
-| `429` | Too many requests: more than 100 a minute from one device, or more than 50 new jobs an hour from one account. The `RateLimit` header says how many seconds to wait |
-
-| Method | Path | What it does |
-|---|---|---|
-| `GET` | `/healthz` | Is the API running? `{"ok":true}` (no sign-in needed) |
-| `GET` | `/readyz` | Can it reach the database? `{"ok":true,"db":"up"}`, or `503` if not (no sign-in needed) |
-| `GET` | `/api/jobs` | Your jobs, newest first |
-| `GET` | `/api/jobs?status=to_apply` | Only jobs still to apply for (`?status=done` for finished ones) |
-| `GET` | `/api/jobs/:id` | One of your jobs, or `404` |
-| `POST` | `/api/jobs` | Save a job. Returns `201` and the new job |
-| `PUT` | `/api/jobs/:id` | Replace a job's details |
-| `PATCH` | `/api/jobs/:id` | Change only the status. Body: `{"status":"done"}` |
-| `DELETE` | `/api/jobs/:id` | Delete a job. Returns `204` |
-
-A job looks like this:
-
-```json
-{
-  "id": "1",
-  "company_name": "Brightside Co.",
-  "job_title": "Frontend Intern",
-  "posting_url": "https://www.linkedin.com/jobs/view/4011223344",
-  "status": "to_apply",
-  "added_at": "2026-09-20T09:15:00.000Z"
-}
-```
-
-To save one (with a pass copied from the signed-in website):
-
-```bash
-curl -X POST http://localhost:3000/api/jobs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your sign-in pass>" \
-  -d '{"company_name":"Brightside Co.","job_title":"Frontend Intern","posting_url":"https://www.linkedin.com/jobs/view/4011223344"}'
-```
-
-**The rules**, checked by the API and again by the database:
-- `company_name` is required, 120 characters at most
-- `job_title` is optional, 160 characters at most
-- `posting_url` is required, must start with `http://` or `https://`, 2000
-  characters at most
-- `status` is `to_apply` (the default) or `done`
+**Full reference** (every route, request body, answer code and rule):
+[docs/api.md](docs/api.md)
 
 ### Demo mode
 
@@ -337,100 +325,70 @@ and it's a fallback if the API is asleep during a demo.
 
 ```
 JobStash/
-├── client/                    the website
-│   ├── index.html             page title, fonts
-│   ├── vercel.json            lets Vercel open /stash directly
-│   ├── public/                served as-is: tab icon, home-screen icons, site.webmanifest,
-│   │                          and og-image.png (the picture in shared-link previews)
+├── client/                     the website (React, Vite, Tailwind CSS)
+│   ├── index.html              page title, icons, link-preview tags
+│   ├── public/                 tab and home-screen icons, link-preview image
 │   └── src/
-│       ├── main.jsx           starts the app and the router
-│       ├── App.jsx            which page shows at which address
-│       ├── styles.css         Tailwind and the design colours, font and sizes
-│       ├── pages/             one file per screen
-│       │   ├── HomePage.jsx       landing page  (/)
-│       │   ├── OverviewPage.jsx   Overview      (/overview): numbers, progress, job sites
-│       │   ├── PrivacyPage.jsx    privacy notice (/privacy)
-│       │   └── StashPage.jsx      My Stash      (/stash)
-│       ├── components/        pieces used by the pages
-│       │   ├── AppHeader.jsx      logo, + Add Job and Sign out, on the app screens
-│       │   ├── AddJobDialog.jsx   the Add Job pop-up (/stash/add)
-│       │   ├── FilterTabs.jsx     To Apply / Done / All
-│       │   ├── StashToolbar.jsx   search and sort
-│       │   ├── JobCard.jsx        one saved job
-│       │   ├── CardMenu.jsx       the ⋮ menu on a card (mark done, delete)
-│       │   ├── UndoToast.jsx      the "Deleted … · Undo" message
-│       │   ├── LandingMenu.jsx    the ⋮ menu on the landing page (phones)
-│       │   ├── StatusBadge.jsx    the To Apply / Done pill
-│       │   ├── Logo.jsx           the JobStash wordmark
-│       │   └── DemoNotice.jsx     the demo-mode notice
-│       ├── lib/
-│       │   ├── auth.jsx           who is signed in, sign out, locks My Stash
-│       │   ├── supabase.js        the Supabase sign-in connection (none in demo mode)
-│       │   ├── useJobs.js         loads your jobs (shared by My Stash and Overview)
-│       │   ├── usePageTitle.js    the browser tab's name, per page ("My Stash · JobStash-ph")
-│       │   └── format.js          "LinkedIn", "2 days ago"
-│       ├── api/               the only code that fetches data
-│       │   ├── index.js           picks demo or real
-│       │   ├── mockApi.js         demo: browser storage
-│       │   ├── httpApi.js         real: calls the API
-│       │   └── seed.json          the demo's sample jobs
-│       └── assets/            images
-├── server/                    the API
-│   ├── server.js              the routes and their checks
-│   ├── auth.js                checks the sign-in pass on every /api request
-│   ├── limits.js              rate limits (too many requests get a 429)
-│   ├── logging.js             one log line per request, with nothing private in it
-│   ├── jobsRepo.js            the database queries (always for one user)
-│   └── db/
-│       ├── migrations/        numbered database changes
-│       ├── migrate.js         runs the migrations that haven't run yet
-│       ├── schema.sql         a picture of the finished table (for reading)
-│       ├── seed.sql           sample jobs (deletes existing ones first)
-│       ├── pool.js            the database connection
-│       └── run.js             runs a .sql file
-├── docs/                      planning documents, weekly reports, screenshots,
-│                              and the logo (docs/assets/logo: SVG + PNG sizes)
-└── AI-USAGE.md                how AI was used in this project
+│       ├── App.jsx             which page shows at which address
+│       ├── pages/              one file per screen: landing, My Stash, Overview, Privacy
+│       ├── components/         parts of the screens: job card, board, ⋮ menus, star,
+│       │                       Add Job pop-up, bottom bar, status chips, Undo message
+│       ├── lib/                sign-in, loading jobs, animations, small helpers
+│       └── api/                the only code that fetches data (demo mode or the real API)
+├── server/                     the API (Node.js, Express)
+│   ├── server.js               the routes and their checks
+│   ├── auth.js                 checks the Google sign-in on every /api request
+│   ├── jobsRepo.js             the database queries, always for one person
+│   ├── limits.js, logging.js   rate limits, and one safe log line per request
+│   └── db/migrations/          numbered database changes
+├── docs/                       project documents, API reference, deploying, logo, screenshots
+└── AI-USAGE.md                 how AI was used in this project
 ```
 
-## 6. Known issues and next steps
+## 6. Screenshots
+
+| | |
+|---|---|
+| ![Landing page](docs/assets/landing.png) | ![My Stash with the To Apply, Done and All tabs](docs/assets/my-stash.png) |
+| **Landing page**: what JobStash is, and Sign in with Google | **My Stash**: saved jobs, tabs, search and sort |
+| ![The Add Job pop-up](docs/assets/add-job.png) | ![Overview with progress numbers and job sites](docs/assets/overview.png) |
+| **Add Job**: paste a link, add the company | **Overview**: progress, results and where jobs come from |
+
+<p align="center">
+  <img src="docs/assets/board.png" alt="My Stash as a board with To Apply, Pending, Accepted and Rejected columns" />
+  <br />
+  <strong>Board view</strong>: drag a job to another column to change it
+</p>
+
+<p align="center">
+  <img src="docs/assets/phone.png" alt="My Stash on a phone, with the bottom bar" width="280" />
+  <br />
+  <strong>On a phone</strong>: the bottom bar (Overview · + Add Job · My Stash)
+</p>
+
+## 7. Known issues and next steps
 
 **Known issues**
 - **Only Google accounts can sign in.** Email sign-in links need an email
   sender with its own domain, which the project doesn't have yet.
-- **The Google app is in Testing mode**, so only the test users listed in
-  Google Cloud can sign in until it's published.
-- **Only the demo is online.** The GitHub Pages link runs in demo mode, so it
-  has no server or database behind it. The full version isn't deployed yet.
+- **Google's sign-in screen shows the Supabase address** ("to continue to
+  ….supabase.co") instead of "JobStash" until Google approves the app's
+  branding. That review has been requested.
+- **Free plans:** the API sleeps after 15 minutes without visitors (the next
+  visit waits about a minute, and My Stash says so), and Supabase pauses a
+  project after 7 days without use (press Resume in its dashboard).
 - **`npm run db:seed` wipes the table** (it refuses in production). See [Set up the database](#set-up-the-database).
 
 **Next steps**
-1. Deploy: the website on Vercel, the API on a free Node host, the database
-   already on Supabase. Then switch off the GitHub Pages demo
+1. Finish Google's branding review, so sign-in says "JobStash"
+2. Edit a saved job (the API can already do it; the website can't yet)
 
 ## Deploying
 
-Only the demo is online, on GitHub Pages. The plan for the full version:
-
-| Piece | Where | Notes |
-|---|---|---|
-| Website | Vercel | Set `VITE_USE_MOCK_API=false`, `VITE_API_BASE_URL` and the two `VITE_SUPABASE_` settings in Vercel's settings, then redeploy. `client/vercel.json` sends every address to the app, so refreshing `/stash` doesn't give a 404 |
-| API | a free Node host (Render or Railway) | Point it at `server/`, add the `server/.env` settings in its dashboard plus `TRUST_PROXY=3`, and add the website's address to `CORS_ORIGINS` |
-| Database | Supabase | Already set up |
-| Sign-in | Google Cloud and Supabase | Add the website's new address to the Google OAuth client's JavaScript origins and to Supabase's Site URL and redirect URLs, then **Publish app** in Google so anyone can sign in |
-
-**The demo on GitHub Pages** comes from the course template's workflow,
-`.github/workflows/deploy-pages.yml`. Every push to `main` that changes
-`client/` rebuilds the website in demo mode and republishes it. It stays until
-the Vercel version is live, then the workflow is deleted and Pages switched off.
-
-**Database security.** Supabase adds its own public web API to every table.
-`schema.sql` turns on Row Level Security for `saved_jobs` with no rules, which
-blocks that API completely. The Express server still works, because it
-connects as the `postgres` user, which bypasses Row Level Security. Instead,
-the server itself keeps lists private: every job has a `user_id`, and every
-query only reads or changes the signed-in person's jobs. Asking for someone
-else's job gets a `404`, as if it didn't exist.
+The live version runs on **Vercel** (website), **Render** (API) and
+**Supabase** (database and sign-in), all on free plans, and updates by itself
+on every push to `main`. Every setting, the rule for database changes, and a
+checklist for moving to a new address: [docs/deploying.md](docs/deploying.md)
 
 ## Author
 

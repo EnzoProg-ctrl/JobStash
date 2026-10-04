@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import DemoNotice from '../components/DemoNotice.jsx'
+import GoogleButton, { googleButtonAvailable } from '../components/GoogleButton.jsx'
 import LandingMenu from '../components/LandingMenu.jsx'
 import Logo from '../components/Logo.jsx'
 import { supabase } from '../lib/supabase.js'
@@ -127,16 +128,27 @@ export default function HomePage() {
   )
 }
 
-// Sign in with Google, through Supabase Auth. The browser leaves for Google,
-// and Google sends it back to /stash with a one-time code, which the Supabase
-// client (lib/supabase.js) swaps for a sign-in session by itself.
+// Sign in with Google, through Supabase Auth.
+//
+// Normally with Google's own button (GoogleButton.jsx): Google's window opens,
+// you pick your account, and Supabase checks what Google sends back and signs
+// you in, without leaving this page. Google's screen then names this site.
+//
+// If Google's button can't load, the old button is used instead: the browser
+// leaves for Google, and Google sends it back to /stash with a one-time code,
+// which the Supabase client (lib/supabase.js) swaps for a sign-in session by
+// itself. That way Google's screen names Supabase's address.
 //
 // In demo mode there is no sign-in at all, so the same spot offers the demo.
 // Someone already signed in gets a way straight into their stash instead.
 function SignIn() {
   const { session, loading } = useAuth()
-  const [status, setStatus] = useState('idle')   // idle | leaving | error
+  const navigate = useNavigate()
+  const [status, setStatus] = useState('idle')   // idle | leaving | checking | error
   const [error, setError] = useState(null)
+  const [withGoogleButton, setWithGoogleButton] = useState(googleButtonAvailable)
+  // Goes up after a failed sign-in, so Google's button is drawn afresh.
+  const [attempt, setAttempt] = useState(0)
   // Set when a sign-in stopped working mid-use (api/httpApi.js). Read it
   // first, then clear it once the page is on screen, so it shows only once.
   const [note] = useState(readSignInNote)
@@ -192,6 +204,20 @@ function SignIn() {
     }
   }
 
+  // Google's button handed over its signed note; Supabase checks it.
+  async function signInWithGoogleNote(token, nonce) {
+    setStatus('checking')
+    setError(null)
+    const { error: problem } = await supabase.auth.signInWithIdToken({ provider: 'google', token, nonce })
+    if (problem) {
+      setError(problem.message)
+      setStatus('error')
+      setAttempt((count) => count + 1)
+      return
+    }
+    navigate('/stash')
+  }
+
   return (
     <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
       {note === 'expired' && (
@@ -204,20 +230,30 @@ function SignIn() {
           You've signed out. Your stash is safe, and nobody using this browser can open it.
         </p>
       )}
-      <button
-        type="button"
-        onClick={signIn}
-        // While the sign-in is still being checked, don't offer it yet: the
-        // visitor may already be signed in.
-        disabled={loading || status === 'leaving'}
-        className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-lg border border-line bg-surface text-lg font-semibold text-ink shadow-sm hover:bg-subtle disabled:opacity-60"
-      >
-        <GoogleIcon />
-        {status === 'leaving' ? 'Opening Google…' : 'Sign in with Google'}
-      </button>
+      {withGoogleButton ? (
+        <GoogleButton
+          attempt={attempt}
+          onToken={signInWithGoogleNote}
+          onUnavailable={() => setWithGoogleButton(false)}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={signIn}
+          // While the sign-in is still being checked, don't offer it yet: the
+          // visitor may already be signed in.
+          disabled={loading || status === 'leaving'}
+          className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-lg border border-line bg-surface text-lg font-semibold text-ink shadow-sm hover:bg-subtle disabled:opacity-60"
+        >
+          <GoogleIcon />
+          {status === 'leaving' ? 'Opening Google…' : 'Sign in with Google'}
+        </button>
+      )}
 
       {status === 'error' ? (
-        <p className="mt-3 text-error" role="alert">Couldn't start signing in: {error}</p>
+        <p className="mt-3 text-error" role="alert">Couldn't sign in: {error}</p>
+      ) : status === 'checking' ? (
+        <p className="mt-3 text-muted" role="status">Signing you in…</p>
       ) : (
         <p className="mt-3 text-muted">
           No new password to remember. We only use your Google account to know it's you.

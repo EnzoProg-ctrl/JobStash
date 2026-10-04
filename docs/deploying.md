@@ -25,16 +25,18 @@ website and Render rebuilds the API, each in about a minute.
 **Vercel (the website)**: a project from this repository, Root Directory
 `client`, preset Vite, address `jobstash-ph.vercel.app` (Settings > Domains).
 Environment: `VITE_USE_MOCK_API=false`,
-`VITE_API_BASE_URL=https://jobstash-api.onrender.com`, `VITE_SUPABASE_URL` and
-`VITE_SUPABASE_PUBLISHABLE_KEY`. `client/vercel.json` sends every address to the
+`VITE_API_BASE_URL=https://jobstash-api.onrender.com`, `VITE_SUPABASE_URL`,
+`VITE_SUPABASE_PUBLISHABLE_KEY` and `VITE_GOOGLE_CLIENT_ID` (the OAuth client
+ID, for Google's own sign-in button; after changing it, redeploy). `client/vercel.json` sends every address to the
 app, so opening or refreshing `/stash` works.
 
 **Supabase**: Authentication > URL Configuration has the Site URL
 `https://jobstash-ph.vercel.app`, and the redirect URLs
 `https://jobstash-ph.vercel.app/**` and `http://localhost:5173/**`.
 
-**Google Cloud**: the OAuth client lists `https://jobstash-ph.vercel.app` and
-`http://localhost:5173` as JavaScript origins, and Supabase's
+**Google Cloud**: the OAuth client lists `https://jobstash-ph.vercel.app`,
+`http://localhost` and `http://localhost:5173` as JavaScript origins (Google's
+sign-in button refuses any address not listed), and Supabase's
 `…/auth/v1/callback` as the redirect URI. The app is published, and its
 Branding page links the home page and `/privacy`. The site's ownership is
 proven to Google Search Console by a meta tag in `client/index.html`; leave it
