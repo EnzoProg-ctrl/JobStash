@@ -4,6 +4,7 @@ import DemoNotice from '../components/DemoNotice.jsx'
 import DoneFilter from '../components/DoneFilter.jsx'
 import FilterTabs from '../components/FilterTabs.jsx'
 import JobCard from '../components/JobCard.jsx'
+import JobCardSkeleton from '../components/JobCardSkeleton.jsx'
 import StashBoard from '../components/StashBoard.jsx'
 import StashToolbar from '../components/StashToolbar.jsx'
 import UndoToast from '../components/UndoToast.jsx'
@@ -242,15 +243,23 @@ export default function StashPage() {
 
       {/* Four states, and each looks different. An empty list means "nothing
           here yet"; an error means "we could not find out". */}
+      {/* Loading: grey stand-in cards where the jobs will appear
+          (JobCardSkeleton.jsx), so the page already looks like My Stash. After
+          5 seconds the note about the sleeping server joins them. */}
       {status === 'loading' && (
-        <div className="mt-6 text-muted" role="status">
-          <p>Loading...</p>
+        <div className="mt-8" role="status">
+          <span className="sr-only">Loading your jobs…</span>
           {slow && (
-            <p className="mt-2">
+            <p className="mb-4 text-muted">
               Still loading. If JobStash hasn't been used for a while, its server takes up to a
               minute to wake up.
             </p>
           )}
+          <ul className="flex flex-col gap-4">
+            <JobCardSkeleton />
+            <JobCardSkeleton />
+            <JobCardSkeleton />
+          </ul>
         </div>
       )}
 
