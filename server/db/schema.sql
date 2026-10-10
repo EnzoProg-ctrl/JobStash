@@ -29,7 +29,15 @@ CREATE INDEX IF NOT EXISTS saved_jobs_user_added_idx
   ON saved_jobs (user_id, added_at DESC);
 
 -- Supabase puts a public web API on every table, reachable with the project's
--- public key. Row Level Security with no policies blocks that API completely.
--- The Express server is not affected: it connects as the postgres user, which
--- bypasses RLS. All access goes through the server, where the input is checked.
+-- public key. Row Level Security blocks that API completely: its roles (anon,
+-- authenticated) have no policy, so they see nothing. All access goes through
+-- the Express server, where the input is checked.
 ALTER TABLE saved_jobs ENABLE ROW LEVEL SECURITY;
+
+-- The live API logs in as jobstash_app (migration 005), which may only read
+-- and write saved_jobs. Its password is set by hand, never in a file.
+-- CREATE ROLE jobstash_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+GRANT USAGE ON SCHEMA public TO jobstash_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON saved_jobs TO jobstash_app;
+GRANT USAGE ON SEQUENCE saved_jobs_id_seq TO jobstash_app;
+CREATE POLICY jobstash_app_all ON saved_jobs FOR ALL TO jobstash_app USING (true) WITH CHECK (true);

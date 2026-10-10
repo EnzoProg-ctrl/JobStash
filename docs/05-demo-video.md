@@ -2,7 +2,7 @@
 
 Three to five minutes, screen recorded, your own voice. Nobody watches ten.
 
-**Link:** (paste it here, and in the main README)
+**Link:** https://drive.google.com/file/d/1tdxjpN7gZdQzwH9U73qrotw_8vPFyEuw/view?usp=drive_link
 
 ## The structure that always works
 

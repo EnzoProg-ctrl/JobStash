@@ -6,7 +6,7 @@ moment you find it, then open the same list on your laptop and actually apply.
 **Live site:** https://jobstash-ph.vercel.app (sign in with Google)
 **API:** https://jobstash-api.onrender.com (free plan: it sleeps after 15 minutes
 without visitors, so the first visit after that can take about a minute)
-**Demo video:** not recorded yet
+**Demo video:** [Watch on Google Drive](https://drive.google.com/file/d/1tdxjpN7gZdQzwH9U73qrotw_8vPFyEuw/view?usp=drive_link): the app, the code, and how AI was used
 
 [![Built with Claude Code](https://img.shields.io/badge/AI--assisted-Claude%20Code-2563EB)](AI-USAGE.md)
 
@@ -113,6 +113,7 @@ Copy-Item server/.env.example server/.env
 | `VITE_SUPABASE_URL` | `https://your-project-ref.supabase.co` | Your Supabase project's address, for signing in. Ignored in demo mode |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Supabase's **publishable** key, which is safe to show. **Dashboard > Project Settings > API Keys**. Ignored in demo mode |
 | `VITE_GOOGLE_CLIENT_ID` | `1234…apps.googleusercontent.com` | The Google OAuth client ID (public). Shows Google's own sign-in button, so Google's screen names this site instead of Supabase's address. Without it, the older redirect button is used |
+| `VITE_CONTACT_EMAIL` | `you@example.com` | The contact address the Privacy page shows. Kept out of the code so no personal email is in the public repository. Without it, the page points to the GitHub project |
 
 Every `VITE_` value ends up inside the website's code, where anyone can read it.
 Never put a password or a secret in one. The publishable key is made to be
@@ -398,7 +399,7 @@ checklist for moving to a new address: [docs/deploying.md](docs/deploying.md)
 
 ## Author
 
-_Laurenzo Centeno_ — @EnzoProg-ctrl (https://github.com/EnzoProg-ctrl)
+@EnzoProg-ctrl (https://github.com/EnzoProg-ctrl)
 _APSI - CS401_
 
 ## Licence

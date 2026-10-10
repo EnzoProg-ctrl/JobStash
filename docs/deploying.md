@@ -20,15 +20,23 @@ website and Render rebuilds the API, each in about a minute.
 | Language / Root Directory | Node / `server` |
 | Build Command / Start Command | `npm ci` / `npm start` |
 | Health Check Path | `/healthz` |
-| Environment | `DATABASE_URL`, `SUPABASE_URL`, `CORS_ORIGINS=http://localhost:5173,https://jobstash-ph.vercel.app`, `NODE_ENV=production`, `TRUST_PROXY=3` |
+| Environment | `DATABASE_URL` (the limited `jobstash_app` account, see below), `SUPABASE_URL`, `CORS_ORIGINS=http://localhost:5173,https://jobstash-ph.vercel.app`, `NODE_ENV=production`, `TRUST_PROXY=3` |
 
 **Vercel (the website)**: a project from this repository, Root Directory
 `client`, preset Vite, address `jobstash-ph.vercel.app` (Settings > Domains).
 Environment: `VITE_USE_MOCK_API=false`,
 `VITE_API_BASE_URL=https://jobstash-api.onrender.com`, `VITE_SUPABASE_URL`,
-`VITE_SUPABASE_PUBLISHABLE_KEY` and `VITE_GOOGLE_CLIENT_ID` (the OAuth client
+`VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_CONTACT_EMAIL` (the Privacy page's contact
+address) and `VITE_GOOGLE_CLIENT_ID` (the OAuth client
 ID, for Google's own sign-in button; after changing it, redeploy). `client/vercel.json` sends every address to the
 app, so opening or refreshing `/stash` works.
+
+**Database accounts**: Render's `DATABASE_URL` logs in as `jobstash_app`
+(migration 005), which can only read and write `saved_jobs`. Its address is the
+Session pooler one with `jobstash_app.<project-ref>` as the user and its own
+password, set by hand (`ALTER ROLE jobstash_app PASSWORD '…'`) and kept only in
+Render. Migrations need the owner, so `server/.env` on your own computer keeps
+the `postgres` address and `npm run db:migrate` runs from there.
 
 **Supabase**: Authentication > URL Configuration has the Site URL
 `https://jobstash-ph.vercel.app`, and the redirect URLs

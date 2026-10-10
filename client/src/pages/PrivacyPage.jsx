@@ -8,8 +8,21 @@ import { usePageTitle } from '../lib/usePageTitle.js'
 // only promises what the code actually does: if the app changes what it keeps,
 // this page changes with it, along with UPDATED.
 
-const CONTACT = 'centenoenzo054@gmail.com'
-const UPDATED = '3 October 2026'
+// How to reach the person running JobStash. The email address is a setting
+// (VITE_CONTACT_EMAIL, in Vercel), not written here, so no personal address
+// sits in the public repository. Without it, the page points to the project's
+// GitHub page instead.
+const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL
+const GITHUB = 'https://github.com/EnzoProg-ctrl/JobStash'
+const UPDATED = '10 October 2026'
+
+function ContactLink() {
+  return CONTACT_EMAIL ? (
+    <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-brand-blue underline">{CONTACT_EMAIL}</a>
+  ) : (
+    <a href={GITHUB} className="font-semibold text-brand-blue underline">the project's GitHub page</a>
+  )
+}
 
 export default function PrivacyPage() {
   usePageTitle('Privacy')
@@ -100,8 +113,7 @@ export default function PrivacyPage() {
         <Section title="Deleting your data">
           <p>
             You can delete any saved job yourself, from its ⋮ menu in My Stash. To delete
-            your account and every job you've saved, email{' '}
-            <a href={`mailto:${CONTACT}`} className="font-semibold text-brand-blue underline">{CONTACT}</a>{' '}
+            your account and every job you've saved, write to <ContactLink />{' '}
             from the Google account you sign in with. It's done within 7 days, and it can't be
             undone.
           </p>
@@ -109,9 +121,8 @@ export default function PrivacyPage() {
 
         <Section title="Changes and questions">
           <p>
-            If this page changes, the date at the top changes too. Questions? Email{' '}
-            <a href={`mailto:${CONTACT}`} className="font-semibold text-brand-blue underline">{CONTACT}</a>.
-            JobStash is a student project by Laurenzo Centeno.
+            If this page changes, the date at the top changes too. Questions? Write to <ContactLink />. JobStash
+            is a student project.
           </p>
         </Section>
       </main>
