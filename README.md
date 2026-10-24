@@ -49,7 +49,7 @@ database.
 
 | Tool | Version | Why |
 |---|---|---|
-| [Node.js](https://nodejs.org) | **20 or newer** (built with 24) | Runs the website tools and the API |
+| [Node.js](https://nodejs.org) | **24** (the LTS line; the API is pinned to 24.x) | Runs the website tools and the API |
 | [Git](https://git-scm.com) | any | To get the code |
 | A [Supabase](https://supabase.com) project | free plan | The PostgreSQL database. Only needed for the full version, not for demo mode |
 
