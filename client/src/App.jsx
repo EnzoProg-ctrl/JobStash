@@ -23,7 +23,11 @@ export default function App() {
         <Route element={<RequireSignIn />}>
           <Route element={<AppLayout />}>
             <Route path="/stash" element={<StashPage />}>
-              <Route path="add" element={<AddJobDialog />} />
+              {/* Two pop-ups: the usual one fills in the company and position
+                  from the link; /manual is for typing them yourself. The keys
+                  make switching between them open a fresh pop-up. */}
+              <Route path="add" element={<AddJobDialog key="auto" />} />
+              <Route path="add/manual" element={<AddJobDialog key="manual" manual />} />
             </Route>
               <Route path="/overview" element={<OverviewPage />} />
             {/* Old links to /add still work. */}

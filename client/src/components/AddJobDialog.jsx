@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useOutletContext } from 'react-router'
+import { useLocation, useNavigate, useOutletContext } from 'react-router'
 import { createJob, previewJob } from '../api'
 
 // The Add Job pop-up. It is shown while the address is /stash/add, on top of
@@ -8,6 +8,10 @@ import { createJob, previewJob } from '../api'
 // Pasting the link is enough: JobStash reads the job's page and fills in the
 // company and position (server/linkPreview.js). They stay editable, and when
 // nothing can be read, the person types the company as before.
+//
+// manual: the "Enter details manually" pop-up (/stash/add/manual). Same form,
+// but nothing is read from the link; the person types everything. Each pop-up
+// has a button to switch to the other, carrying over a link already pasted.
 
 // The same rules the server checks in server/server.js, so mistakes get a
 // friendly message here before anything is sent.
@@ -46,22 +50,26 @@ function isWebLink(text) {
 const inputClass =
   'min-h-12 w-full rounded-lg border border-line bg-surface px-4 text-base placeholder:text-muted aria-invalid:border-error'
 
-export default function AddJobDialog() {
+export default function AddJobDialog({ manual = false }) {
   const dialog = useRef(null)
   const urlInput = useRef(null)
+  const companyInput = useRef(null)
+  // A link pasted in the other pop-up before switching to this one.
+  const carriedLink = useLocation().state?.link ?? ''
 
   // The browser's <dialog> dims the page, keeps Tab inside the pop-up and
   // closes on Esc. showModal() is what switches all of that on. It also moves
   // focus to the first button (the ✕), so the link box is focused after it,
-  // ready for a paste.
+  // ready for a paste (or the company box, when the link came along already).
   useEffect(() => {
     dialog.current.showModal()
-    urlInput.current.focus()
+    ;(manual && carriedLink ? companyInput : urlInput).current.focus()
+    // Only when the pop-up opens.
   }, [])
 
   const navigate = useNavigate()
   const { onJobSaved } = useOutletContext()
-  const [postingUrl, setPostingUrl] = useState('')
+  const [postingUrl, setPostingUrl] = useState(carriedLink)
   const [companyName, setCompanyName] = useState('')
   const [jobTitle, setJobTitle] = useState('')
   const [errors, setErrors] = useState({})
@@ -85,7 +93,7 @@ export default function AddJobDialog() {
   useEffect(() => {
     const id = ++lookupId.current
     const url = postingUrl.trim()
-    if (!isWebLink(url)) {
+    if (manual || !isWebLink(url)) {
       setLookup('idle')
       return
     }
@@ -112,7 +120,12 @@ export default function AddJobDialog() {
       setLookup(found.company_name || found.job_title ? 'filled' : 'none')
     }, 500)
     return () => clearTimeout(timer)
-  }, [postingUrl])
+  }, [postingUrl, manual])
+
+  // Open the other pop-up, taking the link along.
+  function switchMode() {
+    navigate(manual ? '/stash/add' : '/stash/add/manual', { replace: true, state: { link: postingUrl } })
+  }
 
   // Start closing: play the animation first, then really close. People who
   // ask their device for less motion get no animation, so no wait either.
@@ -188,8 +201,12 @@ export default function AddJobDialog() {
         <div className="mx-auto -mt-2 mb-4 h-1.5 w-12 rounded-full bg-line md:hidden" aria-hidden="true"/>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="add-job-title" className="text-3xl font-bold">Add Job</h2>
-            <p className="mt-1 text-muted">Paste a job link. JobStash fills in the company and position.</p>
+            <h2 id="add-job-title" className="text-3xl font-bold">{manual ? 'Add Job manually' : 'Add Job'}</h2>
+            <p className="mt-1 text-muted">
+              {manual
+                ? 'Type the link, company and position yourself.'
+                : 'Paste a job link. JobStash fills in the company and position.'}
+            </p>
           </div>
           <button
             type="button"
@@ -205,9 +222,33 @@ export default function AddJobDialog() {
 
         <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-5">
           <div>
-            <label htmlFor="posting-url" className="mb-2 block text-sm font-semibold">
-              Job posting URL <span className="text-error" aria-hidden="true">*</span>
-            </label>  
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              <label htmlFor="posting-url" className="text-sm font-semibold">
+                Job posting URL <span className="text-error" aria-hidden="true">*</span>
+              </label>
+              {/* Switch to the other pop-up, keeping the link. */}
+              <button
+                type="button"
+                onClick={switchMode}
+                className="-my-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-blue hover:bg-subtle"
+              >
+                {manual ? (
+                  <>
+                    <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z" />
+                    </svg>
+                    Fill in from the link
+                  </>
+                ) : (
+                  <>
+                    <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M10.5 2.5l3 3L6 13H3v-3z" />
+                    </svg>
+                    Enter details manually
+                  </>
+                )}
+              </button>
+            </div>
             <div className="relative">
               <svg className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
                 <path d="M7 9a3 3 0 004.2.3l2-2a3 3 0 00-4.2-4.2l-.8.8M9 7a3 3 0 00-4.2-.3l-2 2a3 3 0 004.2 4.2l.8-.8" />
@@ -229,26 +270,28 @@ export default function AddJobDialog() {
               <p id="posting-url-error" className="mt-2 text-sm text-error">{errors.postingUrl}</p>
             )}
             {/* What reading the link is doing. Screen readers hear it too. */}
-            <p role="status" className="mt-2 flex min-h-5 items-center gap-2 text-sm text-muted">
-              {lookup === 'looking' && (
-                <>
-                  <svg className="size-4 animate-spin text-brand-blue" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2" />
-                    <path d="M14 8a6 6 0 00-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                  Reading the job page…
-                </>
-              )}
-              {lookup === 'filled' && (
-                <>
-                  <svg className="size-4 text-done" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Filled in from the link. Check them before saving.
-                </>
-              )}
-              {lookup === 'none' && "Couldn't read the details from this link. Please type the company name."}
-            </p>
+            {!manual && (
+              <p role="status" className="mt-2 flex min-h-5 items-center gap-2 text-sm text-muted">
+                {lookup === 'looking' && (
+                  <>
+                    <svg className="size-4 animate-spin text-brand-blue" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2" />
+                      <path d="M14 8a6 6 0 00-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    Reading the job page…
+                  </>
+                )}
+                {lookup === 'filled' && (
+                  <>
+                    <svg className="size-4 text-done" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Filled in from the link. Check them before saving.
+                  </>
+                )}
+                {lookup === 'none' && "Couldn't read the details from this link. Please type the company name."}
+              </p>
+            )}
           </div>
 
           <div>
@@ -258,7 +301,8 @@ export default function AddJobDialog() {
             <input
               id="company-name"
               type="text"
-              placeholder="Filled in from the link, or type it"
+              ref={companyInput}
+              placeholder={manual ? 'e.g. NovaTech' : 'Filled in from the link, or type it'}
               aria-required="true"
               value={companyName}
               onChange={(event) => setCompanyName(event.target.value)}
@@ -276,7 +320,7 @@ export default function AddJobDialog() {
             <input
               id="job-title"
               type="text"
-              placeholder="Filled in from the link (optional)"
+              placeholder={manual ? 'e.g. Data Analyst Intern' : 'Filled in from the link (optional)'}
               value={jobTitle}
               onChange={(event) => setJobTitle(event.target.value)}
               aria-invalid={errors.jobTitle ? 'true' : undefined}

@@ -228,6 +228,10 @@ is gone, and the jobs now come from your database.
    link itself. Both stay editable, and anything you typed is never replaced.
    Some sites (Indeed, for example) block automated readers; then it says it
    couldn't read the link and you type the company.
+   Prefer typing everything yourself? **Enter details manually** (above the
+   link box) opens a second pop-up, *Add Job manually* (`/stash/add/manual`),
+   where nothing is read from the link. **Fill in from the link** switches
+   back. A link already pasted comes along either way.
    - **Job posting URL** (required): must be a real `http://` or `https://` link
    - **Company name** (required): filled in when found, 120 characters at most
    - **Job title** (optional): filled in when found, 160 characters at most
