@@ -25,7 +25,8 @@ function summarise(jobs, now = Date.now()) {
 
   const perSite = new Map()
   for (const job of jobs) {
-    const name = siteName(job.posting_url) || 'Unknown site'
+    // A job without a link counts under where it was found, or "No link".
+    const name = job.posting_url ? siteName(job.posting_url) || 'Unknown site' : job.source || 'No link'
     perSite.set(name, (perSite.get(name) ?? 0) + 1)
   }
   // Most jobs first; sites with the same number in A–Z order.

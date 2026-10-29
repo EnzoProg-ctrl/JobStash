@@ -35,25 +35,26 @@ export const MAX_JOBS = 1000
 
 // Returns null when the account already has MAX_JOBS jobs. The count and the
 // insert are one query, so there's no gap between checking and saving.
-export async function create(pool, userId, { company_name, job_title, posting_url, status, outcome, favorite }) {
+// posting_url and source may be null: a job without a link (migration 006).
+export async function create(pool, userId, { company_name, job_title, posting_url, source, status, outcome, favorite }) {
   const result = await pool.query(
-    `INSERT INTO saved_jobs (user_id, company_name, job_title, posting_url, status, outcome, favorite)
-     SELECT $1::uuid, $2::text, $3::text, $4::text, $5::text, $7::text, $8::boolean
+    `INSERT INTO saved_jobs (user_id, company_name, job_title, posting_url, status, outcome, favorite, source)
+     SELECT $1::uuid, $2::text, $3::text, $4::text, $5::text, $7::text, $8::boolean, $9::text
      WHERE (SELECT count(*) FROM saved_jobs WHERE user_id = $1::uuid) < $6
      RETURNING *`,
-    [userId, company_name, job_title ?? '', posting_url, status ?? 'to_apply', MAX_JOBS, outcome ?? null, favorite ?? false]
+    [userId, company_name, job_title ?? '', posting_url ?? null, status ?? 'to_apply', MAX_JOBS, outcome ?? null, favorite ?? false, source ?? null]
   )
   return result.rows[0] ?? null
 }
 
-export async function update(pool, userId, id, { company_name, job_title, posting_url, status, outcome, favorite }) {
+export async function update(pool, userId, id, { company_name, job_title, posting_url, source, status, outcome, favorite }) {
   const result = await pool.query(
     `UPDATE saved_jobs
      SET company_name = $1, job_title = $2, posting_url = $3, status = $4, outcome = $7,
-         favorite = COALESCE($8::boolean, favorite)
+         favorite = COALESCE($8::boolean, favorite), source = $9
      WHERE id = $5 AND user_id = $6
      RETURNING *`,
-    [company_name, job_title ?? '', posting_url, status, id, userId, outcome ?? null, favorite ?? null]
+    [company_name, job_title ?? '', posting_url ?? null, status, id, userId, outcome ?? null, favorite ?? null, source ?? null]
   )
   return result.rows[0] ?? null
 }

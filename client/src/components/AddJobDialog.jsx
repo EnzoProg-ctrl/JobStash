@@ -9,20 +9,26 @@ import { createJob, previewJob } from '../api'
 // company and position (server/linkPreview.js). They stay editable, and when
 // nothing can be read, the person types the company as before.
 //
-// manual: the "Enter details manually" pop-up (/stash/add/manual). Same form,
-// but nothing is read from the link; the person types everything. Each pop-up
-// has a button to switch to the other, carrying over a link already pasted.
+// manual: the "Add Job Without Link" pop-up (/stash/add/manual), for jobs seen
+// offline, referrals and cold emails. The link is optional, nothing is read
+// from it, and "Where you found it" says where the job came from (source,
+// server migration 006). Each pop-up has a button to switch to the other,
+// carrying over a link already pasted.
 
 // The same rules the server checks in server/server.js, so mistakes get a
 // friendly message here before anything is sent.
-function validate({ postingUrl, companyName, jobTitle }) {
+function validate({ postingUrl, companyName, jobTitle, source }, { linkRequired }) {
   const errors = {}
   const url = postingUrl.trim()
 
   if (!url) {
-    errors.postingUrl = 'Paste the job link.'
+    if (linkRequired) errors.postingUrl = 'Paste the job link.'
   } else if (!isWebLink(url)) {
     errors.postingUrl = "That doesn't look like a web link. It should start with https://"
+  }
+
+  if (source.trim().length > 120) {
+    errors.source = 'Keep this under 120 characters.'
   }
 
   if (!companyName.trim()) {
@@ -60,10 +66,10 @@ export default function AddJobDialog({ manual = false }) {
   // The browser's <dialog> dims the page, keeps Tab inside the pop-up and
   // closes on Esc. showModal() is what switches all of that on. It also moves
   // focus to the first button (the ✕), so the link box is focused after it,
-  // ready for a paste (or the company box, when the link came along already).
+  // ready for a paste. Without a link, most people start with the company.
   useEffect(() => {
     dialog.current.showModal()
-    ;(manual && carriedLink ? companyInput : urlInput).current.focus()
+    ;(manual ? companyInput : urlInput).current.focus()
     // Only when the pop-up opens.
   }, [])
 
@@ -72,6 +78,7 @@ export default function AddJobDialog({ manual = false }) {
   const [postingUrl, setPostingUrl] = useState(carriedLink)
   const [companyName, setCompanyName] = useState('')
   const [jobTitle, setJobTitle] = useState('')
+  const [source, setSource] = useState('')
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
@@ -160,7 +167,7 @@ export default function AddJobDialog({ manual = false }) {
 
   async function handleSubmit(event) {
     event.preventDefault()
-    const found = validate({ postingUrl, companyName, jobTitle })
+    const found = validate({ postingUrl, companyName, jobTitle, source }, { linkRequired: !manual })
     if (found.companyName && !companyName.trim() && lookup === 'looking') {
       found.companyName = 'Still reading the link. Wait a moment, or type the company name.'
     }
@@ -171,9 +178,12 @@ export default function AddJobDialog({ manual = false }) {
     setSaveError(null)
     try {
       const job = await createJob({
+        // Empty means no link; the API stores it as none (null).
         posting_url: postingUrl.trim(),
         company_name: companyName.trim(),
         job_title: jobTitle.trim(),
+        // Only the pop-up without a link asks where the job was found.
+        ...(manual && { source: source.trim() }),
       })
       onJobSaved(job)
       close()
@@ -201,10 +211,10 @@ export default function AddJobDialog({ manual = false }) {
         <div className="mx-auto -mt-2 mb-4 h-1.5 w-12 rounded-full bg-line md:hidden" aria-hidden="true"/>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="add-job-title" className="text-3xl font-bold">{manual ? 'Add Job manually' : 'Add Job'}</h2>
+            <h2 id="add-job-title" className="text-3xl font-bold">{manual ? 'Add Job Without Link' : 'Add Job'}</h2>
             <p className="mt-1 text-muted">
               {manual
-                ? 'Type the link, company and position yourself.'
+                ? 'For jobs you saw offline, heard about, or are cold-emailing about.'
                 : 'Paste a job link. JobStash fills in the company and position.'}
             </p>
           </div>
@@ -224,7 +234,12 @@ export default function AddJobDialog({ manual = false }) {
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
               <label htmlFor="posting-url" className="text-sm font-semibold">
-                Job posting URL <span className="text-error" aria-hidden="true">*</span>
+                Job posting URL{' '}
+                {manual ? (
+                  <span className="font-normal text-muted">(optional)</span>
+                ) : (
+                  <span className="text-error" aria-hidden="true">*</span>
+                )}
               </label>
               {/* Switch to the other pop-up, keeping the link. */}
               <button
@@ -237,14 +252,14 @@ export default function AddJobDialog({ manual = false }) {
                     <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z" />
                     </svg>
-                    Fill in from the link
+                    Fill in from a link
                   </>
                 ) : (
                   <>
                     <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M10.5 2.5l3 3L6 13H3v-3z" />
                     </svg>
-                    Enter details manually
+                    Add job without link
                   </>
                 )}
               </button>
@@ -258,7 +273,7 @@ export default function AddJobDialog({ manual = false }) {
                 type="url"
                 placeholder="https://"
                 ref={urlInput}
-                aria-required="true"
+                aria-required={manual ? undefined : 'true'}
                 value={postingUrl}
                 onChange={(event) => setPostingUrl(event.target.value)}
                 aria-invalid={errors.postingUrl ? 'true' : undefined}
@@ -331,6 +346,28 @@ export default function AddJobDialog({ manual = false }) {
               <p id="job-title-error" className="mt-2 text-sm text-error">{errors.jobTitle}</p>
             )}
           </div>
+
+          {/* Only without a link: where the job came from, shown on its card. */}
+          {manual && (
+            <div>
+              <label htmlFor="job-source" className="mb-2 block text-sm font-semibold">
+                Where you found it <span className="font-normal text-muted">(optional)</span>
+              </label>
+              <input
+                id="job-source"
+                type="text"
+                placeholder="e.g. Cold email, job fair, referral"
+                value={source}
+                onChange={(event) => setSource(event.target.value)}
+                aria-invalid={errors.source ? 'true' : undefined}
+                aria-describedby={errors.source ? 'job-source-error' : undefined}
+                className={inputClass}
+              />
+              {errors.source && (
+                <p id="job-source-error" className="mt-2 text-sm text-error">{errors.source}</p>
+              )}
+            </div>
+          )}
 
           {saveError && (
             <p role="alert" className="rounded-lg border border-line bg-subtle p-3 text-sm text-error">

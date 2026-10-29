@@ -42,6 +42,7 @@ A job looks like this:
   "company_name": "Brightside Co.",
   "job_title": "Frontend Intern",
   "posting_url": "https://www.linkedin.com/jobs/view/4011223344",
+  "source": null,
   "status": "to_apply",
   "outcome": null,
   "favorite": false,
@@ -61,8 +62,12 @@ curl -X POST http://localhost:3000/api/jobs \
 **The rules**, checked by the API and again by the database:
 - `company_name` is required, 120 characters at most
 - `job_title` is optional, 160 characters at most
-- `posting_url` is required, must start with `http://` or `https://`, 2000
-  characters at most
+- `posting_url` is optional (a job seen offline or cold-emailed has none; left
+  out or empty, it's saved as `null`). When given, it must start with
+  `http://` or `https://`, 2000 characters at most
+- `source` is optional: where the job was found, e.g. `"Cold email to the
+  hiring manager"`, 120 characters at most. Left out or empty: `null`. `PUT`
+  replaces it like the other fields
 - `status` is `to_apply` (the default) or `done`
 - `outcome` says how a done job turned out: `pending` (applied, waiting),
   `accepted` or `rejected`. It must be empty (`null`) while `status` is

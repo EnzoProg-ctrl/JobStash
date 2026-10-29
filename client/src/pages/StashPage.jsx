@@ -49,7 +49,8 @@ function matchesSearch(job, query) {
   if (!words) return true
   return (
     job.company_name.toLowerCase().includes(words) ||
-    job.job_title.toLowerCase().includes(words)
+    job.job_title.toLowerCase().includes(words) ||
+    (job.source ?? '').toLowerCase().includes(words)
   )
 }
 

@@ -127,15 +127,20 @@ function validate(body) {
   const errors = []
   const company_name = typeof body.company_name === 'string' ? body.company_name.trim() : ''
   const job_title = typeof body.job_title === 'string' ? body.job_title.trim() : ''
+  // The link is optional (migration 006): a job seen offline, a referral or a
+  // cold email has none. When there is one, it must still be a real web link.
   const posting_url = typeof body.posting_url === 'string' ? body.posting_url.trim() : ''
+  // Where the job was found, e.g. "Cold email to the hiring manager". Optional.
+  const source = typeof body.source === 'string' ? body.source.trim() : ''
   const status = body.status ?? 'to_apply'
 
   if (!company_name) errors.push('company_name is required')
   if (company_name.length > 120) errors.push('company_name must be 120 characters or fewer')
   if (job_title.length > 160) errors.push('job_title must be 160 characters or fewer')
-  if (!posting_url) errors.push('posting_url is required')
-  else if (posting_url.length > 2000) errors.push('posting_url must be 2000 characters or fewer')
-  else if (!validUrl(posting_url)) errors.push('posting_url must start with http:// or https://')
+  if (posting_url && posting_url.length > 2000) errors.push('posting_url must be 2000 characters or fewer')
+  else if (posting_url && !validUrl(posting_url)) errors.push('posting_url must start with http:// or https://')
+  if (body.source !== undefined && body.source !== null && typeof body.source !== 'string') errors.push('source must be text')
+  if (source.length > 120) errors.push('source must be 120 characters or fewer')
   if (!STATUSES.includes(status)) errors.push(`status must be one of: ${STATUSES.join(', ')}`)
   const checked = checkOutcome(status, body.outcome)
   if (STATUSES.includes(status) && checked.error) errors.push(checked.error)
@@ -145,7 +150,18 @@ function validate(body) {
   const favorite = body.favorite ?? null
   if (favorite !== null && typeof favorite !== 'boolean') errors.push('favorite must be true or false')
 
-  return { errors, value: { company_name, job_title, posting_url, status, outcome: checked.outcome, favorite } }
+  return {
+    errors,
+    value: {
+      company_name,
+      job_title,
+      posting_url: posting_url || null,
+      source: source || null,
+      status,
+      outcome: checked.outcome,
+      favorite,
+    },
+  }
 }
 
 // GET /api/jobs            everything, newest first

@@ -61,8 +61,9 @@ export default function PrivacyPage() {
               contacts or anything else in your Google account.
             </li>
             <li>
-              <strong>The jobs you save:</strong> the link, the company, the job title, whether
-              it's To Apply or Done, and when you saved it.
+              <strong>The jobs you save:</strong> the link (if there is one), the company, the
+              job title, where you found it (if you say), whether it's To Apply or Done, and
+              when you saved it.
             </li>
           </ul>
           <p className="mt-3">

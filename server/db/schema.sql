@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS saved_jobs (
   id           BIGSERIAL PRIMARY KEY,
   company_name TEXT        NOT NULL CHECK (length(company_name) BETWEEN 1 AND 120),
   job_title    TEXT        NOT NULL DEFAULT '' CHECK (length(job_title) <= 160),
-  posting_url  TEXT        NOT NULL CHECK (posting_url ~* '^https?://' AND length(posting_url) <= 2000),
+  -- Optional since migration 006: a job seen offline or cold-emailed has none.
+  posting_url  TEXT        CHECK (posting_url ~* '^https?://' AND length(posting_url) <= 2000),
+  -- Where the job was found, e.g. "Cold email to the hiring manager" (006).
+  source       TEXT        CHECK (source IS NULL OR length(source) BETWEEN 1 AND 120),
   status       TEXT        NOT NULL DEFAULT 'to_apply' CHECK (status IN ('to_apply', 'done')),
   -- How a done job turned out: 'pending' (applied, waiting), 'accepted' or
   -- 'rejected'. Empty while the job is still to apply for (migration 003).

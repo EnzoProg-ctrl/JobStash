@@ -47,7 +47,8 @@ export default function BoardCard({ job, column, onSetStatus, onDelete, onToggle
         >
           <GripIcon />
         </button>
-        <OpenLink url={job.posting_url} />
+        {/* No link, no Open: the empty spacer keeps the ⋮ on the right. */}
+        {job.posting_url ? <OpenLink url={job.posting_url} /> : <span className="mr-auto" aria-hidden="true" />}
         <CardMenu
           label={heading}
           status={job.status}
@@ -74,7 +75,8 @@ export function BoardCardPreview({ job }) {
 function CardBody({ job, children }) {
   const heading = job.job_title || job.company_name
   const subheading = job.job_title ? job.company_name : null
-  const site = siteName(job.posting_url)
+  // The job site, and/or where it was found (a job without a link).
+  const where = [siteName(job.posting_url), job.source].filter(Boolean).join(' · ')
 
   return (
     <div className="flex items-start gap-2">
@@ -88,7 +90,7 @@ function CardBody({ job, children }) {
         <h3 className="text-sm font-semibold wrap-anywhere">{heading}</h3>
         {subheading && <p className="text-sm wrap-anywhere">{subheading}</p>}
         <p className="mt-0.5 text-xs text-muted wrap-anywhere">
-          {site && <>{site} · </>}
+          {where && <>{where} · </>}
           <time dateTime={job.added_at}>{timeAgo(job.added_at)}</time>
         </p>
       </div>

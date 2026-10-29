@@ -23,10 +23,24 @@ const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 // outcome. Treat those as pending, the same as the database did when the
 // outcome column was added (server migration 003).
 // The same for favourites (migration 004): not starred unless it says so.
+// And for where a job was found (migration 006): empty unless it says so.
 function withOutcome(row) {
   const favorite = row.favorite === true
-  if (row.status === 'done') return { ...row, outcome: row.outcome ?? 'pending', favorite }
-  return { ...row, outcome: null, favorite }
+  const source = row.source ?? null
+  if (row.status === 'done') return { ...row, outcome: row.outcome ?? 'pending', favorite, source }
+  return { ...row, outcome: null, favorite, source }
+}
+
+// The link is optional (server migration 006), but a link that's there must be
+// a real web link; where it was found is optional too. Same rules and
+// messages as validate() in server/server.js. Empty becomes null.
+function checkLinkAndSource(input) {
+  const posting_url = typeof input.posting_url === 'string' ? input.posting_url.trim() : ''
+  const source = typeof input.source === 'string' ? input.source.trim() : ''
+  if (posting_url.length > 2000) throw new Error('posting_url must be 2000 characters or fewer')
+  if (posting_url && !/^https?:\/\//i.test(posting_url)) throw new Error('posting_url must start with http:// or https://')
+  if (source.length > 120) throw new Error('source must be 120 characters or fewer')
+  return { posting_url: posting_url || null, source: source || null }
 }
 
 // The real API answers a favourite that isn't true or false with a 400.
@@ -97,6 +111,7 @@ export async function createJob(input) {
   const created = {
     job_title: '',
     ...input,
+    ...checkLinkAndSource(input),
     status,
     outcome,
     favorite: input.favorite ?? false,
@@ -117,7 +132,14 @@ export async function updateJob(id, input) {
   const outcome = checkOutcome(status, input.outcome)
   if (input.favorite !== undefined) checkFavorite(input.favorite)
   // Favourite left out: keep the star as it is, like the real API.
-  rows[index] = { ...rows[index], ...input, status, outcome, favorite: input.favorite ?? rows[index].favorite }
+  rows[index] = {
+    ...rows[index],
+    ...input,
+    ...checkLinkAndSource(input),
+    status,
+    outcome,
+    favorite: input.favorite ?? rows[index].favorite,
+  }
   write(rows)
   return rows[index]
 }

@@ -32,6 +32,15 @@ INSERT INTO saved_jobs (company_name, job_title, posting_url, status, outcome, f
    'https://cassava.example.net/jobs/1042',
    'done', 'rejected', false, now() - interval '14 days');
 
--- Two of these are deliberately awkward: one job title long enough to find every
--- text-wrapping bug, and one row with no title at all, because the form allows
--- saving a link before you know what the role is called.
+-- A job with no link (migration 006): found by cold-emailing a company.
+INSERT INTO saved_jobs (company_name, job_title, posting_url, source, status, outcome, favorite, added_at) VALUES
+  ('Lumina Tech',
+   'UX Design Intern',
+   NULL,
+   'Cold email to the hiring manager',
+   'to_apply', NULL, false, now() - interval '1 day');
+
+-- Some of these are deliberately awkward: one job title long enough to find
+-- every text-wrapping bug, one row with no title at all, because the form
+-- allows saving a link before you know what the role is called, and one with
+-- no link.
