@@ -14,7 +14,7 @@ import { usePageTitle } from '../lib/usePageTitle.js'
 // GitHub page instead.
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL
 const GITHUB = 'https://github.com/EnzoProg-ctrl/JobStash'
-const UPDATED = '10 October 2026'
+const UPDATED = '30 October 2026'
 
 function ContactLink() {
   return CONTACT_EMAIL ? (
@@ -65,6 +65,11 @@ export default function PrivacyPage() {
               it's To Apply or Done, and when you saved it.
             </li>
           </ul>
+          <p className="mt-3">
+            When you paste a link into Add Job, JobStash's server opens that public job page
+            once to read the company and position. It doesn't keep the page, and it sends
+            nothing about you to that site.
+          </p>
         </Section>
 
         <Section title="What JobStash doesn't do">

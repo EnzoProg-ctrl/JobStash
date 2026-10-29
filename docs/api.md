@@ -19,7 +19,7 @@ person only ever sees and changes their own jobs.
 | `404` | The job doesn't exist, **or belongs to someone else** (the same answer, so nothing leaks) |
 | `503` | The API couldn't reach Supabase to check the pass |
 | `409` | Saving a new job when the account already has 1,000, the most one account can keep |
-| `429` | Too many requests: more than 100 a minute from one device, or more than 50 new jobs an hour from one account. The `RateLimit` header says how many seconds to wait |
+| `429` | Too many requests: more than 100 a minute from one device, more than 50 new jobs an hour from one account, or more than 60 link previews every 10 minutes from one account. The `RateLimit` header says how many seconds to wait |
 
 | Method | Path | What it does |
 |---|---|---|
@@ -28,6 +28,7 @@ person only ever sees and changes their own jobs.
 | `GET` | `/api/jobs` | Your jobs, newest first |
 | `GET` | `/api/jobs?status=to_apply` | Only jobs still to apply for (`?status=done` for finished ones) |
 | `GET` | `/api/jobs/:id` | One of your jobs, or `404` |
+| `GET` | `/api/preview?url=…` | The company and position for a job link, read from its page: `{"company_name":"…","job_title":"…","found":"page"}`. `found` is `"link"` when they came from the link's own words, or `null` when nothing was found (both empty). `400` if `url` isn't an `http(s)` link. The server only opens public addresses on ports 80/443, follows at most 3 redirects, stops after 6 seconds and reads at most 1.5 MB (`server/linkPreview.js`) |
 | `POST` | `/api/jobs` | Save a job. Returns `201` and the new job |
 | `PUT` | `/api/jobs/:id` | Replace a job's details |
 | `PATCH` | `/api/jobs/:id` | Change only the status and outcome. Body: `{"status":"done"}` (gives `pending`), `{"status":"done","outcome":"accepted"}`, or `{"status":"to_apply"}`. Or, on its own, the star: `{"favorite":true}` / `{"favorite":false}` |

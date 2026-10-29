@@ -153,3 +153,18 @@ export async function deleteJob(id) {
   await delay()
   write(read().filter((row) => String(row.id) !== String(id)))
 }
+
+// Demo mode has no server to open the job's page, so it only reads the words
+// some sites put in the link itself, as the real API does when a page is
+// blocked: linkedin.com/jobs/view/frontend-intern-at-brightside-co-4011223344
+export async function previewJob(url) {
+  await delay(400)
+  const capitals = ['ai', 'ml', 'ui', 'ux', 'qa', 'it', 'hr', 'pr', 'seo', 'sql', 'php', 'aws', 'crm', 'erp', 'bpo', 'ceo', 'cto', 'cfo', 'vp', 'ph', 'usa', 'uk']
+  const words = (slug) =>
+    slug.split('-').filter(Boolean)
+      .map((word) => (capitals.includes(word.toLowerCase()) ? word.toUpperCase() : word[0].toUpperCase() + word.slice(1)))
+      .join(' ')
+  const match = /linkedin\.com\/jobs\/view\/([a-z0-9-]+?)-at-([a-z0-9-]+?)-\d+/i.exec(url)
+  if (!match) return { company_name: '', job_title: '', found: null }
+  return { company_name: words(match[2]), job_title: words(match[1]), found: 'link' }
+}

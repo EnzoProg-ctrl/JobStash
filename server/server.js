@@ -3,7 +3,8 @@ import cors from 'cors'
 import helmet from 'helmet'
 import { pool } from './db/pool.js'
 import { requireUser } from './auth.js'
-import { newJobsPerAccount, perDevice } from './limits.js'
+import { newJobsPerAccount, perDevice, previewsPerAccount } from './limits.js'
+import { previewJob } from './linkPreview.js'
 import { logRequests } from './logging.js'
 import * as jobs from './jobsRepo.js'
 
@@ -70,6 +71,22 @@ app.get('/readyz', async (request, response) => {
 // valid sign-in pass (see auth.js). /healthz and /readyz above stay open, so a
 // host can check the server is up without signing in.
 app.use('/api', requireUser)
+
+// Paste a link, get the company and position: this server opens the job's page
+// and reads them (linkPreview.js, where the safety rules are). Always 200 with
+// { company_name, job_title, found }; found is null when nothing was found, and
+// the person types the company instead. GET, because it changes nothing.
+app.get('/api/preview', previewsPerAccount, async (request, response, next) => {
+  const url = typeof request.query.url === 'string' ? request.query.url.trim() : ''
+  if (!/^https?:\/\//i.test(url) || url.length > 2000) {
+    return response.status(400).json({ error: 'url must be a link starting with http:// or https://' })
+  }
+  try {
+    response.json(await previewJob(url))
+  } catch (error) {
+    next(error)
+  }
+})
 
 const STATUSES = ['to_apply', 'done']
 const OUTCOMES = ['pending', 'accepted', 'rejected']

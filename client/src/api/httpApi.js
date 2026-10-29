@@ -118,3 +118,9 @@ export const setFavorite = (id, favorite) =>
 
 export const deleteJob = (id) =>
   request(`/api/jobs/${id}`, { method: 'DELETE' })
+
+// The company and position for a job link, read from its page by the API
+// (server/linkPreview.js): { company_name, job_title, found }. found is null
+// when nothing could be read; then the person types them.
+export const previewJob = (url) =>
+  request(`/api/preview?url=${encodeURIComponent(url)}`)

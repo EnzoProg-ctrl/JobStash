@@ -34,3 +34,15 @@ export const newJobsPerAccount = rateLimit({
   keyGenerator: (request) => request.userId,
   message: { error: "You've saved a lot of jobs in the last hour. Please wait a while and try again." },
 })
+
+// Reading a job link's page (GET /api/preview), per account: 60 every 10
+// minutes. Each one makes this server open someone else's website, so it has
+// its own, tighter limit; pasting links by hand needs a few.
+export const previewsPerAccount = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 60,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: (request) => request.userId,
+  message: { error: "You've looked up a lot of links in the last few minutes. Please wait a moment and type the details instead." },
+})

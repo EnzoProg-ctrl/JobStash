@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router'
-import { createJob } from '../api'
+import { createJob, previewJob } from '../api'
 
 // The Add Job pop-up. It is shown while the address is /stash/add, on top of
 // My Stash, and closing it just goes back to /stash.
+//
+// Pasting the link is enough: JobStash reads the job's page and fills in the
+// company and position (server/linkPreview.js). They stay editable, and when
+// nothing can be read, the person types the company as before.
 
 // The same rules the server checks in server/server.js, so mistakes get a
 // friendly message here before anything is sent.
@@ -67,6 +71,49 @@ export default function AddJobDialog() {
   const [closing, setClosing] = useState(false)
   const closed = useRef(false)
 
+  // Reading the link: 'idle' (no link yet), 'looking', 'filled' or 'none'.
+  const [lookup, setLookup] = useState('idle')
+  // What was filled in automatically, so a new link can replace it but never
+  // something the person typed.
+  const autoFilled = useRef({ company: '', title: '' })
+  // Only the newest link's answer counts, if links change quickly.
+  const lookupId = useRef(0)
+  // The fields as they are now, for the answer that arrives later.
+  const current = useRef({ company: '', title: '' })
+  current.current = { company: companyName, title: jobTitle }
+
+  useEffect(() => {
+    const id = ++lookupId.current
+    const url = postingUrl.trim()
+    if (!isWebLink(url)) {
+      setLookup('idle')
+      return
+    }
+    setLookup('looking')
+    // Wait until typing stops for half a second; a paste is one change.
+    const timer = setTimeout(async () => {
+      let found = {}
+      try {
+        found = await previewJob(url)
+      } catch {
+        // Offline, rate limited or the API asleep: the person types it instead.
+      }
+      if (id !== lookupId.current) return
+      // Fill a field only if it's empty or still holds what was filled in
+      // before; anything the person typed stays.
+      const fill = (setValue, key, value = '') => {
+        const now = current.current[key]
+        if (now.trim() !== '' && now !== autoFilled.current[key]) return
+        autoFilled.current[key] = value
+        setValue(value)
+      }
+      fill(setCompanyName, 'company', found.company_name)
+      fill(setJobTitle, 'title', found.job_title)
+      setLookup(found.company_name || found.job_title ? 'filled' : 'none')
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [postingUrl])
+
   // Start closing: play the animation first, then really close. People who
   // ask their device for less motion get no animation, so no wait either.
   function close() {
@@ -101,6 +148,9 @@ export default function AddJobDialog() {
   async function handleSubmit(event) {
     event.preventDefault()
     const found = validate({ postingUrl, companyName, jobTitle })
+    if (found.companyName && !companyName.trim() && lookup === 'looking') {
+      found.companyName = 'Still reading the link. Wait a moment, or type the company name.'
+    }
     setErrors(found)
     if (Object.keys(found).length > 0) return
 
@@ -139,7 +189,7 @@ export default function AddJobDialog() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="add-job-title" className="text-3xl font-bold">Add Job</h2>
-            <p className="mt-1 text-muted">Paste a job link to save it for later.</p>
+            <p className="mt-1 text-muted">Paste a job link. JobStash fills in the company and position.</p>
           </div>
           <button
             type="button"
@@ -178,6 +228,27 @@ export default function AddJobDialog() {
             {errors.postingUrl && (
               <p id="posting-url-error" className="mt-2 text-sm text-error">{errors.postingUrl}</p>
             )}
+            {/* What reading the link is doing. Screen readers hear it too. */}
+            <p role="status" className="mt-2 flex min-h-5 items-center gap-2 text-sm text-muted">
+              {lookup === 'looking' && (
+                <>
+                  <svg className="size-4 animate-spin text-brand-blue" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2" />
+                    <path d="M14 8a6 6 0 00-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  Reading the job page…
+                </>
+              )}
+              {lookup === 'filled' && (
+                <>
+                  <svg className="size-4 text-done" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Filled in from the link. Check them before saving.
+                </>
+              )}
+              {lookup === 'none' && "Couldn't read the details from this link. Please type the company name."}
+            </p>
           </div>
 
           <div>
@@ -187,7 +258,7 @@ export default function AddJobDialog() {
             <input
               id="company-name"
               type="text"
-              placeholder="e.g. NovaTech"
+              placeholder="Filled in from the link, or type it"
               aria-required="true"
               value={companyName}
               onChange={(event) => setCompanyName(event.target.value)}
@@ -205,7 +276,7 @@ export default function AddJobDialog() {
             <input
               id="job-title"
               type="text"
-              placeholder="e.g. Data Analyst Intern"
+              placeholder="Filled in from the link (optional)"
               value={jobTitle}
               onChange={(event) => setJobTitle(event.target.value)}
               aria-invalid={errors.jobTitle ? 'true' : undefined}

@@ -221,9 +221,16 @@ is gone, and the jobs now come from your database.
    are sent there too, with a note asking you to sign in again.
 3. **Add a job:** click **+ Add Job** in the header. A pop-up opens on top of
    My Stash (address `/stash/add`), with the cursor ready in the link box.
+   **Pasting the link is enough:** JobStash reads the job's page and fills in
+   the company and position within a second or two (*Reading the job page…*,
+   then *Filled in from the link*). It uses the page's job-posting data, its
+   title (LinkedIn, Indeed, Greenhouse and Lever styles) or the words in the
+   link itself. Both stay editable, and anything you typed is never replaced.
+   Some sites (Indeed, for example) block automated readers; then it says it
+   couldn't read the link and you type the company.
    - **Job posting URL** (required): must be a real `http://` or `https://` link
-   - **Company name** (required): 120 characters at most
-   - **Job title** (optional): 160 characters at most
+   - **Company name** (required): filled in when found, 120 characters at most
+   - **Job title** (optional): filled in when found, 160 characters at most
 
    Mistakes show in red under the field before anything is sent. **Save Job**
    shows *Saving…*; if saving fails, the message appears in the pop-up and
@@ -346,6 +353,7 @@ JobStash/
 │   ├── server.js               the routes and their checks
 │   ├── auth.js                 checks the Google sign-in on every /api request
 │   ├── jobsRepo.js             the database queries, always for one person
+│   ├── linkPreview.js          reads a job link's page for its company and position
 │   ├── limits.js, logging.js   rate limits, and one safe log line per request
 │   └── db/migrations/          numbered database changes
 ├── docs/                       project documents, API reference, deploying, logo, screenshots

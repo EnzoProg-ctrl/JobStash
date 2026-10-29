@@ -38,4 +38,5 @@ export const {
   setJobStatus,
   setFavorite,
   deleteJob,
+  previewJob,
 } = implementation
