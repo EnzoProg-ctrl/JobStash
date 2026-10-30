@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --env-file=.env --watch server.js",
+    "start": "node start.js",
+    "dev": "node --env-file=.env --watch start.js",
     "db:migrate": "node --env-file=.env db/migrate.js",
     "db:seed": "node --env-file=.env db/run.js db/seed.sql",
     "db:reset": "npm run db:migrate && npm run db:seed"

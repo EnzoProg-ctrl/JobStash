@@ -101,7 +101,7 @@ Copy-Item server/.env.example server/.env
 | `SUPABASE_URL` | `https://your-project-ref.supabase.co` | Your Supabase project's address, used to check sign-in passes. Not a secret. **Dashboard > Project Settings > API** |
 | `CORS_ORIGINS` | `http://localhost:5173` | Which websites may call the API. Comma-separated, no trailing slash |
 | `NODE_ENV` | `development` | Set to `production` on a host |
-| `TRUST_PROXY` | _(leave out locally)_ | Set to `3` on Render, so the rate limits see each visitor's real address (another host may need a different number) |
+| `TRUST_PROXY` | _(leave out locally)_ | Set to `1` on Vercel (`3` on Render), so the rate limits see each visitor's real address |
 | `PORT` | _(don't set it)_ | A host sets it for you. Locally the API uses 3000 |
 
 **`client/.env`**
@@ -359,7 +359,9 @@ JobStash/
 │       ├── lib/                sign-in, loading jobs, animations, small helpers
 │       └── api/                the only code that fetches data (demo mode or the real API)
 ├── server/                     the API (Node.js, Express)
-│   ├── server.js               the routes and their checks
+│   ├── server.js               the routes and their checks (Vercel runs this)
+│   ├── start.js                starts the API on your computer (npm run dev)
+│   ├── vercel.json             runs the API in Singapore, next to the database
 │   ├── auth.js                 checks the Google sign-in on every /api request
 │   ├── jobsRepo.js             the database queries, always for one person
 │   ├── linkPreview.js          reads a job link's page for its company and position

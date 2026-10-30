@@ -26,9 +26,9 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
 // TRUST_PROXY is how many of those to skip to reach the visitor's real
 // address. Too low, and the rate limits count one of the host's servers
 // instead of the visitor; too high, and a visitor can write a fake address
-// into the header and dodge the limits. On Render it is 3 (tested: counts
-// stay steady across connections, and fake addresses don't reset them). It
-// stays off locally, where there is no host in between.
+// into the header and dodge the limits. On Vercel it is 1: Vercel replaces
+// the header with the visitor's address, so fake ones never get through. (On
+// Render it was 3.) It stays off locally, where there is no host in between.
 app.set('trust proxy', Number(process.env.TRUST_PROXY) || false)
 
 // First, so every request is logged, even ones turned away further down.
@@ -285,32 +285,7 @@ app.use((error, request, response, next) => {
   response.status(500).json({ error: 'Something went wrong on our side. Please try again.' })
 })
 
-// The host chooses the port and tells you through PORT. Hardcoding 3000 is the
-// commonest reason a first deploy is marked unhealthy and killed.
-const port = process.env.PORT || 3000
-
-const server = app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`)
-  console.log(`CORS allows: ${allowedOrigins.join(', ')}`)
-})
-
-// Safe restarts. A host stops the API with SIGTERM on every deploy and
-// restart, and Ctrl+C sends SIGINT. Instead of dropping whatever is in
-// progress, stop taking new requests, let the open ones finish, close the
-// database connections, then exit. If something hangs, give up after 10
-// seconds, because the host will force it soon after anyway.
-function shutDown(signal) {
-  console.log(`${signal} received: finishing open requests, then stopping`)
-  server.close(async () => {
-    await pool.end()
-    console.log('Stopped cleanly')
-    process.exit(0)
-  })
-  setTimeout(() => {
-    console.error('Still busy after 10 seconds, stopping anyway')
-    process.exit(1)
-  }, 10_000).unref()
-}
-
-process.once('SIGTERM', () => shutDown('SIGTERM'))
-process.once('SIGINT', () => shutDown('SIGINT'))
+// This file only builds the app. Vercel finds it by its name (server.js) and
+// runs the app for each request itself. On your computer, start.js starts it.
+export { allowedOrigins }
+export default app
