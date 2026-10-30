@@ -226,8 +226,9 @@ export default function AddJobDialog({ manual = false }) {
       // around it. 768px up: in the middle of the screen. Phones: resting near
       // the bottom edge (clear of the iPhone's home line), so Save stays in
       // the same place in both versions of the pop-up; the taller one just
-      // reaches higher up.
-      className="m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 max-md:mb-[max(1rem,env(safe-area-inset-bottom))]"
+      // reaches higher up. overscroll-contain: scrolling to the end of the
+      // pop-up's own fields doesn't carry on into the page behind it.
+      className="overscroll-contain m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 max-md:mb-[max(1rem,env(safe-area-inset-bottom))]"
     >
       {/* Top: what this pop-up is for, and ✕. */}
       <div className="px-6 pt-6 md:px-8 md:pt-7">
