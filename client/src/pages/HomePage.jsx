@@ -34,7 +34,7 @@ const STEPS = [
   {
     icon: CheckIcon,
     title: "Apply when you're ready",
-    text: 'Open My Stash later, apply, and mark it done. Then keep track of each answer: Pending, Accepted or Rejected.',
+    text: 'Open My Stash later, apply, and mark it as applied. Then keep track of each answer: Pending, Accepted or Rejected.',
   },
 ]
 

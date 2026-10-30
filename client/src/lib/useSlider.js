@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 
 // A marker (an underline, or a box behind a button) that sits on the chosen
 // item in a row and slides to the next one when the choice changes. Used by
-// Overview | My Stash (AppHeader.jsx) and To Apply | Done | All
+// Overview | My Stash (AppHeader.jsx) and To Apply | Applied | All
 // (FilterTabs.jsx).
 //
 // Put `row` on the row and `marker` on the marker. The chosen item is the one

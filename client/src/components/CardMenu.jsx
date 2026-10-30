@@ -3,7 +3,7 @@ import { useMenu } from '../lib/useMenu.js'
 // The ⋮ button on a job card and the small menu it opens.
 //
 // What it offers depends on where the job is:
-//   To Apply:  Mark as Done · Mark as Accepted · Mark as Rejected
+//   To Apply:  Mark as Applied · Mark as Accepted · Mark as Rejected
 //   Pending:   Mark as Accepted · Mark as Rejected · Move back to To Apply
 //   Accepted:  Mark as Rejected · Move back to To Apply
 //   Rejected:  Mark as Accepted · Move back to To Apply
@@ -18,7 +18,7 @@ export default function CardMenu({ label, status, outcome, onSetStatus }) {
 
   const toApply = status !== 'done'
   const actions = [
-    toApply && { key: 'done', label: 'Mark as Done', icon: CheckIcon, className: 'text-done', status: 'done', outcome: 'pending' },
+    toApply && { key: 'done', label: 'Mark as Applied', icon: CheckIcon, className: 'text-done', status: 'done', outcome: 'pending' },
     outcome !== 'accepted' && { key: 'accepted', label: 'Mark as Accepted', icon: CheckCircleIcon, className: 'text-done', status: 'done', outcome: 'accepted' },
     outcome !== 'rejected' && { key: 'rejected', label: 'Mark as Rejected', icon: XCircleIcon, className: 'text-error', status: 'done', outcome: 'rejected' },
     !toApply && { key: 'to_apply', label: 'Move back to To Apply', icon: BackIcon, className: 'text-todo', status: 'to_apply', outcome: null },

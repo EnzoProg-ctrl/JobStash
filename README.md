@@ -17,7 +17,7 @@ wrote myself.
 > but your data is kept in your own browser until you connect it to the API.
 > See [Demo mode](#demo-mode).
 
-![My Stash: saved jobs with To Apply, Done and All tabs](docs/assets/my-stash.png)
+![My Stash: saved jobs with To Apply, Applied and All tabs](docs/assets/my-stash.png)
 
 
 ## Contents
@@ -36,7 +36,7 @@ wrote myself.
 JobStash is for students who find job openings on their phone between classes
 but apply later on a laptop, where their CV is. Paste a job link, add the
 company, and it waits in one list until you're ready. Each job is marked
-**To Apply** or **Done**, so you can see at a glance what's left.
+**To Apply** or **Applied**, so you can see at a glance what's left.
 
 **Built with:** React, Vite, Tailwind CSS and React Router for the website;
 Node.js and Express for the API; PostgreSQL (hosted on Supabase) for the
@@ -254,11 +254,11 @@ is gone, and the jobs now come from your database.
    - the website it's from (LinkedIn, Indeed, JobStreet, Glassdoor, Kalibrr and
      OnlineJobs.ph by name, other sites by address) and the date it was added
      ("Added Oct 25, 2026"; hovering it shows how long ago)
-   - a status chip: **To Apply** (blue), or for done jobs **Pending** (applied,
+   - a status chip: **To Apply** (blue), or for applied jobs **Pending** (applied,
      waiting; blue-grey), **Accepted** (green) or **Rejected** (red)
    - **Open Posting**, which opens the job in a new tab
-5. **Tabs** (To Apply, Done, All) filter the list and show how many jobs each
-   has. The page opens on To Apply. On **Done**, a second row filters by
+5. **Tabs** (To Apply, Applied, All) filter the list and show how many jobs each
+   has. The page opens on To Apply. On **Applied**, a second row filters by
    result: **All** (including Pending), **Accepted** or **Rejected**.
 6. **Search** filters by job title or company as you type; capitals don't
    matter. The tab counts change to show how many matches each tab has.
@@ -288,13 +288,13 @@ is gone, and the jobs now come from your database.
 
    | Card | Menu |
    |---|---|
-   | To Apply | Mark as Done (→ Pending) · Mark as Accepted · Mark as Rejected · Delete Job |
+   | To Apply | Mark as Applied (→ Pending) · Mark as Accepted · Mark as Rejected · Delete Job |
    | Pending | Mark as Accepted · Mark as Rejected · Move back to To Apply · Delete Job |
    | Accepted | Mark as Rejected · Move back to To Apply · Delete Job |
    | Rejected | Mark as Accepted · Move back to To Apply · Delete Job |
 
    Accepted and Rejected can be picked straight from To Apply; the job moves
-   to Done with that result. The card updates straight away. If saving fails,
+   to Applied with that result. The card updates straight away. If saving fails,
    it changes back and a message explains why.
    **Delete Job** (in red) removes the card straight away and shows
    *"Deleted "…" · Undo"* for 5 seconds. Only then is the job really deleted,
@@ -307,7 +307,7 @@ is gone, and the jobs now come from your database.
    limit. If loading takes more than 5 seconds, My Stash says it's taking
    longer than usual, and if loading fails there's a **Try again** button.
 11. **Overview** (`/overview`) sums up the job hunt: how many jobs are saved,
-   to apply and done, a progress bar ("2 of 6 applied"), how many were added
+   to apply and applied, a progress bar ("2 of 6 applied"), how many were added
    this week, how many are Pending, Accepted and Rejected, and which job sites
    they come from. On phones it's the left
    button in the bottom bar (Overview · + Add Job · My Stash); on laptops a
@@ -325,7 +325,7 @@ is gone, and the jobs now come from your database.
 The website talks only to JobStash's own Express API, which talks to the
 database. Every `/api` request needs a Google sign-in, and each person only
 ever sees and changes their own jobs. Main routes: `GET /api/jobs` (your
-list), `POST /api/jobs` (save), `PATCH /api/jobs/:id` (mark done, accepted,
+list), `POST /api/jobs` (save), `PATCH /api/jobs/:id` (mark applied, accepted,
 rejected, or star it), `DELETE /api/jobs/:id`.
 
 **Full reference** (every route, request body, answer code and rule):
@@ -377,7 +377,7 @@ JobStash/
 
 | | |
 |---|---|
-| ![Landing page](docs/assets/landing.png) | ![My Stash with the To Apply, Done and All tabs](docs/assets/my-stash.png) |
+| ![Landing page](docs/assets/landing.png) | ![My Stash with the To Apply, Applied and All tabs](docs/assets/my-stash.png) |
 | **Landing page**: what JobStash is, and Sign in with Google | **My Stash**: saved jobs, tabs, search and sort |
 | ![The Add Job pop-up](docs/assets/add-job.png) | ![Overview with progress numbers and job sites](docs/assets/overview.png) |
 | **Add Job**: paste a link, add the company | **Overview**: progress, results and where jobs come from |

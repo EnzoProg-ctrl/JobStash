@@ -1,6 +1,7 @@
 import useSlider from '../lib/useSlider.js'
 
-// All | Pending | Accepted | Rejected, under the tabs when Done is chosen. Each
+// All | Pending | Accepted | Rejected, under the tabs when Applied is chosen
+// (the tab's value is still 'done', as stored in the database). Each
 // result has its colour dot (the same colours as the status chips): Pending
 // blue-grey, Accepted green, Rejected red.
 //
@@ -24,7 +25,7 @@ export default function DoneFilter({ value, counts, onChange, open = true }) {
       data-open={open}
       className="done-filter relative flex flex-wrap gap-1.5 max-[359px]:gap-1 md:gap-2"
       role="group"
-      aria-label="Show done jobs"
+      aria-label="Show applied jobs"
     >
       {/* The sliding capsule, behind the options. */}
       <span

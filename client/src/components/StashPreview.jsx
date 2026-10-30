@@ -80,7 +80,7 @@ export default function StashPreview() {
         <p className="mt-2 px-2 text-muted md:px-0 md:text-lg">
           <span className="font-semibold text-brand-blue">1 to apply</span>
           {' · '}
-          <span className="font-semibold text-ink">2 done</span>
+          <span className="font-semibold text-ink">2 applied</span>
           {' · '}
           3 saved in total
         </p>

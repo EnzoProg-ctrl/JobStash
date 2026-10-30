@@ -17,9 +17,9 @@ import { Outlet } from 'react-router'
 // at all, which gets its own message below.
 const EMPTY_TAB = {
   to_apply: 'Nothing left to apply for. Nice work!',
-  done: 'Nothing marked as done yet.',
+  done: 'Nothing marked as applied yet.',
 }
-// The same, for the Accepted and Rejected filters on the Done tab.
+// The same, for the Accepted and Rejected filters on the Applied tab.
 const EMPTY_OUTCOME = {
   pending: 'Nothing waiting for an answer.',
   accepted: 'No accepted jobs yet.',
@@ -68,7 +68,7 @@ export default function StashPage() {
   // the cards can slide; the search box itself always updates straight away.
   const [shownQuery, setShownQuery] = useState('')
   const [sort, setSort] = useState('newest')        // newest | oldest | company
-  // The All | Pending | Accepted | Rejected filter, used on the Done tab.
+  // The All | Pending | Accepted | Rejected filter, used on the Applied tab.
   const [doneFilter, setDoneFilter] = useState('all') // all | pending | accepted | rejected
   // Only starred jobs (the ★ Favourites button), and List or Board.
   const [favoritesOnly, setFavoritesOnly] = useState(false)
@@ -88,7 +88,7 @@ export default function StashPage() {
   // was not saved.
   //
   // nextStatus is 'done' or 'to_apply'; nextOutcome is how a done job turned
-  // out: 'pending' (Mark as Done), 'accepted' or 'rejected'. Moving back to
+  // out: 'pending' (Mark as Applied), 'accepted' or 'rejected'. Moving back to
   // To Apply clears it.
   //
   // { instant: true } skips the slide, for a card dropped on the board, which
@@ -293,7 +293,7 @@ export default function StashPage() {
               <>
                 <span className="font-semibold text-brand-blue">{toApplyTotal} to apply</span>
                 {' · '}
-                <span className="font-semibold text-ink">{jobs.length - toApplyTotal} done</span>
+                <span className="font-semibold text-ink">{jobs.length - toApplyTotal} applied</span>
                 {' · '}
                 {jobs.length} saved in total
               </>
@@ -347,14 +347,14 @@ export default function StashPage() {
       {status === 'ready' && jobs.length > 0 && (
         <>
           {/* On the board the columns do the tabs' job, so the tabs and the
-              Done filter only show in the list. */}
+              Applied filter only show in the list. */}
           {view === 'list' && (
             <div className="mt-8">
               <FilterTabs value={tab} counts={counts} onChange={showTab} />
             </div>
           )}
 
-          {/* The Done filter folds open under the tabs when Done is picked,
+          {/* The Applied filter folds open under the tabs when Applied is picked,
               and shut again on the other tabs (the fold style in styles.css).
               While shut it can't be reached with the keyboard (inert). */}
           {view === 'list' && (

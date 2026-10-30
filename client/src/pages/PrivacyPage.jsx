@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>The jobs you save:</strong> the link (if there is one), the company, the
-              job title, where you found it (if you say), whether it's To Apply or Done, and
+              job title, where you found it (if you say), whether it's To Apply or Applied, and
               when you saved it.
             </li>
           </ul>
