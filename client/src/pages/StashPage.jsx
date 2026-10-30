@@ -354,9 +354,17 @@ export default function StashPage() {
             </div>
           )}
 
-          {view === 'list' && tab === 'done' && (
-            <div className="mt-3">
-              <DoneFilter value={doneFilter} counts={doneCounts} onChange={setDoneFilter} />
+          {/* The Done filter folds open under the tabs when Done is picked,
+              and shut again on the other tabs (the fold style in styles.css).
+              While shut it can't be reached with the keyboard (inert). */}
+          {view === 'list' && (
+            <div
+              className={`fold ${tab === 'done' ? 'fold-open mt-3' : 'fold-shut mt-0'}`}
+              {...(tab !== 'done' && { inert: '' })}
+            >
+              <div>
+                <DoneFilter value={doneFilter} counts={doneCounts} onChange={setDoneFilter} open={tab === 'done'} />
+              </div>
             </div>
           )}
 
@@ -376,50 +384,58 @@ export default function StashPage() {
           </div>
 
           {/* Select mode's bar: tick all, how many are ticked, Delete, and the
-              way out. It stays at the top of the screen while scrolling. */}
-          {selecting && (
-            <div
-              role="region"
-              aria-label="Selected jobs"
-              className="sticky top-2 z-10 mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-brand-blue/30 bg-todo-bg px-3 py-2 shadow-sm sm:gap-x-4 sm:px-4"
-            >
-              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-ink">
-                <input
-                  type="checkbox"
-                  className="size-5 accent-brand-blue"
-                  checked={allSelected}
-                  ref={(box) => { if (box) box.indeterminate = selectedVisible.length > 0 && !allSelected }}
-                  onChange={(event) => selectAll(event.target.checked)}
-                />
-                Select all
-              </label>
-              {/* Phones: only screen readers hear this; the Delete button shows the
-                  same number. */}
-              <p className="text-sm text-muted max-sm:sr-only" aria-live="polite">
-                {selectedVisible.length} selected
-              </p>
-              <div className="ml-auto flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={deleteSelected}
-                  disabled={!selectedVisible.length}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-error px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-40"
-                >
-                  <svg className="size-4 max-sm:hidden" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.75 6.5v4.5M9.25 6.5v4.5" />
-                  </svg>
-                  Delete{selectedVisible.length ? ` (${selectedVisible.length})` : ''}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => changeSelecting(false)}
-                  className="inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-4 text-sm font-semibold text-ink hover:bg-subtle"
-                >
-                  Cancel
-                </button>
+              way out. It folds open under the toolbar when Select is pressed
+              and shut again when it ends (the fold style in styles.css), and
+              stays at the top of the screen while scrolling. While shut it
+              can't be reached with the keyboard (inert). */}
+          <div
+            className={`fold sticky top-2 z-10 ${selecting ? 'fold-open mt-4' : 'fold-shut mt-0'}`}
+            {...(!selecting && { inert: '' })}
+          >
+            <div>
+              <div
+                role="region"
+                aria-label="Selected jobs"
+                className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-brand-blue/30 bg-todo-bg px-3 py-2 shadow-sm sm:gap-x-4 sm:px-4"
+              >
+                <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-ink">
+                  <input
+                    type="checkbox"
+                    className="size-5 accent-brand-blue"
+                    checked={allSelected}
+                    ref={(box) => { if (box) box.indeterminate = selectedVisible.length > 0 && !allSelected }}
+                    onChange={(event) => selectAll(event.target.checked)}
+                  />
+                  Select all
+                </label>
+                {/* Phones: only screen readers hear this; the Delete button shows the
+                    same number. */}
+                <p className="text-sm text-muted max-sm:sr-only" aria-live="polite">
+                  {selectedVisible.length} selected
+                </p>
+                <div className="ml-auto flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={deleteSelected}
+                    disabled={!selectedVisible.length}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-error px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-40"
+                  >
+                    <svg className="size-4 max-sm:hidden" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.75 6.5v4.5M9.25 6.5v4.5" />
+                    </svg>
+                    Delete{selectedVisible.length ? ` (${selectedVisible.length})` : ''}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => changeSelecting(false)}
+                    className="inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-4 text-sm font-semibold text-ink hover:bg-subtle"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
-          )}
+          </div>
 
           {actionError && (
             <p className="mt-4 rounded-card border border-line bg-surface p-4 text-error" role="alert">

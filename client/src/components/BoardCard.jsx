@@ -48,10 +48,10 @@ export default function BoardCard({ job, column, onSetStatus, onToggleFavorite, 
     >
       <CardBody job={job}>
         {selecting && (
-          <span className="flex size-9 shrink-0 items-center justify-center">
+          <span className="pop-in flex size-9 shrink-0 items-center justify-center">
             <input
               type="checkbox"
-              className="size-5 accent-brand-blue"
+              className="select-box size-5 accent-brand-blue"
               checked={selected}
               onChange={onSelect}
               aria-label={`Select ${heading}`}

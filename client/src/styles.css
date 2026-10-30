@@ -151,6 +151,53 @@ dialog[data-closing]::backdrop {
   to { opacity: 0; }
 }
 
+/* Select mode (StashPage, JobCard, BoardCard). A board card's tick box grows
+   in where its letter square was; ticking any box gives it a small bounce. */
+@utility pop-in {
+  animation: pop-in 180ms ease-out;
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.6); }
+}
+.select-box:checked {
+  animation: tick-bounce 200ms ease-out;
+}
+@keyframes tick-bounce {
+  50% { transform: scale(1.18); }
+}
+
+/* Parts that fold open and shut (the Select bar, the Done filter): a grid
+   row going from 0 to its full height. The clip margin keeps focus outlines,
+   rings and shadows from being cut off at the edges once it's open. */
+@utility fold {
+  display: grid;
+  transition: grid-template-rows 300ms ease-out, opacity 250ms ease-out, margin-top 300ms ease-out, translate 300ms ease-out;
+  & > * {
+    min-height: 0;
+    overflow: clip;
+    overflow-clip-margin: 8px;
+  }
+}
+@utility fold-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+@utility fold-shut {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  translate: 0 -6px;
+}
+
+/* The Done filter's options arrive one after another when it opens (each
+   button sets its own --i: 0, 1, 2, 3). */
+.done-filter[data-open="true"] > button {
+  animation: option-in 280ms ease-out backwards;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+@keyframes option-in {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+
 /* The landing page's sections arriving as you scroll (Reveal.jsx): hidden ones
    sit 24px lower and see-through, shown ones glide up into place over 0.6s.
    The delay only applies on the way in, so a row of items arrives one after

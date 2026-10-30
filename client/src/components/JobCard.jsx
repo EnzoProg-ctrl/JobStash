@@ -48,15 +48,23 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
     >
       {/* Tick box (Select mode) and the company's letter square. */}
       <div className="flex items-center gap-3 self-start [grid-area:pic] md:self-center">
-        {selecting && (
+        {/* Always there, but 0 wide (and out of reach: inert) until Select
+            mode, so it slides in and the letter square eases over. -mr-3
+            takes back the gap while it's hidden. */}
+        <span
+          className={`flex shrink-0 items-center overflow-clip transition-[width,margin-right,opacity] duration-300 ease-out [overflow-clip-margin:6px] ${
+            selecting ? 'w-5 opacity-100' : '-mr-3 w-0 opacity-0'
+          }`}
+          {...(!selecting && { inert: '' })}
+        >
           <input
             type="checkbox"
-            className="size-5 shrink-0 accent-brand-blue"
+            className="select-box size-5 shrink-0 accent-brand-blue"
             checked={selected}
             onChange={onSelect}
             aria-label={`Select ${heading}`}
           />
-        )}
+        </span>
         {/* The company name is right beside it, so screen readers skip this. */}
         <span
           className={`flex size-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold md:size-14 md:text-xl ${avatarColour(job.company_name)}`}
