@@ -254,6 +254,8 @@ export default function StashPage() {
     accepted: doneMatches.filter((job) => job.outcome === 'accepted').length,
     rejected: doneMatches.filter((job) => job.outcome === 'rejected').length,
   }
+  // For the line under the title: every saved job, whatever the search says.
+  const toApplyTotal = jobs.filter((job) => job.status !== 'done').length
   // filter() already makes a new array, so sorting it leaves `jobs` untouched.
   const visible = matches
     .filter((job) => tab === 'all' || job.status === tab)
@@ -280,13 +282,23 @@ export default function StashPage() {
   return (
     <section>
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        {/* A plain title: the brand column (BrandAside.jsx) already says what
+            JobStash is for. Under it, where the stash stands right now, from
+            every saved job (searching doesn't change it). The line keeps its
+            height while loading, so nothing jumps when the numbers arrive. */}
         <div>
-          <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">My Stash</p>
-          <h1 className="mt-2 text-[2rem] leading-[1.1] font-bold tracking-tight text-ink md:text-[2.75rem]">
-            Your <span className="text-brand-blue">opportunities</span>,
-            <br className="hidden sm:block" /> all in one place.
-          </h1>
-          <p className="mt-3 text-lg text-muted">Keep track of jobs you want to apply to.</p>
+          <h1 className="text-[2rem] leading-[1.1] font-bold tracking-tight text-ink md:text-[2.75rem]">My Stash</h1>
+          <p className="mt-3 min-h-7 text-lg text-muted">
+            {status === 'ready' && jobs.length > 0 && (
+              <>
+                <span className="font-semibold text-brand-blue">{toApplyTotal} to apply</span>
+                {' · '}
+                <span className="font-semibold text-ink">{jobs.length - toApplyTotal} done</span>
+                {' · '}
+                {jobs.length} saved in total
+              </>
+            )}
+          </p>
         </div>
         <DemoNotice className="md:max-w-sm" />
       </div>
