@@ -20,7 +20,7 @@ export default function BrandAside() {
         </Link>
       </div>
 
-      <div className="relative z-10 mt-30">
+      <div className="relative z-10 mt-46">
         <p className="text-xl leading-snug font-bold tracking-tight text-ink">
           Save today.
           <br />
