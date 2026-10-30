@@ -165,8 +165,17 @@ export default function AddJobDialog({ manual = false }) {
 
   // A click on the dimmed background lands on the <dialog> element itself;
   // a click on the white box lands on something inside it.
+  //
+  // Only close when the press also started on the background. Otherwise,
+  // selecting text in a box and letting go outside the white box would count
+  // as a click on the background and close the pop-up.
+  const pressedOnBackdrop = useRef(false)
+  function handleBackdropPress(event) {
+    pressedOnBackdrop.current = event.target === dialog.current
+  }
   function handleBackdropClick(event) {
-    if (event.target === dialog.current) close()
+    if (pressedOnBackdrop.current && event.target === dialog.current) close()
+    pressedOnBackdrop.current = false
   }
 
   async function handleSubmit(event) {
@@ -210,6 +219,7 @@ export default function AddJobDialog({ manual = false }) {
       // Esc press), still go back to /stash.
       onClose={finishClosing}
       data-closing={closing || undefined}
+      onPointerDown={handleBackdropPress}
       onClick={handleBackdropClick}
       aria-labelledby="add-job-title"
       // Phones: a sheet rising from the bottom. 768px up: a box in the middle.
