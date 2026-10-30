@@ -222,12 +222,12 @@ export default function AddJobDialog({ manual = false }) {
       onPointerDown={handleBackdropPress}
       onClick={handleBackdropClick}
       aria-labelledby="add-job-title"
-      // Phones: a sheet rising from the bottom. 768px up: a box in the middle.
-      className="mt-auto mb-0 max-h-[90dvh] w-full max-w-none rounded-t-3xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 md:m-auto md:max-h-[calc(100%-2rem)] md:w-[calc(100%-2rem)] md:max-w-xl md:rounded-2xl"
+      // A box in the middle of the screen, on phones too, with a little of the
+      // dimmed page showing around it.
+      className="m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40"
     >
-      {/* Top: the grab line (phones), what this pop-up is for, and ✕. */}
+      {/* Top: what this pop-up is for, and ✕. */}
       <div className="px-6 pt-6 md:px-8 md:pt-7">
-        <div className="mx-auto -mt-2 mb-4 h-1.5 w-12 rounded-full bg-line md:hidden" aria-hidden="true" />
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
@@ -407,7 +407,7 @@ export default function AddJobDialog({ manual = false }) {
         {/* Bottom: Cancel and Save, under a thin line. Phones: Save only, full
             width (the ✕ and the dimmed page close it). sticky: when the
             pop-up has to scroll (small phones), Save stays in sight. */}
-        <div className="sticky bottom-0 mt-7 flex gap-3 border-t border-line bg-surface px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:justify-end md:px-8 md:pb-5">
+        <div className="sticky bottom-0 mt-7 flex gap-3 border-t border-line bg-surface px-6 pt-4 pb-4 md:justify-end md:px-8 md:pb-5">
           <button
             type="button"
             onClick={close}

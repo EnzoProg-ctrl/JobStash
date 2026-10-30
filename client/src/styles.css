@@ -79,7 +79,8 @@
 
 /* Pop-ups. The Add Job pop-up rises a little and fades in while the page
    behind it dims, instead of appearing all at once. data-closing (set by the
-   pop-up while it closes) plays the same thing backwards. */
+   pop-up while it closes) plays the same thing backwards. The same on phones
+   and wide screens. */
 dialog[open] {
   animation: pop-up-in 200ms ease-out;
 }
@@ -91,24 +92,6 @@ dialog[data-closing] {
 }
 dialog[data-closing]::backdrop {
   animation: fade-out 150ms ease-in forwards;
-}
-
-/* On phones the pop-up is a bottom sheet (AddJobDialog.jsx), so it slides up
-   from the bottom edge and back down, instead of rising a little. */
-@media (width < 48rem) {
-  dialog[open] {
-    animation: sheet-in 250ms ease-out;
-  }
-  dialog[data-closing] {
-    animation: sheet-out 150ms ease-in forwards;
-  }
-}
-
-@keyframes sheet-in {
-  from { transform: translateY(100%); }
-}
-@keyframes sheet-out {
-  to { transform: translateY(100%); }
 }
 
 @keyframes pop-up-in {
