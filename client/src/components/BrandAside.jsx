@@ -14,15 +14,13 @@ export default function BrandAside() {
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col self-start overflow-hidden border-r border-line/70 bg-linear-to-b from-surface to-bg px-8 pb-10 lg:flex">
       {/* The same height as the header beside it (AppHeader.jsx), so the logo
           lines up with Overview, My Stash and Add Job. */}
-      <div className="relative z-10 flex h-17 shrink-0 items-center">
+      <div className="relative z-10 flex h-17 shrink-0 items-center border-b border-line">
         <Link to="/stash" aria-label="JobStash, go to My Stash">
           <Logo className="text-[1.75rem]" />
         </Link>
       </div>
 
-      <div className="relative z-10 flex h-17 shrink-0 items-center border-b border-line"/>
-
-      <div className="relative z-10 mt-10">
+      <div className="relative z-10 mt-27">
         <p className="text-xl leading-snug font-bold tracking-tight text-ink">
           Save today.
           <br />
