@@ -46,14 +46,14 @@ export default function HomePage() {
           {session ? (
             <Link
               to="/stash"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-todo md:px-8"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-brand-blue-dark md:px-8"
             >
               My Stash
             </Link>
           ) : (
             <a
               href="#sign-in"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-todo md:px-8"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-brand-blue-dark md:px-8"
             >
               {demo ? 'Try the demo' : 'Sign in'}
             </a>

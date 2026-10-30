@@ -33,7 +33,7 @@ export default function BottomNav() {
         >
           {/* Sticks up above the bar: -mt-7 lifts it, the ring of page
               colour around it makes it look cut out of the bar. */}
-          <span className="-mt-7 flex size-14 items-center justify-center rounded-full bg-brand-blue text-white shadow-lg ring-4 ring-surface group-hover:bg-todo">
+          <span className="-mt-7 flex size-14 items-center justify-center rounded-full bg-brand-blue text-white shadow-lg ring-4 ring-surface group-hover:bg-brand-blue-dark">
             <svg className="size-7" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M10 4v12M4 10h12" />
             </svg>

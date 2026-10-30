@@ -3,15 +3,17 @@ import { useMenu } from '../lib/useMenu.js'
 // The ⋮ button on a job card and the small menu it opens.
 //
 // What it offers depends on where the job is:
-//   To Apply:  Mark as Done · Mark as Accepted · Mark as Rejected · Delete Job
-//   Pending:   Mark as Accepted · Mark as Rejected · Move back to To Apply · Delete Job
-//   Accepted:  Mark as Rejected · Move back to To Apply · Delete Job
-//   Rejected:  Mark as Accepted · Move back to To Apply · Delete Job
+//   To Apply:  Mark as Done · Mark as Accepted · Mark as Rejected
+//   Pending:   Mark as Accepted · Mark as Rejected · Move back to To Apply
+//   Accepted:  Mark as Rejected · Move back to To Apply
+//   Rejected:  Mark as Accepted · Move back to To Apply
+// Deleting isn't here: it's done in Select mode (the Select button above the
+// list), one job or many.
 //
 // It closes when you pick something, press Esc, or click anywhere outside it
-// (lib/useMenu.js). Picking reports onSetStatus(status, outcome) or onDelete();
-// the page decides what that means.
-export default function CardMenu({ label, status, outcome, onSetStatus, onDelete }) {
+// (lib/useMenu.js). Picking reports onSetStatus(status, outcome); the page
+// decides what that means.
+export default function CardMenu({ label, status, outcome, onSetStatus }) {
   const { open, setOpen, wrapper, button } = useMenu()
 
   const toApply = status !== 'done'
@@ -63,23 +65,6 @@ export default function CardMenu({ label, status, outcome, onSetStatus, onDelete
               {action.label}
             </button>
           ))}
-
-          {/* A thin line, then Delete in red, so it isn't tapped by mistake. */}
-          <div className="my-1 border-t border-line" />
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false)
-              onDelete()
-            }}
-            className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm font-semibold text-error hover:bg-red-50"
-          >
-            <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.75 6.5v4.5M9.25 6.5v4.5" />
-            </svg>
-            Delete Job
-          </button>
         </div>
       )}
     </div>

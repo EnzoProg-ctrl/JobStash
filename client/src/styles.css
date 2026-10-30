@@ -11,7 +11,10 @@
   --color-muted: #64748B;        /* small grey text */
   --color-line: #E2E8F0;         /* borders */
   --color-subtle: #F1F5F9;       /* grey tabs, secondary buttons */
-  --color-brand-blue: #2563EB;   /* "Stash" in the logo, links */
+  --color-brand-blue: #1D4ED8;   /* primary blue: active navigation, selected filters, main buttons, links */
+  --color-brand-blue-dark: #1E40AF; /* the same, on hover */
+  --color-logo-blue: #2563EB;    /* "Stash" in the logo only, kept as the logo was drawn */
+  --color-pending: #64748B;      /* Pending: neutral blue-grey */
   --color-todo: #1D4ED8;         /* To Apply badge text */
   --color-todo-bg: #EFF6FF;      /* To Apply badge background */
   --color-done: #15803D;         /* Done badge text */
@@ -53,7 +56,7 @@
   /* Never remove a focus outline without replacing it. Keyboard users need to
      see where they are, and it is checked. */
   :focus-visible {
-    outline: 3px solid var(--color-primary);
+    outline: 3px solid var(--color-brand-blue);
     outline-offset: 2px;
   }
 

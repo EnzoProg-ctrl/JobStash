@@ -16,7 +16,7 @@ export default function Logo({ className = '', wordClassName = '' }) {
       <img src={mark} alt="" aria-hidden="true" className="h-[1.15em] w-auto" />
       <span className={wordClassName}>
         <span className="text-primary">Job</span>
-        <span className="text-brand-blue">Stash</span>
+        <span className="text-logo-blue">Stash</span>
       </span>
     </span>
   )

@@ -15,13 +15,16 @@ import BoardCard, { BoardCardPreview } from './BoardCard.jsx'
 // card to another column changes the job, exactly like the ⋮ menu would
 // (StashPage's handleSetStatus).
 //
+// In Select mode (the Select button above) the cards get tick boxes instead,
+// and dragging is off, so a tap always ticks.
+//
 // Uses dnd-kit (@dnd-kit/core) for dragging with a mouse, a finger (press and
 // hold, so the page still scrolls normally) and the keyboard, and for telling
 // screen readers what is happening.
 
 const COLUMNS = [
   { id: 'to_apply', title: 'To Apply', status: 'to_apply', outcome: null, dot: 'bg-todo' },
-  { id: 'pending', title: 'Pending', status: 'done', outcome: 'pending', dot: 'bg-slate-500' },
+  { id: 'pending', title: 'Pending', status: 'done', outcome: 'pending', dot: 'bg-pending' },
   { id: 'accepted', title: 'Accepted', status: 'done', outcome: 'accepted', dot: 'bg-done' },
   { id: 'rejected', title: 'Rejected', status: 'done', outcome: 'rejected', dot: 'bg-error' },
 ]
@@ -65,7 +68,7 @@ function name({ data }) {
   return job.job_title || job.company_name
 }
 
-export default function StashBoard({ jobs, onSetStatus, onDelete, onToggleFavorite }) {
+export default function StashBoard({ jobs, onSetStatus, onToggleFavorite, selecting, selected, onSelect }) {
   const [dragging, setDragging] = useState(null)
   const sensors = useSensors(
     // A mouse drag starts after moving 6px, so a plain click still clicks.
@@ -93,15 +96,17 @@ export default function StashBoard({ jobs, onSetStatus, onDelete, onToggleFavori
     >
       {/* Phones: the columns sit side by side and scroll sideways, one at a
           time. Tablets: two by two. Laptops: all four in a row. */}
-      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-4">
+      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-x-5 md:gap-y-8 md:overflow-visible md:px-0 lg:grid-cols-4">
         {COLUMNS.map((column) => (
           <Column
             key={column.id}
             column={column}
             jobs={jobs.filter((job) => columnOf(job) === column.id)}
             onSetStatus={onSetStatus}
-            onDelete={onDelete}
             onToggleFavorite={onToggleFavorite}
+            selecting={selecting}
+            selected={selected}
+            onSelect={onSelect}
           />
         ))}
       </div>
@@ -113,40 +118,51 @@ export default function StashBoard({ jobs, onSetStatus, onDelete, onToggleFavori
   )
 }
 
-function Column({ column, jobs, onSetStatus, onDelete, onToggleFavorite }) {
+// One column: a quiet heading (dot, name, count) over a thin line, and the
+// cards. No box around it; while a card is dragged over the column, its card
+// area turns light blue to show where the card will land.
+function Column({ column, jobs, onSetStatus, onToggleFavorite, selecting, selected, onSelect }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
 
   return (
     <section
       ref={setNodeRef}
       aria-label={`${column.title}, ${jobs.length} ${jobs.length === 1 ? 'job' : 'jobs'}`}
-      className={`flex w-[85%] shrink-0 snap-start flex-col rounded-card border p-2 md:w-auto ${
-        isOver ? 'border-brand-blue bg-todo-bg' : 'border-line bg-subtle'
-      }`}
+      className="flex w-[85%] shrink-0 snap-start flex-col md:w-auto"
     >
-      <h2 className="flex items-center gap-2 px-1 py-2 text-sm font-bold">
+      <h2 className="flex items-center gap-2 border-b border-line px-1 pb-3 text-xs font-semibold tracking-[0.12em] text-muted uppercase">
         <span className={`size-2 rounded-full ${column.dot}`} aria-hidden="true" />
         {column.title}
-        <span className="rounded-full bg-surface px-2 text-xs font-semibold text-muted">{jobs.length}</span>
+        <span className="ml-auto text-sm font-semibold tracking-normal text-ink tabular-nums">{jobs.length}</span>
       </h2>
-      {jobs.length > 0 ? (
-        <ul className="flex flex-col gap-2">
-          {jobs.map((job) => (
-            <BoardCard
-              key={job.id}
-              job={job}
-              column={column.id}
-              onSetStatus={onSetStatus}
-              onDelete={onDelete}
-              onToggleFavorite={onToggleFavorite}
-            />
-          ))}
-        </ul>
-      ) : (
-        <p className="flex min-h-24 items-center justify-center rounded-lg border border-dashed border-line px-3 text-center text-sm text-muted">
-          Drop a job here
-        </p>
-      )}
+      {/* -mx-1.5 px-1.5: the blue drop area reaches a little past the cards
+          without moving them. */}
+      <div
+        className={`-mx-1.5 mt-3 flex-1 rounded-card px-1.5 py-1.5 transition-colors ${
+          isOver ? 'bg-todo-bg ring-1 ring-brand-blue/30' : ''
+        }`}
+      >
+        {jobs.length > 0 ? (
+          <ul className="flex flex-col gap-3">
+            {jobs.map((job) => (
+              <BoardCard
+                key={job.id}
+                job={job}
+                column={column.id}
+                onSetStatus={onSetStatus}
+                onToggleFavorite={onToggleFavorite}
+                selecting={selecting}
+                selected={selected.has(job.id)}
+                onSelect={() => onSelect(job)}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="flex min-h-24 items-center justify-center rounded-xl border border-dashed border-line px-3 text-center text-sm text-muted">
+            Drop a job here
+          </p>
+        )}
+      </div>
     </section>
   )
 }

@@ -53,8 +53,12 @@ function isWebLink(text) {
   }
 }
 
+// The boxes: a thin border that turns blue (with a soft blue glow) while
+// typing in it, and red when something needs fixing. The border and glow take
+// the place of the usual focus outline.
 const inputClass =
-  'min-h-12 w-full rounded-lg border border-line bg-surface px-4 text-base placeholder:text-muted aria-invalid:border-error'
+  'min-h-12 w-full rounded-xl border border-line bg-surface px-4 text-base text-ink placeholder:text-muted transition-[border-color,box-shadow,background-color] focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/15 focus-visible:outline-none aria-invalid:border-error aria-invalid:focus:ring-error/15'
+const labelClass = 'text-sm font-semibold text-ink'
 
 export default function AddJobDialog({ manual = false }) {
   const dialog = useRef(null)
@@ -194,6 +198,10 @@ export default function AddJobDialog({ manual = false }) {
     }
   }
 
+  // Filled in from the link and not changed since: shown with a light blue
+  // tint, so it's clear which details JobStash filled in.
+  const fromLink = (key, value) => value.trim() !== '' && value === autoFilled.current[key]
+
   return (
     <dialog
       ref={dialog}
@@ -204,14 +212,20 @@ export default function AddJobDialog({ manual = false }) {
       data-closing={closing || undefined}
       onClick={handleBackdropClick}
       aria-labelledby="add-job-title"
-      className="mt-auto mb-0 w-full max-w-none max-h-[90dvh] rounded-t-3xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 
-  md:m-auto md:w-[calc(100%-2rem)] md:max-w-xl md:max-h-[calc(100%-2rem)] md:rounded-2xl"
+      // Phones: a sheet rising from the bottom. 768px up: a box in the middle.
+      className="mt-auto mb-0 max-h-[90dvh] w-full max-w-none rounded-t-3xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 md:m-auto md:max-h-[calc(100%-2rem)] md:w-[calc(100%-2rem)] md:max-w-xl md:rounded-2xl"
     >
-      <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:p-8">
-        <div className="mx-auto -mt-2 mb-4 h-1.5 w-12 rounded-full bg-line md:hidden" aria-hidden="true"/>
+      {/* Top: the grab line (phones), what this pop-up is for, and ✕. */}
+      <div className="px-6 pt-6 md:px-8 md:pt-7">
+        <div className="mx-auto -mt-2 mb-4 h-1.5 w-12 rounded-full bg-line md:hidden" aria-hidden="true" />
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="add-job-title" className="text-3xl font-bold">{manual ? 'Add Job Without Link' : 'Add Job'}</h2>
+            <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+              {manual ? 'No link needed' : 'New job'}
+            </p>
+            <h2 id="add-job-title" className="mt-1.5 text-2xl font-bold tracking-tight md:text-[1.75rem]">
+              {manual ? 'Add Job Without Link' : 'Add Job'}
+            </h2>
             <p className="mt-1 text-muted">
               {manual
                 ? 'For jobs you saw offline, heard about, or are cold-emailing about.'
@@ -222,18 +236,20 @@ export default function AddJobDialog({ manual = false }) {
             type="button"
             onClick={close}
             aria-label="Close"
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-subtle text-ink hover:bg-line"
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-line text-muted hover:bg-subtle hover:text-ink"
           >
             <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M5 5l10 10M15 5L5 15" />
             </svg>
           </button>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-5">
+      <form onSubmit={handleSubmit} noValidate className="mt-6">
+        <div className="flex flex-col gap-5 px-6 md:px-8">
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-              <label htmlFor="posting-url" className="text-sm font-semibold">
+              <label htmlFor="posting-url" className={labelClass}>
                 Job posting URL{' '}
                 {manual ? (
                   <span className="font-normal text-muted">(optional)</span>
@@ -245,7 +261,7 @@ export default function AddJobDialog({ manual = false }) {
               <button
                 type="button"
                 onClick={switchMode}
-                className="-my-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-blue hover:bg-subtle"
+                className="-my-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-blue hover:bg-todo-bg"
               >
                 {manual ? (
                   <>
@@ -310,7 +326,7 @@ export default function AddJobDialog({ manual = false }) {
           </div>
 
           <div>
-            <label htmlFor="company-name" className="mb-2 block text-sm font-semibold">
+            <label htmlFor="company-name" className={`mb-2 block ${labelClass}`}>
               Company name <span className="text-error" aria-hidden="true">*</span>
             </label>
             <input
@@ -323,7 +339,7 @@ export default function AddJobDialog({ manual = false }) {
               onChange={(event) => setCompanyName(event.target.value)}
               aria-invalid={errors.companyName ? 'true' : undefined}
               aria-describedby={errors.companyName ? 'company-name-error' : undefined}
-              className={inputClass}
+              className={`${inputClass} ${fromLink('company', companyName) ? 'bg-todo-bg/70' : ''}`}
             />
             {errors.companyName && (
               <p id="company-name-error" className="mt-2 text-sm text-error">{errors.companyName}</p>
@@ -331,16 +347,18 @@ export default function AddJobDialog({ manual = false }) {
           </div>
 
           <div>
-            <label htmlFor="job-title" className="mb-2 block text-sm font-semibold">Job title</label>
+            <label htmlFor="job-title" className={`mb-2 block ${labelClass}`}>
+              Job title <span className="font-normal text-muted">(optional)</span>
+            </label>
             <input
               id="job-title"
               type="text"
-              placeholder={manual ? 'e.g. Data Analyst Intern' : 'Filled in from the link (optional)'}
+              placeholder={manual ? 'e.g. Data Analyst Intern' : 'Filled in from the link'}
               value={jobTitle}
               onChange={(event) => setJobTitle(event.target.value)}
               aria-invalid={errors.jobTitle ? 'true' : undefined}
               aria-describedby={errors.jobTitle ? 'job-title-error' : undefined}
-              className={inputClass}
+              className={`${inputClass} ${fromLink('title', jobTitle) ? 'bg-todo-bg/70' : ''}`}
             />
             {errors.jobTitle && (
               <p id="job-title-error" className="mt-2 text-sm text-error">{errors.jobTitle}</p>
@@ -350,7 +368,7 @@ export default function AddJobDialog({ manual = false }) {
           {/* Only without a link: where the job came from, shown on its card. */}
           {manual && (
             <div>
-              <label htmlFor="job-source" className="mb-2 block text-sm font-semibold">
+              <label htmlFor="job-source" className={`mb-2 block ${labelClass}`}>
                 Where you found it <span className="font-normal text-muted">(optional)</span>
               </label>
               <input
@@ -370,30 +388,33 @@ export default function AddJobDialog({ manual = false }) {
           )}
 
           {saveError && (
-            <p role="alert" className="rounded-lg border border-line bg-subtle p-3 text-sm text-error">
+            <p role="alert" className="rounded-xl border border-error/30 bg-red-50 p-3 text-sm text-error">
               Couldn't save: {saveError}
             </p>
           )}
+        </div>
 
-          <div className="mt-2 flex gap-3 md:justify-between">
-            <button
-              type="button"
-              onClick={close}
-              className="hidden min-h-12 flex-1 rounded-lg bg-subtle px-8 font-semibold text-ink hover:bg-line md:block md:flex-none"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              // Also while closing, so a quick second click can't save it twice.
-              disabled={saving || closing}
-              className="min-h-12 flex-1 rounded-lg bg-brand-blue px-10 font-semibold text-white hover:bg-todo disabled:opacity-60 md:flex-none"
-            >
-              {saving ? 'Saving…' : 'Save Job'}
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* Bottom: Cancel and Save, under a thin line. Phones: Save only, full
+            width (the ✕ and the dimmed page close it). sticky: when the
+            pop-up has to scroll (small phones), Save stays in sight. */}
+        <div className="sticky bottom-0 mt-7 flex gap-3 border-t border-line bg-surface px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:justify-end md:px-8 md:pb-5">
+          <button
+            type="button"
+            onClick={close}
+            className="hidden min-h-12 items-center rounded-xl border border-line bg-surface px-6 font-semibold text-ink hover:bg-subtle md:inline-flex"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            // Also while closing, so a quick second click can't save it twice.
+            disabled={saving || closing}
+            className="press inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-brand-blue px-8 font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60 md:flex-none"
+          >
+            {saving ? 'Saving…' : 'Save Job'}
+          </button>
+        </div>
+      </form>
     </dialog>
   )
 }

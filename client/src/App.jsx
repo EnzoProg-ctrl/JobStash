@@ -1,6 +1,7 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router'
 import AppHeader from './components/AppHeader.jsx'
 import BottomNav from './components/BottomNav.jsx'
+import BrandAside from './components/BrandAside.jsx'
 import HomePage from './pages/HomePage.jsx'
 import StashPage from './pages/StashPage.jsx'
 import PrivacyPage from './pages/PrivacyPage.jsx'
@@ -40,14 +41,24 @@ export default function App() {
   )
 }
 
+// Wide screens: a narrow brand column at the left edge (BrandAside.jsx), then
+// the page, which fills the rest of the screen. Phones and tablets: just the
+// page. pb-32 on phones keeps the last job clear of the bottom bar.
+//
+// The page stops growing at 1536px (max-w-384) and stays on the left, by the
+// brand column, so rows don't stretch across a very wide monitor.
 function AppLayout() {
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <AppHeader />
-      {/* pb-32 on phones keeps the last card clear of the bottom bar. */}
-      <main className="mx-auto max-w-5xl px-4 pt-8 pb-32 md:px-8 md:py-10">
-        <Outlet />
-      </main>
+      <div className="flex w-full flex-1">
+        <BrandAside />
+        <main className="min-w-0 flex-1 px-4 pt-8 pb-32 md:px-8 md:pt-10 md:pb-14 lg:pl-12">
+          <div className="max-w-384">
+            <Outlet />
+          </div>
+        </main>
+      </div>
       <BottomNav />
     </div>
   )

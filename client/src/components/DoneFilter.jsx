@@ -1,13 +1,11 @@
-// The All | Accepted | Rejected row under the tabs, shown on the Done tab.
-// "All" is every done job, including those still Pending.
-//
-// Real buttons, so they can be reached with Tab and pressed with Enter.
-// aria-pressed tells a screen reader which one is picked.
-
+// All | Pending | Accepted | Rejected, under the tabs when Done is chosen. Each
+// result has its colour dot (the same colours as the status chips): Pending
+// blue-grey, Accepted green, Rejected red.
 const OPTIONS = [
-  { value: 'all', label: 'All' },
-  { value: 'accepted', label: 'Accepted' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: 'all', label: 'All', dot: null },
+  { value: 'pending', label: 'Pending', dot: 'bg-pending' },
+  { value: 'accepted', label: 'Accepted', dot: 'bg-done' },
+  { value: 'rejected', label: 'Rejected', dot: 'bg-error' },
 ]
 
 export default function DoneFilter({ value, counts, onChange }) {
@@ -21,16 +19,15 @@ export default function DoneFilter({ value, counts, onChange }) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold max-[359px]:gap-1 max-[359px]:px-2 md:gap-2 md:px-4 ${
+            className={`inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold max-[359px]:gap-1 max-[359px]:px-2 md:px-4 ${
               active
-                ? 'border-brand-blue bg-todo-bg text-brand-blue'
-                : 'border-line bg-surface text-ink hover:border-accent'
+                ? 'border-brand-blue/40 bg-todo-bg text-brand-blue'
+                : 'border-line bg-surface text-ink hover:bg-subtle'
             }`}
           >
+            {option.dot && <span className={`size-2 rounded-full ${option.dot}`} aria-hidden="true" />}
             {option.label}
-            <span className={`rounded-full px-1.5 max-[359px]:px-1 md:px-2 ${active ? 'bg-white' : 'bg-subtle'}`}>
-              {counts[option.value]}
-            </span>
+            <span className="text-muted">{counts[option.value]}</span>
           </button>
         )
       })}

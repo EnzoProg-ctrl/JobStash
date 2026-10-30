@@ -1,9 +1,6 @@
-// The To Apply / Done / All tabs on My Stash: a card each, with an icon and
-// how many jobs it holds.
-//
-// Real buttons, so they can be reached with Tab and pressed with Enter.
-// aria-pressed tells a screen reader which one is picked.
-
+// To Apply | Done | All, with how many jobs each has: one segmented control in
+// a row. The chosen one has a soft blue background. aria-pressed tells screen
+// readers which one is on.
 const TABS = [
   { value: 'to_apply', label: 'To Apply', icon: ApplyIcon },
   { value: 'done', label: 'Done', icon: CheckIcon },
@@ -12,7 +9,11 @@ const TABS = [
 
 export default function FilterTabs({ value, counts, onChange }) {
   return (
-    <div className="grid grid-cols-3 gap-2 md:max-w-3xl md:gap-3" role="group" aria-label="Show jobs">
+    <div
+      className="grid w-full grid-cols-3 gap-1 rounded-xl border border-line bg-surface p-1 md:inline-grid md:w-auto"
+      role="group"
+      aria-label="Show jobs"
+    >
       {TABS.map((tab) => {
         const active = tab.value === value
         return (
@@ -21,36 +22,20 @@ export default function FilterTabs({ value, counts, onChange }) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(tab.value)}
-            // Phones: a plain icon beside the label and count, as in the phone
-            // design (on the narrowest phones, under 360px, the icon goes above
-            // so "To Apply" still fits on one line). From 768px the icon sits in
-            // a circle and the count in a pill.
-            className={`flex items-center gap-1.5 rounded-card border px-2 py-3 text-left max-[359px]:flex-col max-[359px]:items-start md:gap-4 md:p-4 ${
+            className={`flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-1 text-sm font-semibold whitespace-nowrap max-[359px]:flex-col max-[359px]:gap-0 max-[359px]:py-1 sm:gap-2 sm:px-2 md:min-w-36 md:px-5 md:text-base ${
               active
-                ? 'border-brand-blue bg-todo-bg'
-                : 'border-line bg-surface hover:border-accent'
+                ? 'bg-todo-bg text-brand-blue ring-1 ring-brand-blue/30'
+                : 'text-ink hover:bg-subtle'
             }`}
           >
+            <tab.icon />
+            {tab.label}
             <span
-              className={`flex shrink-0 items-center justify-center rounded-full md:size-12 ${
-                active ? 'text-brand-blue md:bg-white' : 'text-ink md:bg-subtle'
+              className={`rounded-full px-1.5 text-xs font-semibold sm:px-2 md:text-sm ${
+                active ? 'bg-white text-brand-blue' : 'bg-subtle text-ink'
               }`}
             >
-              <tab.icon />
-            </span>
-            <span>
-              <span className={`block text-sm font-semibold whitespace-nowrap md:text-base ${active ? 'text-brand-blue' : 'text-ink'}`}>
-                {tab.label}
-              </span>
-              {/* Dark text on grey, never grey on grey: that pair failed the
-                  contrast check in the design system. */}
-              <span
-                className={`inline-block rounded-full text-sm md:mt-1 md:px-2 ${
-                  active ? 'text-brand-blue md:bg-white' : 'text-ink md:bg-subtle'
-                }`}
-              >
-                {counts[tab.value]}
-              </span>
+              {counts[tab.value]}
             </span>
           </button>
         )
@@ -61,13 +46,21 @@ export default function FilterTabs({ value, counts, onChange }) {
 
 function Icon({ children }) {
   return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className="size-5 shrink-0 max-sm:hidden"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       {children}
     </svg>
   )
 }
 
-// A page with a folded corner, and an arrow leaving it: a job to send off.
 function ApplyIcon() {
   return (
     <Icon>

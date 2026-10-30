@@ -21,6 +21,7 @@ const EMPTY_TAB = {
 }
 // The same, for the Accepted and Rejected filters on the Done tab.
 const EMPTY_OUTCOME = {
+  pending: 'Nothing waiting for an answer.',
   accepted: 'No accepted jobs yet.',
   rejected: 'No rejected jobs yet.',
 }
@@ -54,8 +55,8 @@ function matchesSearch(job, query) {
   )
 }
 
-// My Stash: every saved job, filtered by the tabs and the search, sorted, with
-// a menu on each card to mark it done or delete it.
+// My Stash: every saved job, filtered by the tabs and the search, sorted, as a
+// list or a board. A menu on each job changes its status; Select mode deletes.
 export default function StashPage() {
   usePageTitle('My Stash')
   // Loading the list, the "waking up" note and Try again live in lib/useJobs.js,
@@ -67,15 +68,18 @@ export default function StashPage() {
   // the cards can slide; the search box itself always updates straight away.
   const [shownQuery, setShownQuery] = useState('')
   const [sort, setSort] = useState('newest')        // newest | oldest | company
-  // The All | Accepted | Rejected filter, used on the Done tab.
-  const [doneFilter, setDoneFilter] = useState('all') // all | accepted | rejected
+  // The All | Pending | Accepted | Rejected filter, used on the Done tab.
+  const [doneFilter, setDoneFilter] = useState('all') // all | pending | accepted | rejected
   // Only starred jobs (the ★ Favourites button), and List or Board.
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [view, setView] = useState(savedView)
   const [actionError, setActionError] = useState(null)
-  // The job just deleted, while its Undo message shows (5 seconds).
+  // The jobs just deleted, while their Undo message shows (5 seconds).
   const [deleted, setDeleted] = useState(null)
-  // The same job, plus the 5-second timer, kept where the timer can read them.
+  // Select mode, and the ids of the ticked jobs.
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState(() => new Set())
+  // The same jobs, plus the 5-second timer, kept where the timer can read them.
   const pending = useRef(null)
   const timer = useRef(null)
 
@@ -126,30 +130,32 @@ export default function StashPage() {
   // Delete: the card disappears straight away, and the Undo message shows for
   // 5 seconds. Only when the time is up is the job really deleted, so Undo can
   // bring it back exactly as it was.
-  function handleDelete(job) {
-    // A job still waiting from an earlier Delete is deleted for real now.
+  // Deleting is done from Select mode, one job or many at once (gone).
+  function handleDelete(gone) {
+    // Jobs still waiting from an earlier Delete are deleted for real now.
     clearTimeout(timer.current)
-    if (pending.current) reallyDelete(pending.current)
+    if (pending.current) pending.current.forEach(reallyDelete)
 
     setActionError(null)
-    smoothly(() => setJobs((current) => current.filter((row) => row.id !== job.id)))
-    pending.current = job
-    setDeleted(job)
+    const ids = new Set(gone.map((job) => job.id))
+    smoothly(() => setJobs((current) => current.filter((row) => !ids.has(row.id))))
+    pending.current = gone
+    setDeleted(gone)
     timer.current = setTimeout(() => {
-      reallyDelete(job)
+      gone.forEach(reallyDelete)
       pending.current = null
       setDeleted(null)
     }, 5000)
   }
 
-  // Undo: stop the timer and put the job back. The list is sorted, so it lands
-  // in its old place by itself.
+  // Undo: stop the timer and put the jobs back. The list is sorted, so they
+  // land in their old places by themselves.
   function handleUndo() {
     clearTimeout(timer.current)
-    const job = pending.current
+    const back = pending.current
     pending.current = null
     setDeleted(null)
-    smoothly(() => setJobs((current) => [job, ...current]))
+    smoothly(() => setJobs((current) => [...back, ...current]))
   }
 
   // The real delete, on the server. If it fails, the job comes back with a
@@ -163,14 +169,30 @@ export default function StashPage() {
     }
   }
 
-  // Leaving My Stash within the 5 seconds: the waiting job is deleted on the
+  // Leaving My Stash within the 5 seconds: the waiting jobs are deleted on the
   // way out, instead of being forgotten when the timer disappears with the page.
   useEffect(() => {
     return () => {
       clearTimeout(timer.current)
-      if (pending.current) deleteJob(pending.current.id).catch(() => {})
+      pending.current?.forEach((job) => deleteJob(job.id).catch(() => {}))
     }
   }, [])
+
+  // Select mode (the Select button in the toolbar): a tick box on every job,
+  // and a bar to delete the ticked ones. Off by default.
+  function changeSelecting(on) {
+    setSelecting(on)
+    setSelected(new Set())
+  }
+
+  function toggleSelected(job) {
+    setSelected((current) => {
+      const next = new Set(current)
+      if (next.has(job.id)) next.delete(job.id)
+      else next.add(job.id)
+      return next
+    })
+  }
 
   // Called by the Add Job pop-up after it saves. The new job goes first because
   // it is the newest, and the tab and search are reset so it is always visible.
@@ -198,7 +220,12 @@ export default function StashPage() {
   // board, and back (the cards in both views share a name, lib/motion.js).
   const changeView = (value) => {
     if (value === view) return
-    smoothly(() => setView(value), { className: 'switching-view' })
+    // The two views show different jobs (the board ignores the tabs), so
+    // switching starts Select mode afresh.
+    smoothly(() => {
+      setView(value)
+      changeSelecting(false)
+    }, { className: 'switching-view' })
     try {
       localStorage.setItem(VIEW_KEY, value)
     } catch {
@@ -223,6 +250,7 @@ export default function StashPage() {
   const doneMatches = matches.filter((job) => job.status === 'done')
   const doneCounts = {
     all: doneMatches.length,
+    pending: doneMatches.filter((job) => job.outcome === 'pending').length,
     accepted: doneMatches.filter((job) => job.outcome === 'accepted').length,
     rejected: doneMatches.filter((job) => job.outcome === 'rejected').length,
   }
@@ -231,13 +259,34 @@ export default function StashPage() {
     .filter((job) => tab === 'all' || job.status === tab)
     .filter((job) => tab !== 'done' || doneFilter === 'all' || job.outcome === doneFilter)
     .sort(COMPARE[sort])
+  // The board has no tabs: it shows every match, in its columns.
+  const boardJobs = [...matches].sort(COMPARE[sort])
+  const onScreen = view === 'board' ? boardJobs : visible
+  // Ticked jobs that are on screen now: those are the ones Delete acts on, so
+  // nothing hidden by a tab or a search is deleted by surprise.
+  const selectedVisible = onScreen.filter((job) => selected.has(job.id))
+  const allSelected = onScreen.length > 0 && selectedVisible.length === onScreen.length
+
+  function selectAll(on) {
+    setSelected(on ? new Set(onScreen.map((job) => job.id)) : new Set())
+  }
+
+  function deleteSelected() {
+    if (!selectedVisible.length) return
+    handleDelete(selectedVisible)
+    changeSelecting(false)
+  }
 
   return (
     <section>
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-heading font-bold">My Stash</h1>
-          <p className="mt-2 text-lg text-muted">Keep track of jobs you want to apply to.</p>
+          <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">My Stash</p>
+          <h1 className="mt-2 text-[2rem] leading-[1.1] font-bold tracking-tight text-ink md:text-[2.75rem]">
+            Your <span className="text-brand-blue">opportunities</span>,
+            <br className="hidden sm:block" /> all in one place.
+          </h1>
+          <p className="mt-3 text-lg text-muted">Keep track of jobs you want to apply to.</p>
         </div>
         <DemoNotice className="md:max-w-sm" />
       </div>
@@ -256,7 +305,7 @@ export default function StashPage() {
               minute to wake up.
             </p>
           )}
-          <ul className="flex flex-col gap-4">
+          <ul className="border-y border-line">
             <JobCardSkeleton />
             <JobCardSkeleton />
             <JobCardSkeleton />
@@ -310,8 +359,56 @@ export default function StashPage() {
               onFavoritesOnlyChange={showFavoritesOnly}
               view={view}
               onViewChange={changeView}
+              selecting={selecting}
+              onSelectingChange={changeSelecting}
             />
           </div>
+
+          {/* Select mode's bar: tick all, how many are ticked, Delete, and the
+              way out. It stays at the top of the screen while scrolling. */}
+          {selecting && (
+            <div
+              role="region"
+              aria-label="Selected jobs"
+              className="sticky top-2 z-10 mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-brand-blue/30 bg-todo-bg px-3 py-2 shadow-sm sm:gap-x-4 sm:px-4"
+            >
+              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-ink">
+                <input
+                  type="checkbox"
+                  className="size-5 accent-brand-blue"
+                  checked={allSelected}
+                  ref={(box) => { if (box) box.indeterminate = selectedVisible.length > 0 && !allSelected }}
+                  onChange={(event) => selectAll(event.target.checked)}
+                />
+                Select all
+              </label>
+              {/* Phones: only screen readers hear this; the Delete button shows the
+                  same number. */}
+              <p className="text-sm text-muted max-sm:sr-only" aria-live="polite">
+                {selectedVisible.length} selected
+              </p>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={deleteSelected}
+                  disabled={!selectedVisible.length}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-error px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-40"
+                >
+                  <svg className="size-4 max-sm:hidden" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.75 6.5v4.5M9.25 6.5v4.5" />
+                  </svg>
+                  Delete{selectedVisible.length ? ` (${selectedVisible.length})` : ''}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changeSelecting(false)}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-4 text-sm font-semibold text-ink hover:bg-subtle"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           {actionError && (
             <p className="mt-4 rounded-card border border-line bg-surface p-4 text-error" role="alert">
@@ -334,10 +431,12 @@ export default function StashPage() {
           ) : view === 'board' && matches.length > 0 ? (
             <div className="mt-6">
               <StashBoard
-                jobs={[...matches].sort(COMPARE[sort])}
+                jobs={boardJobs}
                 onSetStatus={handleSetStatus}
-                onDelete={handleDelete}
                 onToggleFavorite={handleToggleFavorite}
+                selecting={selecting}
+                selected={selected}
+                onSelect={toggleSelected}
               />
             </div>
           ) : (view === 'board' ? matches.length === 0 : visible.length === 0) && shownQuery.trim() ? (
@@ -358,17 +457,33 @@ export default function StashPage() {
               {tab === 'done' && doneFilter !== 'all' ? EMPTY_OUTCOME[doneFilter] : EMPTY_TAB[tab]}
             </p>
           ) : (
-            <ul className="mt-6 flex flex-col gap-4">
+            // One continuous list, a thin line between jobs (JobCard.jsx).
+            // The status chip only where it tells you something: not on To
+            // Apply, where every job is To Apply.
+            <ul className="mt-4 border-y border-line">
               {visible.map((job) => (
-                <JobCard key={job.id} job={job} onSetStatus={handleSetStatus} onDelete={handleDelete} onToggleFavorite={handleToggleFavorite} />
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  showStatus={tab !== 'to_apply'}
+                  onSetStatus={handleSetStatus}
+                  onToggleFavorite={handleToggleFavorite}
+                  selecting={selecting}
+                  selected={selected.has(job.id)}
+                  onSelect={() => toggleSelected(job)}
+                />
               ))}
             </ul>
           )}
         </>
       )}
-          {deleted && (
+      {deleted && (
         <UndoToast
-          message={`Deleted "${deleted.job_title || deleted.company_name}"`}
+          message={
+            deleted.length === 1
+              ? `Deleted "${deleted[0].job_title || deleted[0].company_name}"`
+              : `Deleted ${deleted.length} jobs`
+          }
           onUndo={handleUndo}
         />
       )}
