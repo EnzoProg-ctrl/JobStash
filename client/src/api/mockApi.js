@@ -187,6 +187,18 @@ export async function previewJob(url) {
       .map((word) => (capitals.includes(word.toLowerCase()) ? word.toUpperCase() : word[0].toUpperCase() + word.slice(1)))
       .join(' ')
   const match = /linkedin\.com\/jobs\/view\/([a-z0-9-]+?)-at-([a-z0-9-]+?)-\d+/i.exec(url)
-  if (!match) return { company_name: '', job_title: '', found: null }
-  return { company_name: words(match[2]), job_title: words(match[1]), found: 'link' }
+  if (match) return { company_name: words(match[2]), job_title: words(match[1]), found: 'link', blocked: false }
+  // glassdoor.com/job-listing/qa-analyst-brightside-co-JV_IC2195824_KO0,10_KE11,24.htm:
+  // the numbers say where the position (KO) and company (KE) sit in the words.
+  const glassdoor = /glassdoor\.[a-z.]+\/job-listing\/([a-z0-9-]+)-JV_.*?_KO(\d+),(\d+)(?:_KE(\d+),(\d+))?/i.exec(url)
+  if (glassdoor) {
+    const [, slug, a, b, c, d] = glassdoor
+    return {
+      job_title: words(slug.slice(Number(a), Number(b))),
+      company_name: c === undefined ? '' : words(slug.slice(Number(c), Number(d))),
+      found: 'link',
+      blocked: false,
+    }
+  }
+  return { company_name: '', job_title: '', found: null, blocked: false }
 }

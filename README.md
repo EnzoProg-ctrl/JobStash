@@ -223,10 +223,12 @@ is gone, and the jobs now come from your database.
    **Pasting the link is enough:** JobStash reads the job's page and fills in
    the company and position within a second or two (*Reading the job page…*,
    then *Filled in from the link*). It uses the page's job-posting data, its
-   title (LinkedIn, Indeed, Greenhouse and Lever styles) or the words in the
-   link itself. Both stay editable, and anything you typed is never replaced.
-   Some sites (Indeed, for example) block automated readers; then it says it
-   couldn't read the link and you type the company.
+   title (LinkedIn, Greenhouse, Lever, Ashby, Workday and Kalibrr pages) or the
+   words in the link itself (LinkedIn, Kalibrr and Glassdoor links). Both stay
+   editable, and anything you typed is never replaced. OnlineJobs.ph postings
+   usually don't name the employer, so only the title is filled in and it asks
+   you for the company. JobStreet, Indeed and Glassdoor block every website
+   from reading their pages; then it says so, and you type the details.
    **No link?** For jobs you saw offline, heard about, or found by
    cold-emailing a company, **Add job without link** (above the link box)
    opens a second pop-up, *Add Job Without Link* (`/stash/add/manual`). There
@@ -249,8 +251,9 @@ is gone, and the jobs now come from your database.
 4. **My Stash** (`/stash`) is the app's home. Every saved job is a card with:
    - a coloured letter circle for the company
    - the job title and company (if there's no title, the company is shown instead)
-   - the website it's from (LinkedIn, Indeed and JobStreet by name, other sites
-     by address) and how long ago it was saved
+   - the website it's from (LinkedIn, Indeed, JobStreet, Glassdoor, Kalibrr and
+     OnlineJobs.ph by name, other sites by address) and the date it was added
+     ("Added Oct 25, 2026"; hovering it shows how long ago)
    - a status chip: **To Apply** (blue), or for done jobs **Pending** (applied,
      waiting; blue-grey), **Accepted** (green) or **Rejected** (red)
    - **Open Posting**, which opens the job in a new tab

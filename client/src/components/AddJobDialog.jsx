@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useOutletContext } from 'react-router'
 import { createJob, previewJob } from '../api'
+import { siteName } from '../lib/format.js'
 
 // The Add Job pop-up. It is shown while the address is /stash/add, on top of
 // My Stash, and closing it just goes back to /stash.
@@ -90,7 +91,10 @@ export default function AddJobDialog({ manual = false }) {
   const [closing, setClosing] = useState(false)
   const closed = useRef(false)
 
-  // Reading the link: 'idle' (no link yet), 'looking', 'filled' or 'none'.
+  // Reading the link: 'idle' (no link yet), 'looking', 'filled', 'title-only'
+  // (the page names the position but not the company, as on OnlineJobs.ph),
+  // 'blocked' (the site refuses to be read, as JobStreet and Indeed do) or
+  // 'none'.
   const [lookup, setLookup] = useState('idle')
   // What was filled in automatically, so a new link can replace it but never
   // something the person typed.
@@ -120,15 +124,23 @@ export default function AddJobDialog({ manual = false }) {
       if (id !== lookupId.current) return
       // Fill a field only if it's empty or still holds what was filled in
       // before; anything the person typed stays.
+      // Says what the field holds afterwards.
       const fill = (setValue, key, value = '') => {
         const now = current.current[key]
-        if (now.trim() !== '' && now !== autoFilled.current[key]) return
+        if (now.trim() !== '' && now !== autoFilled.current[key]) return now
         autoFilled.current[key] = value
         setValue(value)
+        return value
       }
-      fill(setCompanyName, 'company', found.company_name)
+      const company = fill(setCompanyName, 'company', found.company_name)
       fill(setJobTitle, 'title', found.job_title)
-      setLookup(found.company_name || found.job_title ? 'filled' : 'none')
+      setLookup(
+        found.company_name ? 'filled'
+        // Only the title found: ask for the company, unless it's typed already.
+        : found.job_title ? (company.trim() ? 'filled' : 'title-only')
+        : found.blocked ? 'blocked'
+        : 'none',
+      )
     }, 500)
     return () => clearTimeout(timer)
   }, [postingUrl, manual])
@@ -341,6 +353,16 @@ export default function AddJobDialog({ manual = false }) {
                       Filled in from the link. Check them before saving.
                     </>
                   )}
+                  {lookup === 'title-only' && (
+                    <>
+                      <svg className="size-4 shrink-0 text-done" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Filled in the job title. This posting doesn't name the company, so please type it.
+                    </>
+                  )}
+                  {lookup === 'blocked' &&
+                    `${siteName(postingUrl.trim()) || 'This site'} doesn't let other websites read its job pages. Please type the company name and job title.`}
                   {lookup === 'none' && "Couldn't read the details from this link. Please type the company name."}
                 </p>
               )}

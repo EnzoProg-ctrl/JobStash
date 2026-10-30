@@ -7,6 +7,9 @@ const SITE_NAMES = {
   linkedin: 'LinkedIn',
   indeed: 'Indeed',
   jobstreet: 'JobStreet',
+  glassdoor: 'Glassdoor',
+  kalibrr: 'Kalibrr',
+  onlinejobs: 'OnlineJobs.ph',
 }
 
 // "https://ph.indeed.com/viewjob?jk=..." -> "Indeed"

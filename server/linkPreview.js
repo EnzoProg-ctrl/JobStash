@@ -7,7 +7,7 @@ import zlib from 'node:zlib'
 // Reads a job posting's page and suggests its company and job title, so
 // adding a job can be just pasting the link (GET /api/preview in server.js).
 //
-//   const { company_name, job_title, found } = await previewJob(url)
+//   const { company_name, job_title, found, blocked } = await previewJob(url)
 //
 // It looks, in this order, at:
 //   1. the page's job-posting data (schema.org JobPosting): most careers sites
@@ -15,9 +15,13 @@ import zlib from 'node:zlib'
 //   2. its link-preview tags (og:title, og:site_name) and its <title>, e.g.
 //      "Brightside Co. hiring Frontend Intern in Manila | LinkedIn"
 //   3. the link itself, e.g. linkedin.com/jobs/view/frontend-intern-at-brightside-co-4011…
+//      or glassdoor.com/job-listing/frontend-intern-brightside-co-JV_…_KO0,15_KE16,29.htm
 // found says where the answer came from ('page', 'link'), or is null when
-// nothing was found; then the person types the company themselves. It never
-// throws: a page that is slow, blocked or odd just finds nothing.
+// nothing was found; then the person types the company themselves. Either one
+// can be empty (OnlineJobs.ph pages name the position but rarely the
+// employer). blocked is true when the site refused to show the page (JobStreet
+// and Indeed do, to every server). It never throws: a page that is slow,
+// blocked or odd just finds nothing.
 //
 // Opening any link people paste is risky for a server: someone could paste an
 // address inside the hosting network (the cloud's metadata service,
@@ -120,7 +124,7 @@ function fetchPage(text, redirectsLeft, deadline) {
       }
       if (statusCode !== 200 || !/html/i.test(headers['content-type'] ?? '')) {
         response.resume()
-        return finish(reject, new Error(`Not a readable page (${statusCode})`))
+        return finish(reject, Object.assign(new Error(`Not a readable page (${statusCode})`), { status: statusCode }))
       }
 
       const encoding = (headers['content-encoding'] ?? '').toLowerCase()
@@ -160,7 +164,8 @@ function decode(text) {
 
 function clean(text, max) {
   if (typeof text !== 'string') return ''
-  const tidy = decode(text).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  // Decoded twice: some sites encode their titles twice ("&amp;amp;" for "&").
+  const tidy = decode(decode(text)).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
   return tidy.length > max ? '' : tidy
 }
 
@@ -221,9 +226,16 @@ function splitTitle(raw, siteName, host) {
   // Drop a trailing "| LinkedIn", "- Indeed.com", "| Jobstreet" or the site's own name.
   const suffix = /\s+[|\-–—·]\s+([^|\-–—·]+)$/
   const last = title.match(suffix)
-  if (last && (JOB_SITES.test(last[1].trim()) || (siteName && last[1].trim() === siteName))) {
+  const onJobSite = Boolean(last && JOB_SITES.test(last[1].trim()))
+  if (last && (onJobSite || (siteName && last[1].trim() === siteName))) {
     title = title.replace(suffix, '').trim()
   }
+  // A listing number at the end ("AI Video Creator & Editor 1758871" on
+  // OnlineJobs.ph) isn't part of the job's name.
+  title = title.replace(/\s+#?\d{5,}$/, '')
+  // OnlineJobs.ph titles are only the position, written freely by the
+  // employer (who usually stays anonymous), dashes and "at" included.
+  if (host.endsWith('onlinejobs.ph')) return { job_title: title, matched: true }
 
   let match = title.match(/^(.+?) hiring (.+?)(?: in [^|]+)?$/i)        // LinkedIn
   if (match) return { company_name: match[1], job_title: match[2], matched: true }
@@ -234,7 +246,10 @@ function splitTitle(raw, siteName, host) {
     return { company_name: parts[0], job_title: parts[1], matched: true }
   }
   if (parts.length >= 2) return { job_title: parts[0], company_name: parts[1], matched: true }  // Indeed: "Position - Company - Place"
-  return { job_title: title, matched: false }
+  // A job site's page whose title is only the position: OnlineJobs.ph, where
+  // most employers stay anonymous ("AI Video Creator & Editor - OnlineJobs.ph").
+  // The title is still worth filling in; the person types the company.
+  return { job_title: title, matched: onJobSite }
 }
 
 // 3. The link itself, for sites that put the words in it.
@@ -264,6 +279,18 @@ export function fromLink(text) {
   // kalibrr.com/c/brightside-co/jobs/123456/frontend-intern
   match = host.endsWith('kalibrr.com') && path.match(/\/c\/([a-z0-9-]+)\/jobs\/\d+\/([a-z0-9-]+)/i)
   if (match) return { job_title: words(match[2]), company_name: words(match[1]) }
+  // glassdoor.com/job-listing/senior-developer-acme-corp-JV_IC2195824_KO0,16_KE17,26.htm
+  // The numbers say where the position (KO) and the company (KE) sit in the
+  // words before "-JV_". Glassdoor blocks pages being read, so this is all
+  // there is.
+  match = /(^|\.)glassdoor\./.test(host) && path.match(/\/job-listing\/([a-z0-9-]+)-JV_.*?_KO(\d+),(\d+)(?:_KE(\d+),(\d+))?/i)
+  if (match) {
+    const [, slug, titleStart, titleEnd, companyStart, companyEnd] = match
+    const part = (start, end) => (start === undefined ? '' : words(slug.slice(Number(start), Number(end))))
+    const job_title = part(titleStart, titleEnd)
+    const company_name = part(companyStart, companyEnd)
+    if (job_title || company_name) return { job_title, company_name }
+  }
   return {}
 }
 
@@ -296,14 +323,24 @@ export function readDetails(html, host = '') {
   return {}
 }
 
+// Pages that only check whether a real person is visiting ("Just a moment…").
+// Sites behind bot protection (JobStreet, Indeed, Glassdoor) send these to any
+// server, whatever it says it is. JobStash doesn't try to get past them.
+const CHECK_PAGE = /<title[^>]*>\s*(just a moment|attention required|access denied|verify(ing)? you are (a )?human|security check|are you a robot)/i
+
+// The answer also says when the site refused to be read (blocked: true), so
+// the Add Job pop-up can explain instead of just saying nothing was found.
 export async function previewJob(text) {
-  const nothing = { company_name: '', job_title: '', found: null }
   let page = {}
+  let blocked = false
   try {
     const { html, url } = await fetchPage(text, MAX_REDIRECTS, Date.now() + TIME_LIMIT)
-    page = readDetails(html, new URL(url).hostname)
-  } catch {
-    // Blocked, slow, not a page, or not allowed: fall back to the link.
+    if (CHECK_PAGE.test(html)) blocked = true
+    else page = readDetails(html, new URL(url).hostname)
+  } catch (error) {
+    // Refused (401, 403, 429 or 503): blocked. Slow, not a page, or not
+    // allowed: just nothing. Either way, fall back to the link.
+    blocked = [401, 403, 429, 503].includes(error.status)
   }
   const link = fromLink(text)
   // Sure about the page: use it, filling any gap from the link.
@@ -312,10 +349,13 @@ export async function previewJob(text) {
       company_name: page.company_name || link.company_name || '',
       job_title: page.job_title || link.job_title || '',
       found: 'page',
+      blocked,
     }
   }
   // Otherwise the words in the link win over a vague page.
-  if (link.company_name || link.job_title) return { company_name: link.company_name, job_title: link.job_title, found: 'link' }
-  if (page.strength === 'weak') return { company_name: page.company_name, job_title: page.job_title, found: 'page' }
-  return nothing
+  if (link.company_name || link.job_title) {
+    return { company_name: link.company_name, job_title: link.job_title, found: 'link', blocked }
+  }
+  if (page.strength === 'weak') return { company_name: page.company_name, job_title: page.job_title, found: 'page', blocked }
+  return { company_name: '', job_title: '', found: null, blocked }
 }
