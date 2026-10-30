@@ -212,223 +212,231 @@ export default function AddJobDialog({ manual = false }) {
   const fromLink = (key, value) => value.trim() !== '' && value === autoFilled.current[key]
 
   return (
-    <dialog
-      ref={dialog}
-      onCancel={handleCancel}
-      // If the browser closes the pop-up by itself anyway (some do on a second
-      // Esc press), still go back to /stash.
-      onClose={finishClosing}
-      data-closing={closing || undefined}
-      onPointerDown={handleBackdropPress}
-      onClick={handleBackdropClick}
-      aria-labelledby="add-job-title"
-      // A box with rounded corners and a little of the dimmed page showing
-      // around it. 768px up: in the middle of the screen. Phones: resting near
-      // the bottom edge (clear of the iPhone's home line), so Save stays in
-      // the same place in both versions of the pop-up; the taller one just
-      // reaches higher up. overscroll-contain: scrolling to the end of the
-      // pop-up's own fields doesn't carry on into the page behind it.
-      className="overscroll-contain m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 max-md:mb-[max(1rem,env(safe-area-inset-bottom))]"
-    >
-      {/* Top: what this pop-up is for, and ✕. */}
-      <div className="px-6 pt-6 md:px-8 md:pt-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
-              {manual ? 'No link needed' : 'New job'}
-            </p>
-            <h2 id="add-job-title" className="mt-1.5 text-2xl font-bold tracking-tight md:text-[1.75rem]">
-              {manual ? 'Add Job Without Link' : 'Add Job'}
-            </h2>
-            <p className="mt-1 text-muted">
-              {manual
-                ? 'For jobs you saw offline, heard about, or are cold-emailing about.'
-                : 'Paste a job link. JobStash fills in the company and position.'}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Close"
-            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-line text-muted hover:bg-subtle hover:text-ink"
-          >
-            <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M5 5l10 10M15 5L5 15" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} noValidate className="mt-6">
-        <div className="flex flex-col gap-5 px-6 md:px-8">
-          <div>
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-              <label htmlFor="posting-url" className={labelClass}>
-                Job posting URL{' '}
-                {manual ? (
-                  <span className="font-normal text-muted">(optional)</span>
-                ) : (
-                  <span className="text-error" aria-hidden="true">*</span>
-                )}
-              </label>
-              {/* Switch to the other pop-up, keeping the link. */}
-              <button
-                type="button"
-                onClick={switchMode}
-                className="-my-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-blue hover:bg-todo-bg"
-              >
-                {manual ? (
-                  <>
-                    <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z" />
-                    </svg>
-                    Fill in from a link
-                  </>
-                ) : (
-                  <>
-                    <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M10.5 2.5l3 3L6 13H3v-3z" />
-                    </svg>
-                    Add job without link
-                  </>
-                )}
-              </button>
+    <>
+      {/* For Safari on iPhone: it colours the strip behind the time and battery
+          from a bar pinned to the top of the page, and ignores the dimmed
+          background behind the pop-up. This 1px bar, in the same grey as the
+          dimmed page, gives it that grey, so no light strip shows above the
+          dimmed page. Phones only; it goes away with the pop-up. */}
+      <div className="fixed inset-x-0 top-0 z-50 h-px bg-[#9b9fa8] md:hidden" aria-hidden="true" />
+      <dialog
+        ref={dialog}
+        onCancel={handleCancel}
+        // If the browser closes the pop-up by itself anyway (some do on a second
+        // Esc press), still go back to /stash.
+        onClose={finishClosing}
+        data-closing={closing || undefined}
+        onPointerDown={handleBackdropPress}
+        onClick={handleBackdropClick}
+        aria-labelledby="add-job-title"
+        // A box with rounded corners and a little of the dimmed page showing
+        // around it. 768px up: in the middle of the screen. Phones: resting near
+        // the bottom edge (clear of the iPhone's home line), so Save stays in
+        // the same place in both versions of the pop-up; the taller one just
+        // reaches higher up. overscroll-contain: scrolling to the end of the
+        // pop-up's own fields doesn't carry on into the page behind it.
+        className="overscroll-contain m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 max-md:mb-[max(1rem,env(safe-area-inset-bottom))]"
+      >
+        {/* Top: what this pop-up is for, and ✕. */}
+        <div className="px-6 pt-6 md:px-8 md:pt-7">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+                {manual ? 'No link needed' : 'New job'}
+              </p>
+              <h2 id="add-job-title" className="mt-1.5 text-2xl font-bold tracking-tight md:text-[1.75rem]">
+                {manual ? 'Add Job Without Link' : 'Add Job'}
+              </h2>
+              <p className="mt-1 text-muted">
+                {manual
+                  ? 'For jobs you saw offline, heard about, or are cold-emailing about.'
+                  : 'Paste a job link. JobStash fills in the company and position.'}
+              </p>
             </div>
-            <div className="relative">
-              <svg className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                <path d="M7 9a3 3 0 004.2.3l2-2a3 3 0 00-4.2-4.2l-.8.8M9 7a3 3 0 00-4.2-.3l-2 2a3 3 0 004.2 4.2l.8-.8" />
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Close"
+              className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-line text-muted hover:bg-subtle hover:text-ink"
+            >
+              <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M5 5l10 10M15 5L5 15" />
               </svg>
-              <input
-                id="posting-url"
-                type="url"
-                placeholder="https://"
-                ref={urlInput}
-                aria-required={manual ? undefined : 'true'}
-                value={postingUrl}
-                onChange={(event) => setPostingUrl(event.target.value)}
-                aria-invalid={errors.postingUrl ? 'true' : undefined}
-                aria-describedby={errors.postingUrl ? 'posting-url-error' : undefined}
-                className={`${inputClass} pl-12`}
-              />
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} noValidate className="mt-6">
+          <div className="flex flex-col gap-5 px-6 md:px-8">
+            <div>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                <label htmlFor="posting-url" className={labelClass}>
+                  Job posting URL{' '}
+                  {manual ? (
+                    <span className="font-normal text-muted">(optional)</span>
+                  ) : (
+                    <span className="text-error" aria-hidden="true">*</span>
+                  )}
+                </label>
+                {/* Switch to the other pop-up, keeping the link. */}
+                <button
+                  type="button"
+                  onClick={switchMode}
+                  className="-my-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-brand-blue hover:bg-todo-bg"
+                >
+                  {manual ? (
+                    <>
+                      <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z" />
+                      </svg>
+                      Fill in from a link
+                    </>
+                  ) : (
+                    <>
+                      <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M10.5 2.5l3 3L6 13H3v-3z" />
+                      </svg>
+                      Add job without link
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="relative">
+                <svg className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                  <path d="M7 9a3 3 0 004.2.3l2-2a3 3 0 00-4.2-4.2l-.8.8M9 7a3 3 0 00-4.2-.3l-2 2a3 3 0 004.2 4.2l.8-.8" />
+                </svg>
+                <input
+                  id="posting-url"
+                  type="url"
+                  placeholder="https://"
+                  ref={urlInput}
+                  aria-required={manual ? undefined : 'true'}
+                  value={postingUrl}
+                  onChange={(event) => setPostingUrl(event.target.value)}
+                  aria-invalid={errors.postingUrl ? 'true' : undefined}
+                  aria-describedby={errors.postingUrl ? 'posting-url-error' : undefined}
+                  className={`${inputClass} pl-12`}
+                />
+              </div>
+              {errors.postingUrl && (
+                <p id="posting-url-error" className="mt-2 text-sm text-error">{errors.postingUrl}</p>
+              )}
+              {/* What reading the link is doing. Screen readers hear it too. */}
+              {!manual && (
+                <p role="status" className="mt-2 flex min-h-5 items-center gap-2 text-sm text-muted">
+                  {lookup === 'looking' && (
+                    <>
+                      <svg className="size-4 animate-spin text-brand-blue" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2" />
+                        <path d="M14 8a6 6 0 00-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                      Reading the job page…
+                    </>
+                  )}
+                  {lookup === 'filled' && (
+                    <>
+                      <svg className="size-4 text-done" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Filled in from the link. Check them before saving.
+                    </>
+                  )}
+                  {lookup === 'none' && "Couldn't read the details from this link. Please type the company name."}
+                </p>
+              )}
             </div>
-            {errors.postingUrl && (
-              <p id="posting-url-error" className="mt-2 text-sm text-error">{errors.postingUrl}</p>
+
+            <div>
+              <label htmlFor="company-name" className={`mb-2 block ${labelClass}`}>
+                Company name <span className="text-error" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="company-name"
+                type="text"
+                ref={companyInput}
+                placeholder={manual ? 'e.g. NovaTech' : 'Filled in from the link, or type it'}
+                aria-required="true"
+                value={companyName}
+                onChange={(event) => setCompanyName(event.target.value)}
+                aria-invalid={errors.companyName ? 'true' : undefined}
+                aria-describedby={errors.companyName ? 'company-name-error' : undefined}
+                className={`${inputClass} ${fromLink('company', companyName) ? 'bg-todo-bg/70' : ''}`}
+              />
+              {errors.companyName && (
+                <p id="company-name-error" className="mt-2 text-sm text-error">{errors.companyName}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="job-title" className={`mb-2 block ${labelClass}`}>
+                Job title <span className="font-normal text-muted">(optional)</span>
+              </label>
+              <input
+                id="job-title"
+                type="text"
+                placeholder={manual ? 'e.g. Data Analyst Intern' : 'Filled in from the link'}
+                value={jobTitle}
+                onChange={(event) => setJobTitle(event.target.value)}
+                aria-invalid={errors.jobTitle ? 'true' : undefined}
+                aria-describedby={errors.jobTitle ? 'job-title-error' : undefined}
+                className={`${inputClass} ${fromLink('title', jobTitle) ? 'bg-todo-bg/70' : ''}`}
+              />
+              {errors.jobTitle && (
+                <p id="job-title-error" className="mt-2 text-sm text-error">{errors.jobTitle}</p>
+              )}
+            </div>
+
+            {/* Only without a link: where the job came from, shown on its card. */}
+            {manual && (
+              <div>
+                <label htmlFor="job-source" className={`mb-2 block ${labelClass}`}>
+                  Where you found it <span className="font-normal text-muted">(optional)</span>
+                </label>
+                <input
+                  id="job-source"
+                  type="text"
+                  placeholder="e.g. Cold email, job fair, referral"
+                  value={source}
+                  onChange={(event) => setSource(event.target.value)}
+                  aria-invalid={errors.source ? 'true' : undefined}
+                  aria-describedby={errors.source ? 'job-source-error' : undefined}
+                  className={inputClass}
+                />
+                {errors.source && (
+                  <p id="job-source-error" className="mt-2 text-sm text-error">{errors.source}</p>
+                )}
+              </div>
             )}
-            {/* What reading the link is doing. Screen readers hear it too. */}
-            {!manual && (
-              <p role="status" className="mt-2 flex min-h-5 items-center gap-2 text-sm text-muted">
-                {lookup === 'looking' && (
-                  <>
-                    <svg className="size-4 animate-spin text-brand-blue" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2" />
-                      <path d="M14 8a6 6 0 00-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    Reading the job page…
-                  </>
-                )}
-                {lookup === 'filled' && (
-                  <>
-                    <svg className="size-4 text-done" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Filled in from the link. Check them before saving.
-                  </>
-                )}
-                {lookup === 'none' && "Couldn't read the details from this link. Please type the company name."}
+
+            {saveError && (
+              <p role="alert" className="rounded-xl border border-error/30 bg-red-50 p-3 text-sm text-error">
+                Couldn't save: {saveError}
               </p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="company-name" className={`mb-2 block ${labelClass}`}>
-              Company name <span className="text-error" aria-hidden="true">*</span>
-            </label>
-            <input
-              id="company-name"
-              type="text"
-              ref={companyInput}
-              placeholder={manual ? 'e.g. NovaTech' : 'Filled in from the link, or type it'}
-              aria-required="true"
-              value={companyName}
-              onChange={(event) => setCompanyName(event.target.value)}
-              aria-invalid={errors.companyName ? 'true' : undefined}
-              aria-describedby={errors.companyName ? 'company-name-error' : undefined}
-              className={`${inputClass} ${fromLink('company', companyName) ? 'bg-todo-bg/70' : ''}`}
-            />
-            {errors.companyName && (
-              <p id="company-name-error" className="mt-2 text-sm text-error">{errors.companyName}</p>
-            )}
+          {/* Bottom: Cancel and Save, under a thin line. Phones: Save only, full
+              width (the ✕ and the dimmed page close it). sticky: when the
+              pop-up has to scroll (small phones), Save stays in sight. */}
+          <div className="sticky bottom-0 mt-7 flex gap-3 border-t border-line bg-surface px-6 pt-4 pb-4 md:justify-end md:px-8 md:pb-5">
+            <button
+              type="button"
+              onClick={close}
+              className="hidden min-h-12 items-center rounded-xl border border-line bg-surface px-6 font-semibold text-ink hover:bg-subtle md:inline-flex"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              // Also while closing, so a quick second click can't save it twice.
+              disabled={saving || closing}
+              className="press inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-brand-blue px-8 font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60 md:flex-none"
+            >
+              {saving ? 'Saving…' : 'Save Job'}
+            </button>
           </div>
-
-          <div>
-            <label htmlFor="job-title" className={`mb-2 block ${labelClass}`}>
-              Job title <span className="font-normal text-muted">(optional)</span>
-            </label>
-            <input
-              id="job-title"
-              type="text"
-              placeholder={manual ? 'e.g. Data Analyst Intern' : 'Filled in from the link'}
-              value={jobTitle}
-              onChange={(event) => setJobTitle(event.target.value)}
-              aria-invalid={errors.jobTitle ? 'true' : undefined}
-              aria-describedby={errors.jobTitle ? 'job-title-error' : undefined}
-              className={`${inputClass} ${fromLink('title', jobTitle) ? 'bg-todo-bg/70' : ''}`}
-            />
-            {errors.jobTitle && (
-              <p id="job-title-error" className="mt-2 text-sm text-error">{errors.jobTitle}</p>
-            )}
-          </div>
-
-          {/* Only without a link: where the job came from, shown on its card. */}
-          {manual && (
-            <div>
-              <label htmlFor="job-source" className={`mb-2 block ${labelClass}`}>
-                Where you found it <span className="font-normal text-muted">(optional)</span>
-              </label>
-              <input
-                id="job-source"
-                type="text"
-                placeholder="e.g. Cold email, job fair, referral"
-                value={source}
-                onChange={(event) => setSource(event.target.value)}
-                aria-invalid={errors.source ? 'true' : undefined}
-                aria-describedby={errors.source ? 'job-source-error' : undefined}
-                className={inputClass}
-              />
-              {errors.source && (
-                <p id="job-source-error" className="mt-2 text-sm text-error">{errors.source}</p>
-              )}
-            </div>
-          )}
-
-          {saveError && (
-            <p role="alert" className="rounded-xl border border-error/30 bg-red-50 p-3 text-sm text-error">
-              Couldn't save: {saveError}
-            </p>
-          )}
-        </div>
-
-        {/* Bottom: Cancel and Save, under a thin line. Phones: Save only, full
-            width (the ✕ and the dimmed page close it). sticky: when the
-            pop-up has to scroll (small phones), Save stays in sight. */}
-        <div className="sticky bottom-0 mt-7 flex gap-3 border-t border-line bg-surface px-6 pt-4 pb-4 md:justify-end md:px-8 md:pb-5">
-          <button
-            type="button"
-            onClick={close}
-            className="hidden min-h-12 items-center rounded-xl border border-line bg-surface px-6 font-semibold text-ink hover:bg-subtle md:inline-flex"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            // Also while closing, so a quick second click can't save it twice.
-            disabled={saving || closing}
-            className="press inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-brand-blue px-8 font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60 md:flex-none"
-          >
-            {saving ? 'Saving…' : 'Save Job'}
-          </button>
-        </div>
-      </form>
-    </dialog>
+        </form>
+      </dialog>
+    </>
   )
 }
