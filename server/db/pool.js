@@ -1,4 +1,5 @@
 import pg from 'pg'
+import { attachDatabasePool } from '@vercel/functions'
 
 // Fail at boot with one clear line, rather than with a mystery 500 an hour
 // later. The commonest deployment mistake is setting a variable in .env on your
@@ -21,20 +22,23 @@ const isLocal =
   process.env.DATABASE_URL.includes('localhost') ||
   process.env.DATABASE_URL.includes('127.0.0.1')
 
+// On Vercel, DATABASE_URL is Supabase's transaction pooler (port 6543): many
+// short-lived copies of the API share a few real database connections. The
+// 5-second limit on slow queries is stored on the jobstash_app account itself
+// (migration 007), so it applies to every connection without the API setting
+// it.
 export const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: isLocal ? false : { rejectUnauthorized: false },
   max: 5,                          // free tiers allow far fewer than you think
-  idleTimeoutMillis: 10_000,       // hand connections back quickly
+  idleTimeoutMillis: 5_000,        // hand connections back quickly
   connectionTimeoutMillis: 5_000,  // fail fast rather than hanging the request
-  // No query may run longer than 5 seconds. Every query here takes a few
-  // milliseconds, so one that runs longer is stuck, and it would otherwise hold
-  // one of the 5 connections and make everyone else wait. The database stops
-  // it and the visitor gets a 500. This is set on each new connection, because
-  // Supabase's pooler ignores it when it is passed as a connection setting.
-  // db/migrate.js switches it off for itself, since migrations can be slow.
-  onConnect: (client) => client.query('SET statement_timeout = 5000'),
 })
+
+// Vercel pauses the API between requests. This closes idle connections before
+// a pause, so none are left hanging until the database drops them. It does
+// nothing on your computer.
+attachDatabasePool(pool)
 
 // A pool whose server goes away should say so once, loudly, not take the
 // process down.

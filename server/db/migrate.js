@@ -17,7 +17,9 @@ const folder = new URL('./migrations/', import.meta.url)
 const files = readdirSync(folder).filter((name) => name.endsWith('.sql')).sort()
 
 const client = await pool.connect()
-// A migration may rightly take longer than the API's 5-second limit (db/pool.js).
+// A migration may rightly take longer than the API's 5-second limit
+// (migration 007). That limit is on the API's account, not this one; this just
+// makes sure.
 await client.query('SET statement_timeout = 0')
 try {
   await client.query(`

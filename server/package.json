@@ -14,11 +14,15 @@
     "node": "24.x"
   },
   "dependencies": {
+    "@vercel/functions": "^3.10.5",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
     "jose": "^6.2.12",
     "pg": "^8.23.1"
+  },
+  "overrides": {
+    "zod": "^4.6.6"
   }
 }
