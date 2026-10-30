@@ -222,13 +222,12 @@ export default function AddJobDialog({ manual = false }) {
       onPointerDown={handleBackdropPress}
       onClick={handleBackdropClick}
       aria-labelledby="add-job-title"
-      // A box in the middle of the screen, on phones too, with a little of the
-      // dimmed page showing around it. Phones: always the full height of the
-      // screen (less that margin), with Save at the bottom. Both versions of
-      // the pop-up are then the same size, so Save stays in the same place
-      // when it opens and when switching between them. open:flex: a flex
-      // column only while open, so a closed pop-up stays hidden.
-      className="m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl flex-col rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 open:flex max-md:h-[calc(100%-2rem)]"
+      // A box with rounded corners and a little of the dimmed page showing
+      // around it. 768px up: in the middle of the screen. Phones: resting near
+      // the bottom edge (clear of the iPhone's home line), so Save stays in
+      // the same place in both versions of the pop-up; the taller one just
+      // reaches higher up.
+      className="m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 max-md:mb-[max(1rem,env(safe-area-inset-bottom))]"
     >
       {/* Top: what this pop-up is for, and ✕. */}
       <div className="px-6 pt-6 md:px-8 md:pt-7">
@@ -259,10 +258,8 @@ export default function AddJobDialog({ manual = false }) {
         </div>
       </div>
 
-      {/* flex-1 on the form and the boxes: they fill any spare height, which
-          pushes Save down to the bottom of the pop-up. */}
-      <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-1 flex-col">
-        <div className="flex flex-1 flex-col gap-5 px-6 md:px-8">
+      <form onSubmit={handleSubmit} noValidate className="mt-6">
+        <div className="flex flex-col gap-5 px-6 md:px-8">
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
               <label htmlFor="posting-url" className={labelClass}>

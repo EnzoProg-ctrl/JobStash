@@ -42,6 +42,15 @@
     scroll-behavior: smooth;
   }
 
+  /* While a pop-up is open, the root turns the same grey as the dimmed page
+     (ink at 40% over the page background). Safari on iPhone colours the
+     status bar strip at the top from this; without it, the strip stays light
+     above the dimmed page. The page itself is painted by body, so nothing
+     else changes. */
+  html:has(dialog[open]) {
+    background-color: #9b9fa8;
+  }
+
   body {
     background-color: var(--color-bg);
     color: var(--color-ink);
