@@ -10,7 +10,9 @@ import { signOut, useAuth } from '../lib/auth.jsx'
 // gets in the way of menus underneath.
 //
 // Phones: just the logo and the account ⋮; the bottom bar (BottomNav.jsx) has
-// Overview, Add Job and My Stash. From 768px: all of it up here.
+// Overview, Add Job and My Stash. From 768px: all of it up here. From 1024px
+// the logo moves to the top of the brand column (BrandAside.jsx), and this bar
+// sits beside it with the links on the right.
 export default function AppHeader() {
   const { session } = useAuth()
   const [leaving, setLeaving] = useState(false)
@@ -22,8 +24,8 @@ export default function AppHeader() {
 
   return (
     <header className="relative z-20 bg-surface">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 md:px-8">
-        <Link to="/stash" aria-label="JobStash, go to My Stash">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 md:px-8 lg:justify-end">
+        <Link to="/stash" aria-label="JobStash, go to My Stash" className="lg:hidden">
           <Logo className="text-2xl md:text-[1.75rem]" />
         </Link>
         <nav className="flex items-center gap-2 md:gap-3" aria-label="Main">

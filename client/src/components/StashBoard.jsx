@@ -95,8 +95,8 @@ export default function StashBoard({ jobs, onSetStatus, onToggleFavorite, select
       onDragCancel={() => setDragging(null)}
     >
       {/* Phones: the columns sit side by side and scroll sideways, one at a
-          time. Tablets: two by two. Laptops: all four in a row. */}
-      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-x-5 md:gap-y-8 md:overflow-visible md:px-0 lg:grid-cols-4">
+          time. Up to 1279px: two by two. From 1280px: all four in a row. */}
+      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-x-5 md:gap-y-8 md:overflow-visible md:px-0 xl:grid-cols-4">
         {COLUMNS.map((column) => (
           <Column
             key={column.id}

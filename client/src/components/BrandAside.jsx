@@ -1,11 +1,26 @@
+import { Link } from 'react-router'
+import Logo from './Logo.jsx'
+
 // The narrow brand column on the left of the app's pages, on wide screens only
-// (1024px and up). A short line, a quiet echo of the logo's stacked slabs, and
-// the name at the bottom. Deliberately understated: the jobs are the point.
-// Screen readers skip the decoration; the words are plain text.
+// (1024px and up): the logo at the top, a short line, a quiet echo of the
+// logo's stacked slabs, and the name at the bottom. Deliberately understated:
+// the jobs are the point. Screen readers skip the decoration; the words are
+// plain text.
+//
+// It runs the full height of the screen and stays put while the page scrolls
+// (sticky, h-dvh), whatever the length of the page beside it.
 export default function BrandAside() {
   return (
-    <aside className="relative hidden w-60 shrink-0 flex-col justify-between overflow-hidden border-r border-line/70 bg-linear-to-b from-surface/70 to-bg px-8 pt-28 pb-10 lg:flex">
-      <div className="relative z-10">
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col self-start overflow-hidden border-r border-line/70 bg-linear-to-b from-surface to-bg px-8 pb-10 lg:flex">
+      {/* The same height as the header beside it (AppHeader.jsx), so the logo
+          lines up with Overview, My Stash and Add Job. */}
+      <div className="relative z-10 flex h-17 shrink-0 items-center">
+        <Link to="/stash" aria-label="JobStash, go to My Stash">
+          <Logo className="text-[1.75rem]" />
+        </Link>
+      </div>
+
+      <div className="relative z-10 mt-12">
         <p className="text-xl leading-snug font-bold tracking-tight text-ink">
           Save today.
           <br />
@@ -18,7 +33,7 @@ export default function BrandAside() {
 
       <LayeredSlabs />
 
-      <div className="relative z-10">
+      <div className="relative z-10 mt-auto">
         <div className="mb-3 h-px w-8 bg-line" aria-hidden="true" />
         <p className="text-sm font-semibold text-ink">JobStash</p>
         <p className="mt-1 text-xs leading-relaxed text-muted">

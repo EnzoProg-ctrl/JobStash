@@ -41,18 +41,19 @@ export default function App() {
   )
 }
 
-// Wide screens: a narrow brand column at the left edge (BrandAside.jsx), then
-// the page, which fills the rest of the screen. Phones and tablets: just the
-// page. pb-32 on phones keeps the last job clear of the bottom bar.
+// Wide screens: a narrow brand column down the left edge, from the top of the
+// screen to the bottom (BrandAside.jsx, with the logo), then the header and the
+// page beside it, filling the rest of the screen. Phones and tablets: header
+// and page. pb-32 on phones keeps the last job clear of the bottom bar.
 //
 // The page stops growing at 1536px (max-w-384) and stays on the left, by the
 // brand column, so rows don't stretch across a very wide monitor.
 function AppLayout() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <AppHeader />
-      <div className="flex w-full flex-1">
-        <BrandAside />
+    <div className="flex min-h-screen">
+      <BrandAside />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <AppHeader />
         <main className="min-w-0 flex-1 px-4 pt-8 pb-32 md:px-8 md:pt-10 md:pb-14 lg:pl-12">
           <div className="max-w-384">
             <Outlet />
