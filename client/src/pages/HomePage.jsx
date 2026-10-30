@@ -117,14 +117,14 @@ export default function HomePage() {
             alt=""
             aria-hidden="true"
             draggable="false"
-            className="pointer-events-none absolute -top-10 -right-64 -z-10 hidden w-[30rem] opacity-40 select-none xl:block"
+            className={`${TILES_ONLY} absolute -top-10 -right-64 -z-10 hidden w-[30rem] opacity-40 xl:block`}
           />
           <img
             src={sidebarArt}
             alt=""
             aria-hidden="true"
             draggable="false"
-            className="pointer-events-none absolute top-40 -left-56 -z-10 hidden w-[22rem] -scale-x-100 opacity-35 select-none xl:block"
+            className={`${TILES_ONLY} absolute top-40 -left-56 -z-10 hidden w-[22rem] -scale-x-100 opacity-35 xl:block`}
           />
           <p className="inline-block rounded-full bg-todo-bg px-4 py-1.5 text-sm font-semibold text-brand-blue">
             A simpler way to job hunt
@@ -216,7 +216,7 @@ export default function HomePage() {
             alt=""
             aria-hidden="true"
             draggable="false"
-            className="pointer-events-none absolute -right-20 -bottom-28 -z-10 hidden w-96 opacity-25 select-none md:block"
+            className={`${TILES_ONLY} absolute -right-20 -bottom-28 -z-10 hidden w-96 opacity-25 md:block`}
           />
           <h2 id="start-title" className="mx-auto max-w-2xl text-3xl leading-tight font-bold tracking-tight text-balance md:text-[2.5rem]">
             {session ? 'Your stash is waiting.' : 'Your next job could be one link away.'}
@@ -275,6 +275,11 @@ export default function HomePage() {
 // scroll-mt keeps the header's "Sign in" link from landing it at the very top
 // edge of the screen.
 const SIGN_IN_AREA = 'mx-auto mt-10 max-w-[400px] scroll-mt-24 text-center'
+
+// The sidebar's artwork, used as decoration here: only its top part with the
+// tiles (the file's own shape is 244 by 313 there); below that it is just a
+// faint floor that runs on down for the tall sidebar.
+const TILES_ONLY = 'pointer-events-none aspect-[244/313] object-cover object-top select-none'
 
 // The white button in the blue band at the end of the page.
 const START_BUTTON =

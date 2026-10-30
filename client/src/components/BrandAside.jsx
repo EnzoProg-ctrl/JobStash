@@ -3,17 +3,18 @@ import Logo from './Logo.jsx'
 import sidebarArt from '../assets/branding/jobstash-sidebar-art.svg'
 
 // The brand column on the left of the app's pages, on wide screens only (1024px
-// and up): the logo at the top, the slogan, the stacked ribbons artwork
-// (assets/branding/jobstash-sidebar-art.svg) and the name at the bottom. It
-// widens with the screen, to about 335px at 1536px, so smaller laptops keep
-// their room for the jobs. Screen readers skip the artwork; the words are
-// plain text.
+// and up): the logo at the top, the slogan, and right under it the stacked
+// tiles artwork (assets/branding/jobstash-sidebar-art.svg), cut off by the
+// column's right and bottom edges. Drawn to match the design reference
+// (assets/jobstash-sidebar-reference.png). It widens with the screen, to about
+// 335px at 1536px, so smaller laptops keep their room for the jobs. Screen
+// readers skip the artwork; the words are plain text.
 //
 // It runs the full height of the screen and stays put while the page scrolls
 // (sticky, h-dvh), whatever the length of the page beside it.
 export default function BrandAside() {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col self-start overflow-hidden border-r border-line/70 bg-linear-to-b from-surface to-bg px-8 pb-10 lg:flex xl:w-72 2xl:w-84 2xl:pr-8 2xl:pl-12 2xl:pb-15">
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col self-start overflow-hidden border-r border-line/70 bg-[linear-gradient(165deg,#F6F9FE_0%,#F1F6FE_40%,#EDF4FE_70%,#F2F7FE_100%)] px-8 lg:flex xl:w-72 2xl:w-84 2xl:pr-8 2xl:pl-12">
       {/* The same height as the header beside it (AppHeader.jsx), so the logo
           lines up with Overview, My Stash and Add Job. */}
       <div className="relative z-10 flex h-20 shrink-0 items-center border-b border-line pb-3">
@@ -22,38 +23,29 @@ export default function BrandAside() {
         </Link>
       </div>
 
-      {/* The gap above the slogan grows with the screen's height, so short
-          screens still have room for the artwork. */}
-      <div className="relative z-10 mt-[min(10rem,15vh)]">
-        <p className="text-2xl leading-tight font-bold tracking-tight text-ink xl:text-[1.75rem] 2xl:text-[2rem]">
+      {/* The gap above the slogan grows with the screen's height. */}
+      <div className="relative z-10 mt-[min(6rem,9vh)]">
+        <p className="text-2xl leading-tight font-bold tracking-tight text-ink 2xl:text-[1.625rem]">
           Save today.
           <br />
-          <span className="text-brand-blue">Apply tomorrow.</span>
+          <span className="text-logo-blue">Apply tomorrow.</span>
         </p>
-        <p className="mt-4 max-w-64 text-sm leading-relaxed text-muted xl:text-base 2xl:text-lg">
+        <p className="mt-4 max-w-[190px] text-[0.9375rem] leading-[1.45] text-muted 2xl:max-w-54 2xl:text-base">
           A simple place to keep opportunities that matter to you.
         </p>
       </div>
 
-      {/* The artwork fills the space between the slogan and the name at the
-          bottom: as tall as that space (up to 28rem), wider than the column,
-          and cut off at both sides on purpose. It never covers the words. */}
-      <div className="relative my-6 min-h-0 flex-1" aria-hidden="true">
-        <img
-          src={sidebarArt}
-          alt=""
-          className="pointer-events-none absolute top-1/2 -left-8 h-[min(100%,28rem)] w-auto max-w-none -translate-y-1/2 select-none"
-          draggable="false"
-        />
-      </div>
-
-      <div className="relative z-10 shrink-0">
-        <div className="mb-3 h-px w-8 bg-line" aria-hidden="true" />
-        <p className="text-sm font-semibold text-ink 2xl:text-lg">JobStash</p>
-        <p className="mt-1 text-xs leading-relaxed text-muted 2xl:text-base">
-          Your future opportunities, organized.
-        </p>
-      </div>
+      {/* The artwork, right under the words as in the reference: the full
+          width of the column (the negative margins undo its padding), cut
+          off by its right edge, and by its bottom edge however tall the
+          screen is (the faint floor runs on down). */}
+      <img
+        src={sidebarArt}
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+        className="pointer-events-none mt-3 -mr-8 -ml-8 w-[calc(100%+4rem)] max-w-none shrink-0 select-none 2xl:-ml-12 2xl:w-[calc(100%+5rem)]"
+      />
     </aside>
   )
 }
