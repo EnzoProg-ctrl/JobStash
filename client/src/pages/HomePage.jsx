@@ -4,27 +4,59 @@ import DemoNotice from '../components/DemoNotice.jsx'
 import GoogleButton, { googleButtonAvailable } from '../components/GoogleButton.jsx'
 import LandingMenu from '../components/LandingMenu.jsx'
 import Logo from '../components/Logo.jsx'
+import Reveal from '../components/Reveal.jsx'
+import StashPreview from '../components/StashPreview.jsx'
+import UserAvatar from '../components/UserAvatar.jsx'
 import { supabase } from '../lib/supabase.js'
-import { clearSignInNote, readSignInNote, useAuth } from '../lib/auth.jsx'
+import { clearSignInNote, readSignInNote, signOut, useAuth } from '../lib/auth.jsx'
 import { usePageTitle } from '../lib/usePageTitle.js'
-import phoneImage from '../assets/landing-phone.webp'
+import sidebarArt from '../assets/branding/jobstash-sidebar-art.svg'
 
 // The landing page. Its own header and footer, and full width, unlike the app
-// screens that share AppLayout.
+// screens that share AppLayout. It uses the dashboard's look (the same blue,
+// the same initials circle and Sign out when signed in, and a live preview of
+// My Stash), so going from here into the app feels like one place.
 
-const FEATURES = [
-  { icon: BookmarkIcon, title: 'Save in seconds', text: 'Store job postings with just a link.' },
-  { icon: ListIcon, title: 'Stay organized', text: 'Keep track of what to apply to.' },
-  { icon: BoltIcon, title: 'Focus on what matters', text: 'Your future, on your terms.' },
+// How it works, in the order it happens. Step 2 is the link preview
+// (server/linkPreview.js); jobs without a link (a referral, a cold email) can
+// be typed in instead.
+const STEPS = [
+  {
+    icon: LinkIcon,
+    title: 'Paste the link',
+    text: 'Found a job on LinkedIn, JobStreet or a company site? Paste its link into Add Job, on your phone or your computer.',
+  },
+  {
+    icon: BoltIcon,
+    title: 'The details fill themselves in',
+    text: 'JobStash reads the posting for the company and the job title. No link, like a referral or a cold email? Just type them in.',
+  },
+  {
+    icon: CheckIcon,
+    title: "Apply when you're ready",
+    text: 'Open My Stash later, apply, and mark it done. Then keep track of each answer: Pending, Accepted or Rejected.',
+  },
 ]
 
 // Each person only sees their own jobs: the API checks who is signed in and
 // only returns that person's jobs (server/jobsRepo.js). In demo mode the jobs
 // never leave the browser, so the promise holds there too.
 const PROMISES = [
-  { icon: CapIcon, title: 'Built for everyone', text: 'Designed to make your job hunt simpler.' },
-  { icon: LockIcon, title: 'Your data stays private', text: 'Only you can see your saved jobs.' },
-  { icon: DevicesIcon, title: 'On any device', text: 'Save jobs from your phone or computer.' },
+  {
+    icon: CapIcon,
+    title: 'Built for everyone',
+    text: 'Nothing to set up and nothing to learn. If you can paste a link, you can use it.',
+  },
+  {
+    icon: LockIcon,
+    title: 'Your data stays private',
+    text: "Only you can see your saved jobs. You sign in with Google, so there's no new password to remember.",
+  },
+  {
+    icon: DevicesIcon,
+    title: 'On any device',
+    text: 'Save a job on your phone the moment you find it, then open the same list on your laptop to apply.',
+  },
 ]
 
 export default function HomePage() {
@@ -33,27 +65,35 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen overflow-x-clip">
-      <header className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-5 min-[360px]:gap-4 md:px-8">
+      {/* 80px tall from 768px, like the dashboard's top bar (AppHeader.jsx). */}
+      <header className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-5 min-[360px]:gap-4 md:h-20 md:px-8 md:py-0">
         <Link to="/" aria-label="JobStash home">
           {/* On the narrowest phones (under 360px) only the mark shows, so the
               mark, the button and the ⋮ menu fit on one line. The link's label
               still says "JobStash home" for screen readers. */}
-          <Logo className="text-2xl md:text-3xl" wordClassName="max-[359px]:sr-only" />
+          <Logo className="text-2xl md:text-[1.75rem]" wordClassName="max-[359px]:sr-only" />
         </Link>
         <nav className="flex items-center gap-2 md:gap-8" aria-label="Page sections">
-          <a href="#how-it-works" className="hidden text-muted hover:text-ink md:inline">How it works</a>
-          <a href="#features" className="hidden text-muted hover:text-ink md:inline">Features</a>
+          <a href="#how-it-works" className="hidden font-semibold text-muted hover:text-ink md:inline">How it works</a>
+          <a href="#features" className="hidden font-semibold text-muted hover:text-ink md:inline">Features</a>
           {session ? (
-            <Link
-              to="/stash"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-brand-blue-dark md:px-8"
-            >
-              My Stash
-            </Link>
+            <span className="flex items-center gap-2 md:gap-4">
+              <Link
+                to="/stash"
+                className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap text-white min-[360px]:px-4 hover:bg-brand-blue-dark md:h-12 md:px-5"
+              >
+                My Stash
+              </Link>
+              {/* Phones keep just the button and the ⋮ menu. */}
+              <span className="hidden items-center gap-2 md:flex">
+                <UserAvatar user={session.user} />
+                <SignOutButton />
+              </span>
+            </span>
           ) : (
             <a
               href="#sign-in"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap min-[360px]:px-4 text-white hover:bg-brand-blue-dark md:px-8"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap text-white min-[360px]:px-4 hover:bg-brand-blue-dark md:h-12 md:px-6"
             >
               {demo ? 'Try the demo' : 'Sign in'}
             </a>
@@ -69,60 +109,149 @@ export default function HomePage() {
       <main className="mx-auto max-w-7xl px-4 md:px-8">
         <DemoNotice className="mb-6" />
 
-        <section className="grid items-center gap-12 py-8 lg:grid-cols-[1.35fr_1fr] lg:py-10">
-          <div>
-            <p className="inline-block rounded-full bg-todo-bg px-4 py-1.5 text-sm text-ink">
-              A simpler way to job hunt
-            </p>
-            <h1 className="mt-6 text-4xl leading-tight font-bold tracking-tight md:text-display">
-              Found it on your phone?
-              <span className="block text-brand-blue">Stash it. Apply later.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg text-muted md:text-xl">
-              Save job postings, keep track of what to apply to, and stay one step
-              closer to your future.
-            </p>
-            <SignIn />
+        {/* The headline, centred, with room around it. The ribbons from the
+            dashboard's sidebar peek in from the right on wide screens. */}
+        <section className="relative isolate pt-10 pb-14 text-center md:pt-20 md:pb-20">
+          <img
+            src={sidebarArt}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className="pointer-events-none absolute -top-10 -right-64 -z-10 hidden w-[30rem] opacity-40 select-none xl:block"
+          />
+          <img
+            src={sidebarArt}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className="pointer-events-none absolute top-40 -left-56 -z-10 hidden w-[22rem] -scale-x-100 opacity-35 select-none xl:block"
+          />
+          <p className="inline-block rounded-full bg-todo-bg px-4 py-1.5 text-sm font-semibold text-brand-blue">
+            A simpler way to job hunt
+          </p>
+          <h1 className="mx-auto mt-6 max-w-4xl text-[2.25rem] leading-[1.1] font-bold tracking-tight text-ink min-[400px]:text-[2.5rem] md:text-display lg:text-[4rem]">
+            Found it on your phone?
+            <span className="block text-brand-blue">Stash it. Apply later.</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted md:text-xl">
+            Save job postings, keep track of what to apply to, and stay one step
+            closer to your future.
+          </p>
+          {/* Signing out from this page shows the "You've signed out" note:
+              a new key starts the sign-in area afresh, so it reads the note. */}
+          <SignIn key={session ? 'in' : 'out'} />
+        </section>
+
+        {/* What My Stash looks like, drawn by the app itself. */}
+        <section className="pb-20 md:pb-28" aria-label="A look at My Stash">
+          <Reveal className="mx-auto max-w-6xl">
+            <StashPreview />
+          </Reveal>
+        </section>
+
+        {/* How it works: a short heading, then the three steps side by side
+            (stacked on phones), each arriving a moment after the one before. */}
+        <section id="how-it-works" className="scroll-mt-8 border-t border-line py-20 md:py-28" aria-labelledby="how-it-works-title">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-semibold tracking-wide text-brand-blue uppercase">How it works</p>
+            <h2 id="how-it-works-title" className="mt-3 text-3xl leading-tight font-bold tracking-tight text-balance text-ink md:text-[2.5rem]">
+              From a link to an application, in three steps.
+            </h2>
+          </Reveal>
+          <ol className="mt-12 grid gap-5 md:mt-16 md:grid-cols-3 md:gap-8">
+            {STEPS.map((step, index) => (
+              <Reveal as="li" key={step.title} delay={index * 120} className="rounded-2xl border border-line bg-surface p-7 md:p-8">
+                <div className="flex items-center justify-between">
+                  <span className="flex size-12 items-center justify-center rounded-xl bg-todo-bg text-brand-blue">
+                    <step.icon />
+                  </span>
+                  <span className="text-sm font-semibold text-muted">Step {index + 1}</span>
+                </div>
+                <h3 className="mt-6 text-xl font-bold text-ink">{step.title}</h3>
+                <p className="mt-2 leading-relaxed text-pretty text-muted">{step.text}</p>
+              </Reveal>
+            ))}
+          </ol>
+        </section>
+
+        {/* Features: why JobStash on the left, the three promises on the
+            right (stacked on phones and tablets). */}
+        <section id="features" className="scroll-mt-8 border-t border-line py-20 md:py-28" aria-labelledby="features-title">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-20">
+            <Reveal className="lg:pt-6">
+              <p className="text-sm font-semibold tracking-wide text-brand-blue uppercase">Why JobStash</p>
+              <h2 id="features-title" className="mt-3 text-3xl leading-tight font-bold tracking-tight text-balance text-ink md:text-[2.5rem]">
+                One calm place for every job you find.
+              </h2>
+              <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">
+                Job hunting means open tabs, screenshots and notes everywhere. JobStash keeps
+                them in one list, so no good opportunity slips away.
+              </p>
+            </Reveal>
+            <ul className="divide-y divide-line border-y border-line">
+              {PROMISES.map((item, index) => (
+                <Reveal as="li" key={item.title} delay={index * 120} className="flex gap-5 py-7 md:py-8">
+                  <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-todo-bg text-brand-blue">
+                    <item.icon />
+                  </span>
+                  <div>
+                    <h3 className="text-xl font-bold text-ink">{item.title}</h3>
+                    <p className="mt-1.5 leading-relaxed text-pretty text-muted">{item.text}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </ul>
           </div>
-
-          <HeroImage />
         </section>
 
-        <section id="how-it-works" className="grid scroll-mt-8 gap-8 py-5 sm:grid-cols-3" aria-label="How it works">
-          {FEATURES.map((item) => (
-            <div key={item.title}>
-              <span className="flex size-14 items-center justify-center rounded-full bg-todo-bg text-brand-blue">
-                <item.icon />
-              </span>
-              <h2 className="mt-4 text-lg font-bold">{item.title}</h2>
-              <p className="mt-1 text-muted">{item.text}</p>
-            </div>
-          ))}
-        </section>
-
-        <section
-          id="features"
-          className="my-10 grid scroll-mt-8 divide-y divide-line rounded-card border border-line bg-surface md:grid-cols-3 md:divide-x md:divide-y-0"
-          aria-label="Features"
+        {/* The page ends with a next step: sign in (back up at the top),
+            the demo, or straight into My Stash when signed in. */}
+        <Reveal
+          as="section"
+          className="relative isolate mb-20 overflow-hidden rounded-3xl bg-brand-blue px-6 py-14 text-center text-white md:mb-28 md:py-20"
+          aria-labelledby="start-title"
         >
-          {PROMISES.map((item) => (
-            <div key={item.title} className="flex items-center gap-4 p-6">
-              <span className="shrink-0 text-primary">
-                <item.icon />
-              </span>
-              <div>
-                <h2 className="font-bold">{item.title}</h2>
-                <p className="text-sm text-muted">{item.text}</p>
-              </div>
-            </div>
-          ))}
-        </section>
+          <img
+            src={sidebarArt}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className="pointer-events-none absolute -right-20 -bottom-28 -z-10 hidden w-96 opacity-25 select-none md:block"
+          />
+          <h2 id="start-title" className="mx-auto max-w-2xl text-3xl leading-tight font-bold tracking-tight text-balance md:text-[2.5rem]">
+            {session ? 'Your stash is waiting.' : 'Your next job could be one link away.'}
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-balance text-white/85">
+            {session
+              ? 'Pick up where you left off: apply to what you saved, and keep track of the answers.'
+              : 'Start your stash in a few seconds, and never lose a job posting again.'}
+          </p>
+          {session || demo ? (
+            <Link to="/stash" className={START_BUTTON}>
+              {session ? 'Go to My Stash' : 'Try the demo'}
+              <ArrowIcon />
+            </Link>
+          ) : (
+            <a href="#sign-in" className={START_BUTTON}>
+              Get started
+              <ArrowIcon />
+            </a>
+          )}
+        </Reveal>
       </main>
 
-      <footer className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 sm:flex-row sm:items-center sm:gap-6 md:px-8">
-        <Logo className="text-2xl" />
-        <p className="text-sm text-muted">Stash today. A brighter tomorrow.</p>
-        <Link to="/privacy" className="text-sm text-muted underline hover:text-ink sm:ml-auto">Privacy</Link>
+      <footer className="border-t border-line">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between md:px-8">
+          <div>
+            <Logo className="text-2xl" />
+            <p className="mt-2 text-sm text-muted">Stash today. A brighter tomorrow.</p>
+          </div>
+          <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-muted" aria-label="Footer">
+            <a href="#how-it-works" className="inline-flex min-h-11 items-center hover:text-ink">How it works</a>
+            <a href="#features" className="inline-flex min-h-11 items-center hover:text-ink">Features</a>
+            <Link to="/privacy" className="inline-flex min-h-11 items-center hover:text-ink">Privacy</Link>
+          </nav>
+        </div>
       </footer>
     </div>
   )
@@ -141,6 +270,16 @@ export default function HomePage() {
 //
 // In demo mode there is no sign-in at all, so the same spot offers the demo.
 // Someone already signed in gets a way straight into their stash instead.
+//
+// Centred under the headline, as wide as Google's button (400px at most).
+// scroll-mt keeps the header's "Sign in" link from landing it at the very top
+// edge of the screen.
+const SIGN_IN_AREA = 'mx-auto mt-10 max-w-[400px] scroll-mt-24 text-center'
+
+// The white button in the blue band at the end of the page.
+const START_BUTTON =
+  'press mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-white px-8 text-lg font-semibold text-brand-blue hover:bg-todo-bg'
+
 function SignIn() {
   const { session, loading } = useAuth()
   const navigate = useNavigate()
@@ -156,10 +295,10 @@ function SignIn() {
 
   if (!supabase) {
     return (
-      <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
+      <div id="sign-in" className={SIGN_IN_AREA}>
         <Link
           to="/stash"
-          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
+          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-lg font-semibold text-white hover:bg-brand-blue-dark"
         >
           Try the demo
           <ArrowIcon />
@@ -171,10 +310,10 @@ function SignIn() {
 
   if (session) {
     return (
-      <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
+      <div id="sign-in" className={SIGN_IN_AREA}>
         <Link
           to="/stash"
-          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-white hover:bg-ink"
+          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-lg font-semibold text-white hover:bg-brand-blue-dark"
         >
           Go to My Stash
           <ArrowIcon />
@@ -219,7 +358,7 @@ function SignIn() {
   }
 
   return (
-    <div id="sign-in" className="mt-8 max-w-md scroll-mt-8">
+    <div id="sign-in" className={SIGN_IN_AREA}>
       {note === 'expired' && (
         <p className="mb-4 rounded-card border border-line bg-todo-bg p-3 text-ink" role="status">
           Your sign-in expired. Please sign in again to get back to your stash.
@@ -263,59 +402,25 @@ function SignIn() {
   )
 }
 
-function HeroImage() {
+// Sign out, beside the initials circle when signed in (wider screens). The
+// same as the dashboard's (AppHeader.jsx): plain text, blue on hover.
+function SignOutButton() {
+  const [leaving, setLeaving] = useState(false)
+
+  async function handleSignOut() {
+    setLeaving(true)
+    await signOut()
+  }
+
   return (
-    // On wide screens the phone shifts left (xl:mr-36) to leave room for the
-    // handwritten notes on its right.
-    <div className="relative isolate mx-auto w-full max-w-sm xl:mr-36">
-      {/* The soft blob behind the phone. Decoration only. It is bigger than
-          the picture, and on phones the picture sits under the sign-in
-          button, so the blob reaches over the button: pointer-events-none
-          lets taps go through it to the button. */}
-      <svg className="pointer-events-none absolute inset-0 -z-10 size-full scale-175" viewBox="0 0 400 400" aria-hidden="true">
-        <path
-          fill="#EAF1FF"
-          d="M286 58C336 78 372 128 366 182C361 226 322 240 330 282C338 326 300 368 250 370C204 372 186 338 142 344C92 351 44 322 38 268C32 218 74 196 66 150C58 100 96 50 150 44C196 39 240 40 286 58Z"
-        />
-      </svg>
-
-      <img
-        src={phoneImage}
-        width="1024"
-        height="1536"
-        // Lowercase on purpose: React 18 doesn't know the camelCase name and
-        // warns about it. It still reaches the browser as the real attribute.
-        fetchpriority="high"
-        alt="JobStash on a phone, showing My Stash with saved jobs, next to the Add Job form"
-        className="w-full"
-      />
-
-      {/* Handwritten notes, wide screens only: on smaller ones they crowd the
-          image. Each sits just past the phone's right edge (left-full). */}
-      <HandNote className="top-[6%]">
-        Save now.
-        <br />
-        Apply later.
-      </HandNote>
-      <HandNote className="top-[58%]">
-        Add a job
-        <br />
-        in under
-        <br />
-        10 seconds.
-      </HandNote>
-    </div>
-  )
-}
-
-function HandNote({ className, children }) {
-  return (
-    <div className={`absolute left-full hidden w-40 xl:block ${className}`} aria-hidden="true">
-      <svg className="mb-1 h-8 w-16 text-primary" viewBox="0 0 64 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M60 6C44 4 22 10 8 24M8 24l2-11M8 24l11-1" />
-      </svg>
-      <p className="-rotate-6 font-hand text-3xl leading-tight text-primary">{children}</p>
-    </div>
+    <button
+      type="button"
+      onClick={handleSignOut}
+      disabled={leaving}
+      className="min-h-11 rounded-lg px-2 font-medium text-ink hover:text-brand-blue disabled:opacity-60"
+    >
+      {leaving ? 'Signing out…' : 'Sign out'}
+    </button>
   )
 }
 
@@ -330,12 +435,12 @@ function Icon({ children, className = 'size-6' }) {
   )
 }
 
-function BookmarkIcon() {
-  return <Icon><path d="M6 3h12v18l-6-4-6 4z" fill="currentColor" /></Icon>
+function LinkIcon() {
+  return <Icon><path d="M10 14a4.5 4.5 0 006.4.4l3-3a4.5 4.5 0 00-6.4-6.4l-1.2 1.2M14 10a4.5 4.5 0 00-6.4-.4l-3 3a4.5 4.5 0 006.4 6.4l1.2-1.2" /></Icon>
 }
 
-function ListIcon() {
-  return <Icon><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" /></Icon>
+function CheckIcon() {
+  return <Icon><circle cx="12" cy="12" r="9" /><path d="M8 12.5l2.7 2.7L16 9.5" /></Icon>
 }
 
 function BoltIcon() {
@@ -343,15 +448,15 @@ function BoltIcon() {
 }
 
 function CapIcon() {
-  return <Icon className="size-9"><path d="M2 9l10-5 10 5-10 5zM6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5M22 9v6" /></Icon>
+  return <Icon><path d="M2 9l10-5 10 5-10 5zM6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5M22 9v6" /></Icon>
 }
 
 function LockIcon() {
-  return <Icon className="size-9"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4M12 15v2" /></Icon>
+  return <Icon><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4M12 15v2" /></Icon>
 }
 
 function DevicesIcon() {
-  return <Icon className="size-9"><path d="M4 16V6a2 2 0 012-2h11a2 2 0 012 2v2M2 20h11M16 10h5a1 1 0 011 1v9a1 1 0 01-1 1h-5a1 1 0 01-1-1v-9a1 1 0 011-1zM18.5 18h.01" /></Icon>
+  return <Icon><path d="M4 16V6a2 2 0 012-2h11a2 2 0 012 2v2M2 20h11M16 10h5a1 1 0 011 1v9a1 1 0 01-1 1h-5a1 1 0 01-1-1v-9a1 1 0 011-1zM18.5 18h.01" /></Icon>
 }
 
 // Google's "G", in Google's own colours (their sign-in button guidelines ask

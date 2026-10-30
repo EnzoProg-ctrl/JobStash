@@ -22,7 +22,6 @@
   --color-error: #B91C1C;        /* form error messages */
 
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-hand: "Caveat", cursive;  /* the handwritten notes on the landing page */
   --text-heading: 2.5rem;        /* 40px: screen titles ("My Stash") */
   --text-heading--line-height: 1.1;
   --text-display: 3.5rem;        /* 56px: the landing page headline only */
@@ -150,6 +149,21 @@ dialog[data-closing]::backdrop {
 }
 @keyframes fade-out {
   to { opacity: 0; }
+}
+
+/* The landing page's sections arriving as you scroll (Reveal.jsx): hidden ones
+   sit 24px lower and see-through, shown ones glide up into place over 0.6s.
+   The delay only applies on the way in, so a row of items arrives one after
+   another but leaves together. */
+.reveal {
+  transition: opacity 600ms ease-out, translate 600ms ease-out;
+}
+.reveal[data-reveal="shown"] {
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal[data-reveal="hidden"] {
+  opacity: 0;
+  translate: 0 24px;
 }
 
 /* Small menus (the ⋮ menu on a job card) grow out of the button that opened
@@ -305,6 +319,12 @@ div[role="status"].fixed {
 
   button:not(:disabled):active, .press:active {
     transform: none;
+  }
+
+  /* The landing page's sections are simply there, not faded in. */
+  .reveal[data-reveal="hidden"] {
+    opacity: 1;
+    translate: none;
   }
 
   ::view-transition-group(*),

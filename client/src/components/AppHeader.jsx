@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router'
 import useSlider from '../lib/useSlider.js'
 import AccountMenu from './AccountMenu.jsx'
 import Logo from './Logo.jsx'
+import UserAvatar from './UserAvatar.jsx'
 import { signOut, useAuth } from '../lib/auth.jsx'
 
 // The bar across the top of the app's pages. No divider line under it: the
@@ -65,13 +66,7 @@ export default function AppHeader() {
           )}
           {session && (
             <div className="hidden items-center gap-2 md:flex">
-              <span
-                title={`Signed in as ${session.user.email}`}
-                className="ml-1 flex size-11 items-center justify-center rounded-full bg-subtle font-semibold text-ink"
-              >
-                <span aria-hidden="true">{initials(session.user)}</span>
-                <span className="sr-only">Signed in as {session.user.email}</span>
-              </span>
+              <UserAvatar user={session.user} className="ml-1" />
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -110,14 +105,3 @@ function PageLink({ to, children }) {
   )
 }
 
-// "Lorenzo Centeno" -> "LC", from the name Google shares at sign-in; without a
-// name, the first letter of the email address.
-function initials(user) {
-  const name = (user.user_metadata?.full_name || user.user_metadata?.name || '').trim()
-  const words = name.split(/\s+/).filter(Boolean)
-  const first = (word) => Array.from(word)[0] ?? ''
-  const letters = words.length > 1
-    ? first(words[0]) + first(words[words.length - 1])
-    : first(words[0] || user.email || '?')
-  return letters.toUpperCase()
-}

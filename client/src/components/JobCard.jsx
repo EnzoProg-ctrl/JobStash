@@ -104,7 +104,11 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
               rel="noopener noreferrer"
               className="press -mr-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold whitespace-nowrap text-brand-blue hover:bg-todo-bg md:hidden"
             >
-              Open Posting
+              {/* Under 360px wide, "Open ↗" (screen readers still hear
+                  "Open Posting"), so it fits beside a status chip. */}
+              <span>
+                Open<span className="max-[359px]:sr-only"> Posting</span>
+              </span>
               <OpenIcon className="size-4" />
               <span className="sr-only">(opens in a new tab)</span>
             </a>
