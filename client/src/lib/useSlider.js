@@ -14,16 +14,33 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 // The first time, and when the row changes size (fonts loading, a count
 // growing, the window resizing), the marker jumps into place without sliding,
 // so it only slides when someone picks another item.
-export default function useSlider(selector, chosen) {
+//
+// slideFrom (optional): a screen width, e.g. '48rem'. Narrower than that the
+// marker doesn't slide; it fades and grows in on the new item instead. On
+// phones the items sit close together, and a sliding box sweeping across the
+// item in between looked like it covered it for a moment.
+export default function useSlider(selector, chosen, { slideFrom } = {}) {
   const row = useRef(null)
   const marker = useRef(null)
 
   // A new choice: slide there (or jump, the very first time).
   useLayoutEffect(() => {
-    const placedBefore = marker.current?.style.getPropertyValue('--w')
-    if (placedBefore) place(row.current, marker.current, selector)
-    else placeWithoutSliding(row.current, marker.current, selector)
-  }, [selector, chosen])
+    const markerElement = marker.current
+    const placedBefore = markerElement?.style.getPropertyValue('--w')
+    if (!placedBefore) {
+      placeWithoutSliding(row.current, markerElement, selector)
+    } else if (!slideFrom || window.matchMedia(`(width >= ${slideFrom})`).matches) {
+      place(row.current, markerElement, selector)
+    } else {
+      placeWithoutSliding(row.current, markerElement, selector)
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        markerElement.animate(
+          [{ opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1 }],
+          { duration: 200, easing: 'ease-out' },
+        )
+      }
+    }
+  }, [selector, chosen, slideFrom])
 
   // The row changing size: jump. One watcher for as long as the row is there.
   useEffect(() => {

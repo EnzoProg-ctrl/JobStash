@@ -2,8 +2,8 @@ import useSlider from '../lib/useSlider.js'
 
 // To Apply | Done | All, with how many jobs each has: one segmented control in
 // a row. The chosen one has a soft blue box behind it, which slides to the
-// next tab when another is picked (lib/useSlider.js). aria-pressed tells
-// screen readers which one is on.
+// next tab when another is picked, or on phones fades in there
+// (lib/useSlider.js). aria-pressed tells screen readers which one is on.
 const TABS = [
   { value: 'to_apply', label: 'To Apply', icon: ApplyIcon },
   { value: 'done', label: 'Done', icon: CheckIcon },
@@ -11,7 +11,8 @@ const TABS = [
 ]
 
 export default function FilterTabs({ value, counts, onChange }) {
-  const { row, marker } = useSlider('[aria-pressed="true"]', value)
+  // Slides from tab to tab from 768px up; on phones it fades in on the new tab.
+  const { row, marker } = useSlider('[aria-pressed="true"]', value, { slideFrom: '48rem' })
 
   return (
     <div
