@@ -366,6 +366,7 @@ JobStash/
 │   ├── jobsRepo.js             the database queries, always for one person
 │   ├── linkPreview.js          reads a job link's page for its company and position
 │   ├── limits.js, logging.js   rate limits, and one safe log line per request
+│   ├── rateLimitStore.js       keeps the rate-limit counts in the database, shared by every copy
 │   └── db/migrations/          numbered database changes
 ├── docs/                       project documents, API reference, deploying, logo, screenshots
 └── AI-USAGE.md                 how AI was used in this project
