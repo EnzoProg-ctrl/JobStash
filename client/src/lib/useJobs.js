@@ -7,8 +7,8 @@ import { listJobs } from '../api'
 //   const { status, jobs, setJobs, error, slow, retry } = useJobs()
 //
 // status is 'loading', 'ready' or 'error'. slow turns true after 5 seconds of
-// loading: on a free host the API sleeps when nobody uses it, and waking up
-// takes up to a minute, so the page can explain the wait. retry() loads again,
+// loading (normally it takes under a second), so the page can say it's taking
+// longer than usual instead of looking stuck. retry() loads again,
 // for a Try again button. setJobs lets a page change the list after loading
 // (marking done, deleting, adding).
 export function useJobs() {

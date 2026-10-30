@@ -4,8 +4,7 @@ A digital clipboard for job hunting. Save a job posting link on your phone the
 moment you find it, then open the same list on your laptop and actually apply.
 
 **Live site:** https://jobstash-ph.vercel.app (sign in with Google)
-**API:** https://jobstash-api.onrender.com (free plan: it sleeps after 15 minutes
-without visitors, so the first visit after that can take about a minute)
+**API:** https://jobstash-api.vercel.app
 **Demo video:** [Watch on Google Drive](https://drive.google.com/file/d/1tdxjpN7gZdQzwH9U73qrotw_8vPFyEuw/view?usp=drive_link): the app, the code, and how AI was used
 
 [![Built with Claude Code](https://img.shields.io/badge/AI--assisted-Claude%20Code-2563EB)](AI-USAGE.md)
@@ -101,7 +100,7 @@ Copy-Item server/.env.example server/.env
 | `SUPABASE_URL` | `https://your-project-ref.supabase.co` | Your Supabase project's address, used to check sign-in passes. Not a secret. **Dashboard > Project Settings > API** |
 | `CORS_ORIGINS` | `http://localhost:5173` | Which websites may call the API. Comma-separated, no trailing slash |
 | `NODE_ENV` | `development` | Set to `production` on a host |
-| `TRUST_PROXY` | _(leave out locally)_ | Set to `1` on Vercel (`3` on Render), so the rate limits see each visitor's real address |
+| `TRUST_PROXY` | _(leave out locally)_ | Set to `1` on Vercel, so the rate limits see each visitor's real address |
 | `PORT` | _(don't set it)_ | A host sets it for you. Locally the API uses 3000 |
 
 **`client/.env`**
@@ -302,9 +301,8 @@ is gone, and the jobs now come from your database.
    the card comes back with a message.
 10. **When something goes wrong,** the message says so in plain words: the
    API can't be reached, you're offline, too many requests, or the 1,000-job
-   limit. If loading takes more than 5 seconds, My Stash explains that the
-   server may be waking up (free hosts sleep when nobody uses them), and if
-   loading fails there's a **Try again** button.
+   limit. If loading takes more than 5 seconds, My Stash says it's taking
+   longer than usual, and if loading fails there's a **Try again** button.
 11. **Overview** (`/overview`) sums up the job hunt: how many jobs are saved,
    to apply and done, a progress bar ("2 of 6 applied"), how many were added
    this week, how many are Pending, Accepted and Rejected, and which job sites
@@ -342,7 +340,7 @@ built:
 
 Both give the same results, so the screens don't know which one they're using.
 Demo mode is the default so the site still works if the setting is forgotten,
-and it's a fallback if the API is asleep during a demo.
+and it's a fallback if the API can't be reached during a demo.
 
 ## 5. Project structure
 
@@ -401,9 +399,9 @@ JobStash/
 - **Google's sign-in screen shows the Supabase address** ("to continue to
   ….supabase.co") instead of "JobStash" until Google approves the app's
   branding. That review has been requested.
-- **Free plans:** the API sleeps after 15 minutes without visitors (the next
-  visit waits about a minute, and My Stash says so), and Supabase pauses a
-  project after 7 days without use (press Resume in its dashboard).
+- **Free plans:** Supabase pauses a project after 7 days without use (press
+  Resume in its dashboard), and Vercel's free plan is for personal,
+  non-commercial projects.
 - **`npm run db:seed` wipes the table** (it refuses in production). See [Set up the database](#set-up-the-database).
 
 **Next steps**
@@ -412,7 +410,7 @@ JobStash/
 
 ## Deploying
 
-The live version runs on **Vercel** (website), **Render** (API) and
+The live version runs on **Vercel** (website and API) and
 **Supabase** (database and sign-in), all on free plans, and updates by itself
 on every push to `main`. Every setting, the rule for database changes, and a
 checklist for moving to a new address: [docs/deploying.md](docs/deploying.md)

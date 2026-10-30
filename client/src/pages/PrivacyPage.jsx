@@ -111,8 +111,7 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-2 pl-6">
             <li><strong>Google</strong>, for signing in.</li>
             <li><strong>Supabase</strong>, which stores your account and saved jobs, in Singapore.</li>
-            <li><strong>Render</strong>, which runs the JobStash server, in Singapore.</li>
-            <li><strong>Vercel</strong>, which serves the website.</li>
+            <li><strong>Vercel</strong>, which serves the website and runs the JobStash server, in Singapore.</li>
           </ul>
         </Section>
 

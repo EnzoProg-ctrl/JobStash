@@ -27,8 +27,8 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
 // address. Too low, and the rate limits count one of the host's servers
 // instead of the visitor; too high, and a visitor can write a fake address
 // into the header and dodge the limits. On Vercel it is 1: Vercel replaces
-// the header with the visitor's address, so fake ones never get through. (On
-// Render it was 3.) It stays off locally, where there is no host in between.
+// the header with the visitor's address, so fake ones never get through.
+// It stays off locally, where there is no host in between.
 app.set('trust proxy', Number(process.env.TRUST_PROXY) || false)
 
 // First, so every request is logged, even ones turned away further down.

@@ -1,6 +1,6 @@
 # JobStash API
 
-The Express API in `server/`. Live at https://jobstash-api.onrender.com;
+The Express API in `server/`. Live at https://jobstash-api.vercel.app;
 locally at http://localhost:3000 (`npm run dev` in `server/`). Back to the
 [main README](../README.md).
 

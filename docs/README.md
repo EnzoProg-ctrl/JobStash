@@ -12,7 +12,7 @@ repository, so it is versioned alongside the thing it describes.
 | [05-demo-video.md](05-demo-video.md) | the recording, and its plan | the end |
 | [06-security-and-privacy.md](06-security-and-privacy.md) | what you checked before making this public | before your first push |
 | [api.md](api.md) | every API route, request body, answer code and rule | reference |
-| [deploying.md](deploying.md) | how the live version is set up (Vercel, Render, Supabase, Google) | reference |
+| [deploying.md](deploying.md) | how the live version is set up (Vercel, Supabase, Google) | reference |
 
 Put images in `assets/`. The main README shows `landing.png`, `my-stash.png`,
 `add-job.png`, `overview.png`, `board.png` and `phone.png` from there, and a README with an image reads as finished in a way one

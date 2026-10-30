@@ -115,7 +115,7 @@ export default function AddJobDialog({ manual = false }) {
       try {
         found = await previewJob(url)
       } catch {
-        // Offline, rate limited or the API asleep: the person types it instead.
+        // Offline, rate limited or the API unreachable: the person types it instead.
       }
       if (id !== lookupId.current) return
       // Fill a field only if it's empty or still holds what was filled in

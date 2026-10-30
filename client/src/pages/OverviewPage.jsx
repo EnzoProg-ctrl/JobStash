@@ -81,14 +81,14 @@ export default function OverviewPage() {
       <p className="mt-3 text-lg text-muted">Your saved jobs, where they stand, and what to do next.</p>
 
       {/* Loading: grey stand-ins for the five numbers, like My Stash's grey
-          rows. After 5 seconds the note about the sleeping server joins them. */}
+          rows. After 5 seconds a note that it's taking longer than usual
+          joins them. */}
       {status === 'loading' && (
         <div className="mt-8" role="status">
           <span className="sr-only">Loading your overview…</span>
           {slow && (
             <p className="mb-4 text-muted">
-              Still loading. If JobStash hasn't been used for a while, its server takes up to a
-              minute to wake up.
+              Still loading. This is taking longer than usual; a slow connection can do this.
             </p>
           )}
           <div className="grid animate-pulse grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4" aria-hidden="true">

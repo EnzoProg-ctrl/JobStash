@@ -19,10 +19,10 @@ async function signInHeader() {
   return pass ? { Authorization: `Bearer ${pass}` } : {}
 }
 
-// A free host puts the API to sleep when nobody has used it for a while, and
-// the first request then waits up to a minute while it wakes up. So only give
-// up after 90 seconds, long enough for that, but not forever.
-const GIVE_UP_AFTER = 90 * 1000
+// The API answers in well under a second, and starting up on Vercel after a
+// quiet spell adds about a second more. So 30 seconds means something is
+// wrong: give up then, and say so, rather than wait forever.
+const GIVE_UP_AFTER = 30 * 1000
 
 // An Error that also says what went wrong: the HTTP status, or 0 when the API
 // never answered at all.

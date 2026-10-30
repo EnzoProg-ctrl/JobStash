@@ -307,14 +307,13 @@ export default function StashPage() {
           here yet"; an error means "we could not find out". */}
       {/* Loading: grey stand-in cards where the jobs will appear
           (JobCardSkeleton.jsx), so the page already looks like My Stash. After
-          5 seconds the note about the sleeping server joins them. */}
+          5 seconds a note that it's taking longer than usual joins them. */}
       {status === 'loading' && (
         <div className="mt-8" role="status">
           <span className="sr-only">Loading your jobs…</span>
           {slow && (
             <p className="mb-4 text-muted">
-              Still loading. If JobStash hasn't been used for a while, its server takes up to a
-              minute to wake up.
+              Still loading. This is taking longer than usual; a slow connection can do this.
             </p>
           )}
           <ul className="border-y border-line">
