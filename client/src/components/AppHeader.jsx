@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router'
+import { Link, NavLink, useLocation } from 'react-router'
+import useSlider from '../lib/useSlider.js'
 import AccountMenu from './AccountMenu.jsx'
 import Logo from './Logo.jsx'
 import { signOut, useAuth } from '../lib/auth.jsx'
@@ -16,6 +17,10 @@ import { signOut, useAuth } from '../lib/auth.jsx'
 export default function AppHeader() {
   const { session } = useAuth()
   const [leaving, setLeaving] = useState(false)
+  // The underline under Overview or My Stash, whichever page this is (NavLink
+  // marks it aria-current="page"); it slides across when the page changes.
+  const { pathname } = useLocation()
+  const { row, marker } = useSlider('[aria-current="page"]', pathname)
 
   async function handleSignOut() {
     setLeaving(true)
@@ -28,7 +33,14 @@ export default function AppHeader() {
         <Link to="/stash" aria-label="JobStash, go to My Stash" className="lg:hidden">
           <Logo className="text-2xl md:text-[1.75rem]" />
         </Link>
-        <nav className="flex items-center gap-2 md:gap-3" aria-label="Main">
+        <nav ref={row} className="relative flex items-center gap-2 md:gap-3" aria-label="Main">
+          {/* The sliding underline: 12px in from each side of the link, 4px
+              up from its bottom edge. */}
+          <span
+            ref={marker}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 left-3 h-0.5 w-[calc(var(--w)-1.5rem)] translate-x-(--x) translate-y-[calc(var(--y)+var(--h)-0.375rem)] rounded-full bg-brand-blue transition-[translate,width] duration-300 ease-out"
+          />
           <PageLink to="/overview">Overview</PageLink>
           <PageLink to="/stash">My Stash</PageLink>
 
@@ -68,16 +80,15 @@ export default function AppHeader() {
   )
 }
 
-// Overview and My Stash: the current one is blue, with a short underline.
+// Overview and My Stash: the current one is blue, with the sliding underline
+// (in AppHeader) under it.
 function PageLink({ to, children }) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `relative hidden min-h-11 items-center px-3 font-semibold md:inline-flex ${
-          isActive
-            ? 'text-brand-blue after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:rounded-full after:bg-brand-blue'
-            : 'text-muted hover:text-ink'
+        `hidden min-h-11 items-center px-3 font-semibold transition-colors duration-300 md:inline-flex ${
+          isActive ? 'text-brand-blue' : 'text-muted hover:text-ink'
         }`
       }
     >

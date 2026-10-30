@@ -1,6 +1,9 @@
+import useSlider from '../lib/useSlider.js'
+
 // To Apply | Done | All, with how many jobs each has: one segmented control in
-// a row. The chosen one has a soft blue background. aria-pressed tells screen
-// readers which one is on.
+// a row. The chosen one has a soft blue box behind it, which slides to the
+// next tab when another is picked (lib/useSlider.js). aria-pressed tells
+// screen readers which one is on.
 const TABS = [
   { value: 'to_apply', label: 'To Apply', icon: ApplyIcon },
   { value: 'done', label: 'Done', icon: CheckIcon },
@@ -8,12 +11,21 @@ const TABS = [
 ]
 
 export default function FilterTabs({ value, counts, onChange }) {
+  const { row, marker } = useSlider('[aria-pressed="true"]', value)
+
   return (
     <div
-      className="grid w-full grid-cols-3 gap-1 rounded-xl border border-line bg-surface p-1 md:inline-grid md:w-auto"
+      ref={row}
+      className="relative grid w-full grid-cols-3 gap-1 rounded-xl border border-line bg-surface p-1 md:inline-grid md:w-auto"
       role="group"
       aria-label="Show jobs"
     >
+      {/* The sliding box, behind the tabs. */}
+      <div
+        ref={marker}
+        aria-hidden="true"
+        className="absolute top-0 left-0 h-(--h) w-(--w) translate-x-(--x) translate-y-(--y) rounded-lg bg-todo-bg ring-1 ring-brand-blue/30 transition-[translate,width,height] duration-300 ease-out"
+      />
       {TABS.map((tab) => {
         const active = tab.value === value
         return (
@@ -22,16 +34,14 @@ export default function FilterTabs({ value, counts, onChange }) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(tab.value)}
-            className={`flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-1 text-sm font-semibold whitespace-nowrap max-[359px]:flex-col max-[359px]:gap-0 max-[359px]:py-1 sm:gap-2 sm:px-2 md:min-w-36 md:px-5 md:text-base ${
-              active
-                ? 'bg-todo-bg text-brand-blue ring-1 ring-brand-blue/30'
-                : 'text-ink hover:bg-subtle'
+            className={`relative flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-1 text-sm font-semibold whitespace-nowrap transition-colors duration-300 max-[359px]:flex-col max-[359px]:gap-0 max-[359px]:py-1 sm:gap-2 sm:px-2 md:min-w-36 md:px-5 md:text-base ${
+              active ? 'text-brand-blue' : 'text-ink hover:bg-subtle'
             }`}
           >
             <tab.icon />
             {tab.label}
             <span
-              className={`rounded-full px-1.5 text-xs font-semibold sm:px-2 md:text-sm ${
+              className={`rounded-full px-1.5 text-xs font-semibold transition-colors duration-300 sm:px-2 md:text-sm ${
                 active ? 'bg-white text-brand-blue' : 'bg-subtle text-ink'
               }`}
             >
