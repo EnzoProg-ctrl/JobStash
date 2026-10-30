@@ -122,7 +122,7 @@ export default function SortMenu({ value, options, onChange }) {
         aria-label={`Sort jobs: ${options[chosen].label}`}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleButtonKey}
-        className="relative flex min-h-11 w-full items-center rounded-card border border-transparent bg-transparent pr-8 pl-8 text-left text-base font-semibold whitespace-nowrap text-ink max-[359px]:pr-7 max-[359px]:pl-7 max-[359px]:text-sm md:min-h-12 md:border-line md:bg-surface md:pr-10 md:pl-12 md:hover:bg-subtle"
+        className="relative flex min-h-11 w-full items-center rounded-card border border-transparent bg-transparent pr-8 pl-8 text-left text-base font-semibold whitespace-nowrap text-ink max-[359px]:pr-7 max-[359px]:pl-7 max-[359px]:text-sm md:min-h-13.5 md:border-line md:bg-surface md:pr-10 md:pl-12 md:hover:bg-subtle"
       >
         <svg ref={icon} className="pointer-events-none absolute top-1/2 left-1 size-5 -translate-y-1/2 text-ink md:left-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M6 3v14M3 14l3 3 3-3M14 17V3M11 6l3-3 3 3" />

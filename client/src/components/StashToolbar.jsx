@@ -37,7 +37,7 @@ export default function StashToolbar({
           placeholder="Search jobs or companies..."
           autoComplete="off"
           // The browser's own clear button is hidden; ours below looks the same everywhere.
-          className="min-h-12 w-full rounded-card border border-line bg-surface pr-12 pl-12 text-base text-ellipsis placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
+          className="min-h-12 w-full rounded-card md:min-h-13.5 border border-line bg-surface pr-12 pl-12 text-base text-ellipsis placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
         />
         {query && (
           <button
@@ -65,7 +65,7 @@ export default function StashToolbar({
         aria-pressed={favoritesOnly}
         onClick={() => onFavoritesOnlyChange(!favoritesOnly)}
         title="Show only favourites"
-        className={`col-start-2 row-start-1 inline-flex min-h-12 items-center justify-center gap-1.5 rounded-card border font-semibold max-xl:w-12 xl:px-4 ${
+        className={`col-start-2 row-start-1 inline-flex min-h-12 items-center justify-center gap-1.5 rounded-card border font-semibold max-xl:w-12 md:min-h-13.5 md:max-xl:w-13.5 xl:px-4 ${
           favoritesOnly ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-line bg-surface text-ink hover:bg-subtle'
         }`}
       >
@@ -86,7 +86,7 @@ export default function StashToolbar({
         aria-pressed={selecting}
         onClick={() => onSelectingChange(!selecting)}
         title={selecting ? 'Stop selecting' : 'Select jobs'}
-        className={`col-start-3 row-start-1 inline-flex min-h-12 items-center justify-center gap-1.5 rounded-card border font-semibold max-xl:w-12 xl:px-4 ${
+        className={`col-start-3 row-start-1 inline-flex min-h-12 items-center justify-center gap-1.5 rounded-card border font-semibold max-xl:w-12 md:min-h-13.5 md:max-xl:w-13.5 xl:px-4 ${
           selecting ? 'border-brand-blue/40 bg-todo-bg text-brand-blue' : 'border-line bg-surface text-ink hover:bg-subtle'
         }`}
       >
@@ -98,12 +98,14 @@ export default function StashToolbar({
       </button>
 
       {/* List | Board. The blue highlight behind the chosen button slides
-          across when you switch (each button is 40px wide). */}
+          across when you switch, one button's width at a time (40px buttons
+          on phones, 48px from 768px, so the whole switch is 54px tall there
+          like the rest of the row). */}
       <div className="relative col-span-2 col-start-2 row-start-2 flex justify-self-end rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="View">
         <span
           aria-hidden="true"
-          className="absolute top-0.5 left-0.5 size-10 rounded-md bg-todo-bg transition-transform duration-200 ease-out"
-          style={{ transform: `translateX(${Math.max(0, VIEWS.findIndex((option) => option.value === view)) * 40}px)` }}
+          className="absolute top-0.5 left-0.5 size-10 rounded-md bg-todo-bg ring-1 ring-brand-blue/30 transition-transform duration-200 ease-out md:size-12"
+          style={{ transform: `translateX(${Math.max(0, VIEWS.findIndex((option) => option.value === view)) * 100}%)` }}
         />
         {VIEWS.map((option) => (
           <button
@@ -113,7 +115,7 @@ export default function StashToolbar({
             aria-label={option.label}
             title={option.label}
             onClick={() => onViewChange(option.value)}
-            className={`relative flex size-10 items-center justify-center rounded-md ${
+            className={`relative flex size-10 items-center justify-center rounded-md md:size-12 ${
               view === option.value ? 'text-brand-blue' : 'text-accent hover:text-ink'
             }`}
           >

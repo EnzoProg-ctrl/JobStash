@@ -91,6 +91,37 @@
   }
 }
 
+/* My Stash rows (JobCard.jsx): which part of a row goes where. Each part
+   names its area: pic (tick box and letter square), main (title and
+   company), where (source and date, 1280px up), status (Done and All only),
+   act (☆ ↗ ⋮), and on phones extra (a second line with the status and Open
+   Posting). The middle columns have fixed widths so every row lines up. */
+@layer components {
+  .job-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "pic main act" ". extra extra";
+  }
+  @media (width >= 48rem) {
+    .job-row {
+      grid-template-areas: "pic main act";
+    }
+    .job-row.with-status {
+      grid-template-columns: auto minmax(0, 1fr) 8.5rem auto;
+      grid-template-areas: "pic main status act";
+    }
+  }
+  @media (width >= 80rem) {
+    .job-row {
+      grid-template-columns: auto minmax(0, 1fr) 12rem auto;
+      grid-template-areas: "pic main where act";
+    }
+    .job-row.with-status {
+      grid-template-columns: auto minmax(0, 1fr) 12rem 8.5rem auto;
+      grid-template-areas: "pic main where status act";
+    }
+  }
+}
+
 /* Pop-ups. The Add Job pop-up rises a little and fades in while the page
    behind it dims, instead of appearing all at once. data-closing (set by the
    pop-up while it closes) plays the same thing backwards. The same on phones

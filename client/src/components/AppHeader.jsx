@@ -11,9 +11,10 @@ import { signOut, useAuth } from '../lib/auth.jsx'
 // gets in the way of menus underneath.
 //
 // Phones: just the logo and the account ⋮; the bottom bar (BottomNav.jsx) has
-// Overview, Add Job and My Stash. From 768px: all of it up here. From 1024px
-// the logo moves to the top of the brand column (BrandAside.jsx), and this bar
-// sits beside it with the links on the right.
+// Overview, Add Job and My Stash. From 768px the bar is 80px tall: Overview and
+// My Stash on the left, then Add Job, a circle with your initials and Sign out
+// on the right. From 1024px the logo moves to the top of the brand column
+// (BrandAside.jsx), which is the same 80px tall, so the two line up.
 export default function AppHeader() {
   const { session } = useAuth()
   const [leaving, setLeaving] = useState(false)
@@ -29,24 +30,28 @@ export default function AppHeader() {
 
   return (
     <header className="relative z-20 bg-surface">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 md:px-8 lg:justify-end">
-        <Link to="/stash" aria-label="JobStash, go to My Stash" className="lg:hidden">
-          <Logo className="text-2xl md:text-[1.75rem]" />
-        </Link>
-        <nav ref={row} className="relative flex items-center gap-2 md:gap-3" aria-label="Main">
-          {/* The sliding underline: 12px in from each side of the link, 4px
-              up from its bottom edge. */}
-          <span
-            ref={marker}
-            aria-hidden="true"
-            className="pointer-events-none absolute top-0 left-3 h-0.5 w-[calc(var(--w)-1.5rem)] translate-x-(--x) translate-y-[calc(var(--y)+var(--h)-0.375rem)] rounded-full bg-brand-blue transition-[translate,width] duration-300 ease-out"
-          />
-          <PageLink to="/overview">Overview</PageLink>
-          <PageLink to="/stash">My Stash</PageLink>
+      <div className="flex items-center justify-between gap-3 px-4 py-3 md:h-20 md:px-8 md:py-0 lg:pl-12">
+        <div className="flex items-center gap-8 self-stretch">
+          <Link to="/stash" aria-label="JobStash, go to My Stash" className="flex items-center lg:hidden">
+            <Logo className="text-2xl md:text-[1.75rem]" />
+          </Link>
+          {/* Overview and My Stash run the full height of the bar, so the
+              sliding underline sits on its bottom edge. */}
+          <nav ref={row} className="relative hidden items-stretch gap-6 self-stretch md:flex lg:gap-10" aria-label="Main">
+            <span
+              ref={marker}
+              aria-hidden="true"
+              className="pointer-events-none absolute top-0 left-0 h-0.5 w-(--w) translate-x-(--x) translate-y-[calc(var(--y)+var(--h)-0.125rem)] rounded-full bg-brand-blue transition-[translate,width] duration-300 ease-out"
+            />
+            <PageLink to="/overview">Overview</PageLink>
+            <PageLink to="/stash">My Stash</PageLink>
+          </nav>
+        </div>
 
+        <div className="flex items-center gap-3 md:gap-4">
           <Link
             to="/stash/add"
-            className="press ml-2 hidden min-h-11 items-center gap-2 rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-brand-blue-dark md:inline-flex"
+            className="press hidden h-12 items-center gap-2 rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-brand-blue-dark md:inline-flex"
           >
             <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M10 4v12M4 10h12" />
@@ -59,17 +64,25 @@ export default function AppHeader() {
             </div>
           )}
           {session && (
-            <button
-              type="button"
-              onClick={handleSignOut}
-              disabled={leaving}
-              title={`Signed in as ${session.user.email}`}
-              className="hidden min-h-11 items-center rounded-lg border border-line bg-surface px-4 font-semibold text-ink hover:bg-subtle disabled:opacity-60 md:inline-flex"
-            >
-              {leaving ? 'Signing out…' : 'Sign out'}
-            </button>
+            <div className="hidden items-center gap-2 md:flex">
+              <span
+                title={`Signed in as ${session.user.email}`}
+                className="ml-1 flex size-11 items-center justify-center rounded-full bg-subtle font-semibold text-ink"
+              >
+                <span aria-hidden="true">{initials(session.user)}</span>
+                <span className="sr-only">Signed in as {session.user.email}</span>
+              </span>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={leaving}
+                className="min-h-11 rounded-lg px-2 font-medium text-ink hover:text-brand-blue disabled:opacity-60"
+              >
+                {leaving ? 'Signing out…' : 'Sign out'}
+              </button>
+            </div>
           )}
-        </nav>
+        </div>
       </div>
       {/* The fade from the bar's white into the page's background. */}
       <div
@@ -87,7 +100,7 @@ function PageLink({ to, children }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `hidden min-h-11 items-center px-3 font-semibold transition-colors duration-300 md:inline-flex ${
+        `inline-flex items-center font-semibold transition-colors duration-300 ${
           isActive ? 'text-brand-blue' : 'text-muted hover:text-ink'
         }`
       }
@@ -95,4 +108,16 @@ function PageLink({ to, children }) {
       {children}
     </NavLink>
   )
+}
+
+// "Lorenzo Centeno" -> "LC", from the name Google shares at sign-in; without a
+// name, the first letter of the email address.
+function initials(user) {
+  const name = (user.user_metadata?.full_name || user.user_metadata?.name || '').trim()
+  const words = name.split(/\s+/).filter(Boolean)
+  const first = (word) => Array.from(word)[0] ?? ''
+  const letters = words.length > 1
+    ? first(words[0]) + first(words[words.length - 1])
+    : first(words[0] || user.email || '?')
+  return letters.toUpperCase()
 }

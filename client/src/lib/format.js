@@ -46,6 +46,13 @@ export function timeAgo(date, now = Date.now()) {
   return 'just now'
 }
 
+const DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+// "2026-10-25T09:15:00Z" -> "Oct 25, 2026" (in the visitor's own time zone)
+export function addedOn(date) {
+  return DAY.format(new Date(date))
+}
+
 // Letter-circle colours. Each pair passes the 4.5 : 1 contrast check. A company
 // always gets the same colour, because it is picked from its name.
 const AVATAR_COLOURS = [

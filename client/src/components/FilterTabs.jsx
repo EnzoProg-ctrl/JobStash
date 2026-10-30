@@ -35,7 +35,7 @@ export default function FilterTabs({ value, counts, onChange }) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(tab.value)}
-            className={`relative flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-1 text-sm font-semibold whitespace-nowrap transition-colors duration-300 max-[359px]:flex-col max-[359px]:gap-0 max-[359px]:py-1 sm:gap-2 sm:px-2 md:min-w-36 md:px-5 md:text-base ${
+            className={`relative flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-1 text-sm font-semibold whitespace-nowrap transition-colors duration-300 max-[359px]:flex-col max-[359px]:gap-0 max-[359px]:py-1 sm:gap-2 sm:px-2 md:min-h-13 md:min-w-52 md:px-5 md:text-base ${
               active ? 'text-brand-blue' : 'text-ink hover:bg-subtle'
             }`}
           >
