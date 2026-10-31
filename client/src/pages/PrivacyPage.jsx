@@ -14,7 +14,7 @@ import { usePageTitle } from '../lib/usePageTitle.js'
 // GitHub page instead.
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL
 const GITHUB = 'https://github.com/EnzoProg-ctrl/JobStash'
-const UPDATED = '30 October 2026'
+const UPDATED = '31 October 2026'
 
 function ContactLink() {
   return CONTACT_EMAIL ? (
@@ -115,12 +115,20 @@ export default function PrivacyPage() {
           </ul>
         </Section>
 
+        <Section title="Backups">
+          <p>
+            To recover from mistakes, the person who runs JobStash keeps backup copies of the
+            saved jobs, with the email of the account each one belongs to, on their own
+            computer. They're never shared, and they're used only to put lost jobs back.
+          </p>
+        </Section>
+
         <Section title="Deleting your data">
           <p>
-            You can delete any saved job yourself, from its ⋮ menu in My Stash. To delete
-            your account and every job you've saved, write to <ContactLink />{' '}
-            from the Google account you sign in with. It's done within 7 days, and it can't be
-            undone.
+            You can delete saved jobs yourself in My Stash: press Select, tick the jobs, then
+            Delete. To delete your account and every job you've saved, write to{' '}
+            <ContactLink /> from the Google account you sign in with. It's done within 7 days,
+            backups included, and it can't be undone.
           </p>
         </Section>
 

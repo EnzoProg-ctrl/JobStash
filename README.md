@@ -308,18 +308,20 @@ is gone, and the jobs now come from your database.
 
    | Card | Menu |
    |---|---|
-   | To Apply | Mark as Applied (→ Pending) · Mark as Accepted · Mark as Rejected · Delete Job |
-   | Pending | Mark as Accepted · Mark as Rejected · Move back to To Apply · Delete Job |
-   | Accepted | Mark as Rejected · Move back to To Apply · Delete Job |
-   | Rejected | Mark as Accepted · Move back to To Apply · Delete Job |
+   | To Apply | Mark as Applied (→ Pending) · Mark as Accepted · Mark as Rejected |
+   | Pending | Mark as Accepted · Mark as Rejected · Move back to To Apply |
+   | Accepted | Mark as Rejected · Move back to To Apply |
+   | Rejected | Mark as Accepted · Move back to To Apply |
 
    Accepted and Rejected can be picked straight from To Apply; the job moves
    to Applied with that result. The card updates straight away. If saving fails,
    it changes back and a message explains why.
-   **Delete Job** (in red) removes the card straight away and shows
-   *"Deleted "…" · Undo"* for 5 seconds. Only then is the job really deleted,
-   so **Undo** brings it back exactly as it was. Deleting another job, or
-   leaving My Stash, within the 5 seconds deletes the waiting one at once;
+   **Deleting** is done in Select mode: press **Select** in the toolbar, tick
+   the jobs (or **Select all**), then **Delete**. The cards go straight away and
+   *"Deleted "…" · Undo"* (or *"Deleted 3 jobs · Undo"*) shows for 5 seconds.
+   Only then are they really deleted, so **Undo** brings them back exactly as
+   they were. Deleting again, or leaving My Stash, within the 5 seconds
+   deletes the waiting ones at once;
    closing the tab or signing out leaves it in your stash. If deleting fails,
    the card comes back with a message.
 10. **When something goes wrong,** the message says so in plain words: the
@@ -334,7 +336,8 @@ is gone, and the jobs now come from your database.
    link in the header. My Stash stays the start page.
 12. **Privacy** (`/privacy`, linked from the landing page footer and from
    Google's sign-in screen) says in plain words what JobStash keeps, what it
-   doesn't do, and how to have your data deleted.
+   doesn't do, that backups are kept, and how to have your data deleted
+   (backups included).
 13. **Sign out** in the header ends the sign-in on this browser only, and the
    landing page confirms it. Your other devices stay signed in. On a shared
    computer, sign out when you're done. JobStash's Sign out doesn't sign you
