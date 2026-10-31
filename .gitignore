@@ -11,6 +11,9 @@ build/
 # Database dumps: a full plain-text copy of your data
 *.dump
 backup*.sql
+# JobStash backups (npm run db:backup): people's emails and job links
+backups/
+jobstash-backup-*.json
 
 # Editor and OS noise
 .DS_Store

@@ -8,7 +8,8 @@
     "dev": "node --env-file=.env --watch start.js",
     "db:migrate": "node --env-file=.env db/migrate.js",
     "db:seed": "node --env-file=.env db/run.js db/seed.sql",
-    "db:reset": "npm run db:migrate && npm run db:seed"
+    "db:reset": "npm run db:migrate && npm run db:seed",
+    "db:backup": "node --env-file=.env db/backup.js"
   },
   "engines": {
     "node": "24.x"

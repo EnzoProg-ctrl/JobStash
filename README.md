@@ -138,6 +138,26 @@ add the next numbered file; never edit one that has already run.
 > goes for `npm run db:reset`, which runs both. As a safety net, both refuse to
 > run when `NODE_ENV=production`.
 
+### Back up the database
+
+Supabase's free plan keeps no backups you can restore, so take your own,
+weekly is a good habit. From `server/`:
+
+```bash
+npm run db:backup
+```
+
+It saves every job (all its details) and the account each belongs to (id and
+email) to one dated file, `jobstash-backup-YYYY-MM-DD-HHMM.json`, in a
+`backups` folder **next to** the repository (outside it, so it can't be pushed
+by accident; `.gitignore` blocks it too). Set `BACKUP_DIR` to save somewhere
+else, such as an external drive. It only reads; the database isn't changed. It
+needs the owner's (`postgres`) address in `server/.env`, as for migrations.
+
+> 🔒 **A backup holds people's emails and job links.** Keep it private, never
+> commit or share it, and when someone asks for their account to be deleted,
+> delete their data from your backups too.
+
 ### Set up Google sign-in
 
 Only needed for the full version. People sign in with their Google account, so
