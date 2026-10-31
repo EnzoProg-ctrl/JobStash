@@ -14,7 +14,7 @@ import sidebarArt from '../assets/branding/jobstash-sidebar-art.svg'
 // (sticky, h-dvh), whatever the length of the page beside it.
 export default function BrandAside() {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col self-start overflow-hidden border-r border-line/70 bg-[linear-gradient(165deg,#F6F9FE_0%,#F1F6FE_40%,#EDF4FE_70%,#F2F7FE_100%)] px-8 lg:flex xl:w-72 2xl:w-84 2xl:pr-8 2xl:pl-12">
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col self-start overflow-hidden bg-[linear-gradient(165deg,#F6F9FE_0%,#F1F6FE_40%,#EDF4FE_70%,#F2F7FE_100%)] px-8 lg:flex xl:w-72 2xl:w-84 2xl:pr-8 2xl:pl-12">
       {/* The same height as the header beside it (AppHeader.jsx), so the logo
           lines up with Overview, My Stash and Add Job. */}
       <div className="relative z-10 flex h-20 shrink-0 items-center border-b border-line pb-3">
@@ -45,6 +45,19 @@ export default function BrandAside() {
         aria-hidden="true"
         draggable="false"
         className="pointer-events-none mt-3 -mr-8 -ml-8 w-[calc(100%+4rem)] max-w-none shrink-0 select-none 2xl:-ml-12 2xl:w-[calc(100%+5rem)]"
+      />
+
+      {/* Where the column meets the dashboard: no hard edge. Its last 48px
+          shade into the dashboard's own background colour (artwork
+          included), and a thin line, faded out at the top and bottom,
+          marks the edge without cutting the page in two. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-linear-to-r from-transparent to-bg"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-linear-to-b from-transparent via-line to-transparent"
       />
     </aside>
   )
