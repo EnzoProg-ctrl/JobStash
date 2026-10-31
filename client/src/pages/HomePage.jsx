@@ -10,7 +10,7 @@ import UserAvatar from '../components/UserAvatar.jsx'
 import { supabase } from '../lib/supabase.js'
 import { clearSignInNote, readSignInNote, signOut, useAuth } from '../lib/auth.jsx'
 import { usePageTitle } from '../lib/usePageTitle.js'
-import sidebarArt from '../assets/branding/jobstash-sidebar-art.svg'
+import tilesArt from '../assets/branding/jobstash-tiles.svg'
 
 // The landing page. Its own header and footer, and full width, unlike the app
 // screens that share AppLayout. It uses the dashboard's look (the same blue,
@@ -113,18 +113,18 @@ export default function HomePage() {
             dashboard's sidebar peek in from the right on wide screens. */}
         <section className="relative isolate pt-10 pb-14 text-center md:pt-20 md:pb-20">
           <img
-            src={sidebarArt}
+            src={tilesArt}
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`${TILES_ONLY} absolute -top-10 -right-64 -z-10 hidden w-[30rem] opacity-40 xl:block`}
+            className={`${DECORATION} absolute -top-6 -right-80 -z-10 hidden w-[26rem] opacity-40 xl:block`}
           />
           <img
-            src={sidebarArt}
+            src={tilesArt}
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`${TILES_ONLY} absolute top-40 -left-56 -z-10 hidden w-[22rem] -scale-x-100 opacity-35 xl:block`}
+            className={`${DECORATION} absolute top-32 -left-56 -z-10 hidden w-[20rem] -scale-x-100 opacity-35 xl:block`}
           />
           <p className="inline-block rounded-full bg-todo-bg px-4 py-1.5 text-sm font-semibold text-brand-blue">
             A simpler way to job hunt
@@ -212,11 +212,11 @@ export default function HomePage() {
           aria-labelledby="start-title"
         >
           <img
-            src={sidebarArt}
+            src={tilesArt}
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`${TILES_ONLY} absolute -right-20 -bottom-28 -z-10 hidden w-96 opacity-25 md:block`}
+            className={`${DECORATION} absolute -right-20 -bottom-28 -z-10 hidden w-96 opacity-25 md:block`}
           />
           <h2 id="start-title" className="mx-auto max-w-2xl text-3xl leading-tight font-bold tracking-tight text-balance md:text-[2.5rem]">
             {session ? 'Your stash is waiting.' : 'Your next job could be one link away.'}
@@ -276,10 +276,10 @@ export default function HomePage() {
 // edge of the screen.
 const SIGN_IN_AREA = 'mx-auto mt-10 max-w-[400px] scroll-mt-24 text-center'
 
-// The sidebar's artwork, used as decoration here: only its top part with the
-// tiles (the file's own shape is 244 by 313 there); below that it is just a
-// faint floor that runs on down for the tall sidebar.
-const TILES_ONLY = 'pointer-events-none aspect-[244/313] object-cover object-top select-none'
+// The decorations use jobstash-tiles.svg: the sidebar's four tiles, whole and
+// without its floor. (The sidebar's own file is cut off at its right and
+// bottom on purpose, which shows as hard edges when it floats freely here.)
+const DECORATION = 'pointer-events-none select-none'
 
 // The white button in the blue band at the end of the page.
 const START_BUTTON =
