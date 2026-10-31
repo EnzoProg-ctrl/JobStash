@@ -158,6 +158,26 @@ needs the owner's (`postgres`) address in `server/.env`, as for migrations.
 > commit or share it, and when someone asks for their account to be deleted,
 > delete their data from your backups too.
 
+**Putting jobs back** from a backup, also from `server/`:
+
+```bash
+npm run db:restore                            # rehearse with the newest backup
+npm run db:restore -- path/to/backup.json     # rehearse with a chosen one
+npm run db:restore -- --email someone@x.com   # only that person's jobs
+npm run db:restore -- --yes                   # really put them back
+```
+
+It only puts back jobs that are **missing**; a job still in the database is
+never overwritten, and nothing is deleted. Each job goes back to its owner (the
+same account, or a new account with the same email). Jobs whose account no
+longer exists, for example deleted at the person's request, stay out. Without
+`--yes` it's a **rehearsal**: the database does it all, checks it, shows what
+would happen (emails masked, like `c•••@gmail.com`), then undoes it.
+
+> ⚠️ Jobs people deleted themselves after the backup was taken also count as
+> missing, and would come back. Use the backup from just before the problem,
+> and `--email` to restore only the people affected.
+
 ### Set up Google sign-in
 
 Only needed for the full version. People sign in with their Google account, so

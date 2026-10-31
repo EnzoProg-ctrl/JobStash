@@ -135,7 +135,7 @@ export default function PrivacyPage() {
         <Section title="Changes and questions">
           <p>
             If this page changes, the date at the top changes too. Questions? Write to <ContactLink />. JobStash
-            is a student project.
+            is a personal project.
           </p>
         </Section>
       </main>

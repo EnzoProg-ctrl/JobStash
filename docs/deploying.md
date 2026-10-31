@@ -67,8 +67,9 @@ in.
 **Backups**: Supabase's free plan keeps none you can restore. Run
 `npm run db:backup` from `server/` (weekly, and before any risky database
 change); it saves every job and its owner's email to a dated file in a
-`backups` folder next to the repository. Those files are private data. See the
-README's "Back up the database".
+`backups` folder next to the repository. Those files are private data.
+`npm run db:restore` puts missing jobs back from one (a rehearsal unless you
+add `--yes`). See the README's "Back up the database".
 
 **Changing the database**: add a numbered migration and run
 `npm run db:migrate` from your computer (with `server/.env` pointing at
