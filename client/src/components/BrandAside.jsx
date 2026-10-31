@@ -47,17 +47,18 @@ export default function BrandAside() {
         className="pointer-events-none mt-3 -mr-8 -ml-8 w-[calc(100%+4rem)] max-w-none shrink-0 select-none 2xl:-ml-12 2xl:w-[calc(100%+5rem)]"
       />
 
-      {/* Where the column meets the dashboard: no hard edge. Its last 48px
-          shade into the dashboard's own background colour (artwork
-          included), and a thin line, faded out at the top and bottom,
-          marks the edge without cutting the page in two. */}
+      {/* Where the column meets the dashboard: no line at all. Its last
+          48px shade into what's beside them: the dashboard's background
+          (artwork included), and at the top the white header bar, which
+          fades into the background over its last 24px (AppHeader.jsx) just
+          as this does. */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-linear-to-r from-transparent to-bg"
       />
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-linear-to-b from-transparent via-line to-transparent"
+        className="pointer-events-none absolute top-0 right-0 h-26 w-12 bg-linear-to-r from-transparent to-surface mask-[linear-gradient(to_bottom,black_5rem,transparent)]"
       />
     </aside>
   )
