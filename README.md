@@ -101,6 +101,7 @@ Copy-Item server/.env.example server/.env
 | `CORS_ORIGINS` | `http://localhost:5173` | Which websites may call the API. Comma-separated, no trailing slash |
 | `NODE_ENV` | `development` | Set to `production` on a host |
 | `TRUST_PROXY` | _(leave out locally)_ | Set to `1` on Vercel, so the rate limits see each visitor's real address |
+| `CRON_SECRET` | _(leave out locally)_ | On Vercel only: a long random string. Vercel sends it when it calls `/cron/keep-alive` once a day, which keeps the free Supabase database from pausing after a quiet week. **A secret: never commit it** |
 | `PORT` | _(don't set it)_ | A host sets it for you. Locally the API uses 3000 |
 
 **`client/.env`**
@@ -445,9 +446,11 @@ JobStash/
 - **Google's sign-in screen shows the Supabase address** ("to continue to
   ….supabase.co") instead of "JobStash" until Google approves the app's
   branding. That review has been requested.
-- **Free plans:** Supabase pauses a project after 7 days without use (press
-  Resume in its dashboard), and Vercel's free plan is for personal,
-  non-commercial projects.
+- **Free plans:** Supabase pauses a project after 7 days without enough use
+  (press Resume in its dashboard). A daily call from Vercel to
+  `/cron/keep-alive` keeps it busy enough, and Supabase emails a warning a week
+  before it would pause. Vercel's free plan is for personal, non-commercial
+  projects.
 - **`npm run db:seed` wipes the table** (it refuses in production). See [Set up the database](#set-up-the-database).
 
 **Next steps**

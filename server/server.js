@@ -67,6 +67,30 @@ app.get('/readyz', async (request, response) => {
   }
 })
 
+// Keeps the database awake. Supabase pauses a free project after a week
+// without enough database activity, which takes the whole site down until
+// someone presses Resume. Vercel calls this once a day (server/vercel.json,
+// "crons"), and it does a little real work: counts the jobs, and clears out
+// rate-limit counts whose time is up.
+//
+// Only Vercel may call it: Vercel sends "Authorization: Bearer <CRON_SECRET>"
+// (the CRON_SECRET setting in the Vercel project), and anything else gets 401.
+// Without a CRON_SECRET it's switched off.
+app.get('/cron/keep-alive', async (request, response) => {
+  const secret = process.env.CRON_SECRET
+  if (!secret || request.get('authorization') !== `Bearer ${secret}`) {
+    return response.status(401).json({ error: 'Not allowed' })
+  }
+  try {
+    await pool.query('SELECT count(*) FROM saved_jobs')
+    await pool.query('DELETE FROM rate_limits WHERE reset_at < now()')
+    response.json({ ok: true })
+  } catch (error) {
+    console.error('keep-alive failed:', error.message)
+    response.status(503).json({ ok: false })
+  }
+})
+
 // Everything under /api is someone's data, so every request there must carry a
 // valid sign-in pass (see auth.js). /healthz and /readyz above stay open, so a
 // host can check the server is up without signing in.

@@ -28,6 +28,7 @@ computer). `server/vercel.json` runs it in Singapore, next to the database.
 | `CORS_ORIGINS` | `https://jobstash-ph.vercel.app,http://localhost:5173` |
 | `NODE_ENV` | `production` |
 | `TRUST_PROXY` | `1` (Vercel replaces the visitor-address header itself, so one step is right) |
+| `CRON_SECRET` | a long random string, marked sensitive. Vercel sends it with its daily call to `/cron/keep-alive` (the `crons` in `server/vercel.json`), which keeps Supabase's free database from pausing after a week without activity; any other caller gets `401` |
 
 Vercel runs the API as several short-lived copies, so anything shared between
 requests lives in the database: the rate-limit counts are in the
