@@ -27,7 +27,7 @@ const STEPS = [
     text: 'Found a job on LinkedIn, JobStreet or a company site? Paste its link into Add Job, on your phone or your computer.',
   },
   {
-    icon: BoltIcon,
+    icon: WandIcon,
     title: 'The details fill themselves in',
     text: 'JobStash reads the posting for the company and the job title. No link, like a referral or a cold email? Just type them in.',
   },
@@ -448,8 +448,15 @@ function CheckIcon() {
   return <Icon><circle cx="12" cy="12" r="9" /><path d="M8 12.5l2.7 2.7L16 9.5" /></Icon>
 }
 
-function BoltIcon() {
-  return <Icon><path d="M13 2L4 14h7l-1 8 9-12h-7z" fill="currentColor" /></Icon>
+// A magic wand with sparkles: the details appear as if by magic.
+function WandIcon() {
+  return (
+    <Icon>
+      <path d="M3.5 20.5l10-10M12 9l3 3" />
+      <path d="M18 2.5l.9 2.6 2.6.9-2.6.9L18 9.5l-.9-2.6-2.6-.9 2.6-.9z" />
+      <path d="M9 3.5v3M7.5 5h3M20 12.5v3M18.5 14h3" />
+    </Icon>
+  )
 }
 
 function CapIcon() {
