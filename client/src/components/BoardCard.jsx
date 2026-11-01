@@ -1,7 +1,8 @@
-import { useDraggable } from '@dnd-kit/core'
+import { useDndMonitor, useDraggable } from '@dnd-kit/core'
 import CardMenu from './CardMenu.jsx'
 import FavoriteButton from './FavoriteButton.jsx'
 import { avatarColour, siteName, timeAgo } from '../lib/format.js'
+import { useCardClick } from '../lib/useCardClick.js'
 
 // One job on the board (StashBoard.jsx): a small white tile with a thin
 // border, so four columns fit side by side.
@@ -15,14 +16,26 @@ import { avatarColour, siteName, timeAgo } from '../lib/format.js'
 // the keyboard with the ⠿ grip: Space to pick it up, arrow keys to choose a
 // column, Space to drop. The ⋮ menu works here too.
 //
+// A plain click or tap on the card (not a drag) opens the posting in a new
+// tab (lib/useCardClick.js).
+//
 // selecting: Select mode. A tick box takes the letter circle's place (the
 // cards are narrow), tapping the card ticks it, and dragging is off (the grip
 // hides).
 export default function BoardCard({ job, column, onSetStatus, onToggleFavorite, selecting, selected, onSelect }) {
+  const id = String(job.id)
   const { setNodeRef, setActivatorNodeRef, listeners, attributes, isDragging } = useDraggable({
-    id: String(job.id),
+    id,
     data: { job, column },
     disabled: selecting,
+  })
+  const click = useCardClick({ url: job.posting_url, selecting, onSelect })
+  // Dropping a dragged card can still end in a click (a press and hold on a
+  // phone): that one shouldn't open the posting.
+  useDndMonitor({
+    onDragStart: ({ active }) => {
+      if (active.id === id) click.cancel()
+    },
   })
   // Mouse and touch start a drag from anywhere on the card; the keyboard only
   // from the grip, so Enter on the star or the ⋮ still does what it says.
@@ -36,7 +49,8 @@ export default function BoardCard({ job, column, onSetStatus, onToggleFavorite, 
       // (lib/motion.js).
       data-transition-name={`job-${job.id}`}
       {...(selecting ? {} : pointerListeners)}
-      onClick={selecting ? (event) => { if (!event.target.closest('a, button, input, label')) onSelect() } : undefined}
+      onPointerDown={click.onPointerDown}
+      onClick={click.onClick}
       // relative: keeps the hidden "(opens in a new tab)" text inside the card.
       // Without it, on a phone, that text escapes the sideways-scrolling
       // columns and makes the whole page scroll sideways.
@@ -44,7 +58,7 @@ export default function BoardCard({ job, column, onSetStatus, onToggleFavorite, 
         selected
           ? 'border-brand-blue/40 bg-todo-bg ring-1 ring-brand-blue/30'
           : 'border-line bg-surface hover:border-brand-blue/30 hover:shadow-sm'
-      } ${selecting ? 'cursor-pointer' : ''} ${isDragging ? 'opacity-40' : ''}`}
+      } ${selecting || job.posting_url ? 'cursor-pointer' : ''} ${isDragging ? 'opacity-40' : ''}`}
     >
       <CardBody job={job}>
         {selecting && (

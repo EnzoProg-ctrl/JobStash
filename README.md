@@ -297,7 +297,9 @@ is gone, and the jobs now come from your database.
      ("Added Oct 25, 2026"; hovering it shows how long ago)
    - a status chip: **To Apply** (blue), or for applied jobs **Pending** (applied,
      waiting; blue-grey), **Accepted** (green) or **Rejected** (red)
-   - **Open Posting**, which opens the job in a new tab
+   - **Open Posting**, which opens the job in a new tab. Clicking or tapping
+     anywhere else on the card does the same (its buttons keep their own jobs;
+     on the board, a drag moves the card instead)
 5. **Tabs** (To Apply, Applied, All) filter the list and show how many jobs each
    has. The page opens on To Apply. On **Applied**, a second row filters by
    result: **All** (including Pending), **Accepted** or **Rejected**.

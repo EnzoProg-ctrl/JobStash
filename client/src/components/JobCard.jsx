@@ -2,6 +2,7 @@ import CardMenu from './CardMenu.jsx'
 import FavoriteButton from './FavoriteButton.jsx'
 import StatusBadge from './StatusBadge.jsx'
 import { addedOn, avatarColour, siteName, timeAgo } from '../lib/format.js'
+import { useCardClick } from '../lib/useCardClick.js'
 
 // One saved job: a row in My Stash's continuous list, with a thin line under
 // it rather than a card of its own.
@@ -16,10 +17,13 @@ import { addedOn, avatarColour, siteName, timeAgo } from '../lib/format.js'
 // too. Which part goes where is the job-row style in styles.css; each part
 // names its area (pic, main, where, status, act).
 //
+// Clicking anywhere on the row (outside its buttons) opens the posting in a
+// new tab, or ticks the row in Select mode (lib/useCardClick.js).
+//
 // showStatus: the status chip, left out on To Apply (every job there is To
-// Apply). selecting: Select mode, with a tick box at the front; clicking
-// anywhere on the row (outside its buttons) ticks it too.
+// Apply). selecting: Select mode, with a tick box at the front.
 export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite, selecting, selected, onSelect }) {
+  const click = useCardClick({ url: job.posting_url, selecting, onSelect })
   // The title is optional, so a link can be saved before you know what the
   // role is called. Without one, the company moves up to the bold line.
   const heading = job.job_title || job.company_name
@@ -39,12 +43,13 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
     <li
       // Lets this row slide on its own when the list changes (lib/motion.js).
       data-transition-name={`job-${job.id}`}
-      onClick={selecting ? (event) => { if (!event.target.closest('a, button, input, label')) onSelect() } : undefined}
+      onPointerDown={click.onPointerDown}
+      onClick={click.onClick}
       className={`job-row grid items-center gap-x-3 border-b border-line px-2 py-3.5 transition-colors last:border-b-0 md:gap-x-5 md:px-4 md:py-4 ${
         showStatus ? 'with-status' : ''
       } ${
         selected ? 'bg-todo-bg/70' : 'hover:bg-surface'
-      } ${selecting ? 'cursor-pointer' : ''}`}
+      } ${selecting || job.posting_url ? 'cursor-pointer' : ''}`}
     >
       {/* Tick box (Select mode) and the company's letter square. */}
       <div className="flex items-center gap-3 self-start [grid-area:pic] md:self-center">
