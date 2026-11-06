@@ -486,10 +486,12 @@ export default function AddJobDialog({ manual = false }) {
           and the area around its address bar in the colour of whatever is
           pinned to the top and bottom edges of the page, and ignores the
           dimmed background behind the pop-up. So those stayed light above
-          and below the dimmed page. These two grey bars, in the same grey as
-          the dimmed page, sit on top of it at both edges, and Safari copies
-          their grey. They're a popover so they share the pop-up's top layer
-          (bars beneath it are ignored). Phones only; tested on an iPhone. */}
+          and below the dimmed page. These two grey bars sit on top of it at
+          both edges, and Safari copies their grey: the grey white turns when
+          dimmed (#9fa2aa), as the header and the bottom bar there are white.
+          They turn from white to grey with the dimming (styles.css). They're
+          a popover so they share the pop-up's top layer (bars beneath it are
+          ignored). Phones only; tested on an iPhone. */}
       <div
         ref={edges}
         popover="manual"
@@ -497,8 +499,8 @@ export default function AddJobDialog({ manual = false }) {
         data-closing={closing || undefined}
         className="dialog-edges pointer-events-none fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 md:hidden"
       >
-        <span className="pointer-events-auto fixed inset-x-0 top-0 h-4 bg-[#9b9fa8]" />
-        <span className="pointer-events-auto fixed inset-x-0 bottom-0 h-4 bg-[#9b9fa8]" />
+        <span className="pointer-events-auto fixed inset-x-0 top-0 h-4 bg-[#9fa2aa]" />
+        <span className="pointer-events-auto fixed inset-x-0 bottom-0 h-4 bg-[#9fa2aa]" />
       </div>
     </>
   )
