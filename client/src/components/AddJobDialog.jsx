@@ -250,20 +250,23 @@ export default function AddJobDialog({ manual = false }) {
         onClick={handleBackdropClick}
         aria-labelledby="add-job-title"
         // A box with rounded corners and a little of the dimmed page showing
-        // around it. 768px up: in the middle of the screen. Phones: resting near
-        // the bottom edge (clear of the iPhone's home line), so Save stays in
-        // the same place in both versions of the pop-up; the taller one just
-        // reaches higher up.
+        // around it, in the middle of the screen. top and bottom keep it in
+        // the part of an iPhone's screen that's clear of the clock and the
+        // home line (both 0 elsewhere), so it's centred in that part, and
+        // max-h leaves at least 1rem free above and below it.
         //
         // Two parts, one above the other: the title and fields, which scroll
         // when the pop-up is too short for them (small phones), and the Save
         // bar under them, always in sight. open:flex, not flex: a closed
         // <dialog> must stay hidden.
-        className="m-auto max-h-[calc(100%-2rem)] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 open:flex max-md:mb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="top-[env(safe-area-inset-top)] bottom-[env(safe-area-inset-bottom)] m-auto max-h-[calc(100%_-_2rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 open:flex"
       >
-        {/* overscroll-contain: scrolling to the end of the fields doesn't
+        {/* As tall as its contents, shrinking (and scrolling) only when the
+            screen is too short. Not flex-1: from a starting height of 0,
+            Safari on iPhone never grew it, and the pop-up collapsed.
+            overscroll-contain: scrolling to the end of the fields doesn't
             carry on into the page behind the pop-up. */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-7">
+        <div className="min-h-0 flex-initial overflow-y-auto overscroll-contain pb-7">
           {/* Top: what this pop-up is for, and ✕. */}
           <div className="px-6 pt-6 md:px-8 md:pt-7">
             <div className="flex items-start justify-between gap-4">
