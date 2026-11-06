@@ -69,7 +69,7 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
         <div aria-hidden="true" className="absolute inset-0 flex items-center justify-end bg-error pr-7 text-white">
           <BinIcon
             className="size-6"
-            style={{ opacity: swipe.progress, transform: `scale(${0.6 + 0.4 * swipe.progress})` }}
+            style={{ opacity: 'var(--swipe-progress, 0)', transform: 'scale(calc(0.6 + 0.4 * var(--swipe-progress, 0)))' }}
           />
         </div>
       )}
@@ -78,8 +78,7 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
           show through it. touch-pan-y: the browser keeps up-and-down
           scrolling and leaves sideways moves to the swipe. */}
       <div
-        {...swipe.handlers}
-        style={swipe.style}
+        ref={swipe.ref}
         className={`job-row relative grid items-center gap-x-3 px-2 py-3.5 transition-colors md:gap-x-5 md:px-4 md:py-4 ${
           onDelete ? 'touch-pan-y touch-pinch-zoom' : ''
         } ${showStatus ? 'with-status' : ''} ${
