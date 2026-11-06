@@ -63,6 +63,7 @@ const labelClass = 'text-sm font-semibold text-ink'
 
 export default function AddJobDialog({ manual = false }) {
   const dialog = useRef(null)
+  const edges = useRef(null)
   const urlInput = useRef(null)
   const companyInput = useRef(null)
   // A link pasted in the other pop-up before switching to this one.
@@ -74,6 +75,14 @@ export default function AddJobDialog({ manual = false }) {
   // ready for a paste. Without a link, most people start with the company.
   useEffect(() => {
     dialog.current.showModal()
+    // Phones: the grey edges (below) go on top of the dimmed page.
+    if (window.matchMedia('(width < 48rem)').matches) {
+      try {
+        edges.current.showPopover()
+      } catch {
+        // Already showing, or a browser without popovers: nothing to do.
+      }
+    }
     ;(manual ? companyInput : urlInput).current.focus()
     // Only when the pop-up opens.
   }, [])
@@ -164,6 +173,11 @@ export default function AddJobDialog({ manual = false }) {
   function finishClosing() {
     if (closed.current) return
     closed.current = true
+    try {
+      edges.current?.hidePopover()
+    } catch {
+      // Not showing: nothing to hide.
+    }
     dialog.current?.close()
     navigate('/stash')
   }
@@ -225,12 +239,6 @@ export default function AddJobDialog({ manual = false }) {
 
   return (
     <>
-      {/* For Safari on iPhone: it colours the strip behind the time and battery
-          from a bar pinned to the top of the page, and ignores the dimmed
-          background behind the pop-up. This 1px bar, in the same grey as the
-          dimmed page, gives it that grey, so no light strip shows above the
-          dimmed page. Phones only; it goes away with the pop-up. */}
-      <div className="fixed inset-x-0 top-0 z-50 h-px bg-[#9b9fa8] md:hidden" aria-hidden="true" />
       <dialog
         ref={dialog}
         onCancel={handleCancel}
@@ -459,6 +467,24 @@ export default function AddJobDialog({ manual = false }) {
           </div>
         </form>
       </dialog>
+      {/* For Safari on iPhone (iOS 26): it paints the strip behind the time
+          and the area around its address bar in the colour of whatever is
+          pinned to the top and bottom edges of the page, and ignores the
+          dimmed background behind the pop-up. So those stayed light above
+          and below the dimmed page. These two grey bars, in the same grey as
+          the dimmed page, sit on top of it at both edges, and Safari copies
+          their grey. They're a popover so they share the pop-up's top layer
+          (bars beneath it are ignored). Phones only; tested on an iPhone. */}
+      <div
+        ref={edges}
+        popover="manual"
+        aria-hidden="true"
+        data-closing={closing || undefined}
+        className="dialog-edges pointer-events-none fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 md:hidden"
+      >
+        <span className="pointer-events-auto fixed inset-x-0 top-0 h-4 bg-[#9b9fa8]" />
+        <span className="pointer-events-auto fixed inset-x-0 bottom-0 h-4 bg-[#9b9fa8]" />
+      </div>
     </>
   )
 }

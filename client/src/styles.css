@@ -42,10 +42,10 @@
   }
 
   /* While a pop-up is open, the root turns the same grey as the dimmed page
-     (ink at 40% over the page background). Safari on iPhone colours the
-     status bar strip at the top from this; without it, the strip stays light
-     above the dimmed page. The page itself is painted by body, so nothing
-     else changes.
+     (ink at 40% over the page background, #9b9fa8), for browsers that colour
+     their edges from it. iPhone Safari needs more: the grey edge bars in
+     AddJobDialog.jsx. The page itself is painted by body, so nothing else
+     changes.
      overflow: hidden stops the page behind the pop-up from scrolling.
      scrollbar-gutter keeps the space of the page's scrollbar (on computers
      that show one), so the page doesn't shift sideways when it disappears. */
@@ -135,6 +135,13 @@ dialog[data-closing] {
   animation: pop-up-out 150ms ease-in forwards;
 }
 dialog[data-closing]::backdrop {
+  animation: fade-out 150ms ease-in forwards;
+}
+/* The grey edges for iPhone Safari (AddJobDialog.jsx) fade with the dim. */
+.dialog-edges:popover-open {
+  animation: fade-in 200ms ease-out;
+}
+.dialog-edges[data-closing] {
   animation: fade-out 150ms ease-in forwards;
 }
 
