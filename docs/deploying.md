@@ -10,7 +10,7 @@ website and the API, each in about a minute.
 |---|---|---|
 | Website | Vercel, Hobby (free) plan | https://jobstash-ph.vercel.app |
 | API | Vercel, Hobby (free) plan, Singapore (`sin1`) | https://jobstash-api.vercel.app |
-| Database and sign-in | Supabase, Free plan, Singapore | (the project's own address) |
+| Database and sign-in | Supabase, Free plan, Mumbai (`ap-south-1`) | (the project's own address) |
 | Google sign-in | Google Cloud project "JobStash" | published; branding review requested |
 
 The website and the API are two Vercel projects made from the same
@@ -19,7 +19,9 @@ repository, each with its own folder.
 **Vercel, the API (`jobstash-api`)**: Root Directory `server`, preset Express.
 Vercel finds `server/server.js` by its name and runs the app from it for each
 request (`start.js`, which starts an always-on server, is only for your own
-computer). `server/vercel.json` runs it in Singapore, next to the database.
+computer). `server/vercel.json` runs it in Singapore. The database is in Mumbai, so
+each database call crosses between the two; running the API in Mumbai
+(`bom1`) instead would make those calls quicker.
 
 | Setting | Value |
 |---|---|

@@ -14,7 +14,7 @@ import { usePageTitle } from '../lib/usePageTitle.js'
 // GitHub page instead.
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL
 const GITHUB = 'https://github.com/EnzoProg-ctrl/JobStash'
-const UPDATED = '31 October 2026'
+const UPDATED = '4 November 2026'
 
 function ContactLink() {
   return CONTACT_EMAIL ? (
@@ -110,8 +110,8 @@ export default function PrivacyPage() {
           <p>JobStash uses these services, which handle data only to run it:</p>
           <ul className="mt-3 list-disc space-y-2 pl-6">
             <li><strong>Google</strong>, for signing in.</li>
-            <li><strong>Supabase</strong>, which stores your account and saved jobs, in Singapore.</li>
-            <li><strong>Vercel</strong>, which serves the website and runs the JobStash server, in Singapore.</li>
+            <li><strong>Supabase</strong>, which stores your account and saved jobs, in Mumbai, India.</li>
+            <li><strong>Vercel</strong>, which runs the JobStash server in Singapore, and sends you the website from its servers around the world.</li>
           </ul>
         </Section>
 

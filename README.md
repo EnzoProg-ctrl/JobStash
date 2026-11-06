@@ -408,7 +408,7 @@ JobStash/
 ├── server/                     the API (Node.js, Express)
 │   ├── server.js               the routes and their checks (Vercel runs this)
 │   ├── start.js                starts the API on your computer (npm run dev)
-│   ├── vercel.json             runs the API in Singapore, next to the database
+│   ├── vercel.json             runs the API in Singapore (the database is in Mumbai)
 │   ├── auth.js                 checks the Google sign-in on every /api request
 │   ├── jobsRepo.js             the database queries, always for one person
 │   ├── linkPreview.js          reads a job link's page for its company and position
