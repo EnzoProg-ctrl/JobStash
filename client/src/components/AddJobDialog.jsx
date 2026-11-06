@@ -500,7 +500,9 @@ export default function AddJobDialog({ manual = false }) {
         className="dialog-edges pointer-events-none fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 md:hidden"
       >
         <span className="pointer-events-auto fixed inset-x-0 top-0 h-4 bg-[#9fa2aa]" />
-        <span className="pointer-events-auto fixed inset-x-0 bottom-0 h-4 bg-[#9fa2aa]" />
+        {/* Only 4px at the bottom: the bottom bar's labels end 8px above the
+            edge, and a taller grey bar cut through them. */}
+        <span className="pointer-events-auto fixed inset-x-0 bottom-0 h-1 bg-[#9fa2aa]" />
       </div>
     </>
   )
