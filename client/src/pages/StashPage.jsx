@@ -130,7 +130,8 @@ export default function StashPage() {
   // Delete: the card disappears straight away, and the Undo message shows for
   // 5 seconds. Only when the time is up is the job really deleted, so Undo can
   // bring it back exactly as it was.
-  // Deleting is done from Select mode, one job or many at once (gone).
+  // Deleting is done from Select mode, one job or many at once (gone), or by
+  // swiping a row to the left on a phone (one job).
   function handleDelete(gone) {
     // Jobs still waiting from an earlier Delete are deleted for real now.
     clearTimeout(timer.current)
@@ -495,6 +496,7 @@ export default function StashPage() {
                   showStatus={tab !== 'to_apply'}
                   onSetStatus={handleSetStatus}
                   onToggleFavorite={handleToggleFavorite}
+                  onDelete={(gone) => handleDelete([gone])}
                   selecting={selecting}
                   selected={selected.has(job.id)}
                   onSelect={() => toggleSelected(job)}

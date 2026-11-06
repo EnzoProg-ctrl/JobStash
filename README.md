@@ -342,7 +342,10 @@ is gone, and the jobs now come from your database.
    to Applied with that result. The card updates straight away. If saving fails,
    it changes back and a message explains why.
    **Deleting** is done in Select mode: press **Select** in the toolbar, tick
-   the jobs (or **Select all**), then **Delete**. The cards go straight away and
+   the jobs (or **Select all**), then **Delete**. On a phone you can also
+   **swipe a card to the left** in the list: it slides away over a red bin
+   (let go before about 40% of the way, and it springs back). The cards go
+   straight away and
    *"Deleted "…" · Undo"* (or *"Deleted 3 jobs · Undo"*) shows for 5 seconds.
    Only then are they really deleted, so **Undo** brings them back exactly as
    they were. Deleting again, or leaving My Stash, within the 5 seconds
