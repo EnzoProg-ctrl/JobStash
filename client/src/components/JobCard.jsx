@@ -10,7 +10,7 @@ import { useCardClick } from '../lib/useCardClick.js'
 //   1280px up: [☐] (B) Title / Company   🌐 Source / Added Oct 25, 2026   [status]   ☆ ↗ ⋮
 //   768px up:  [☐] (B) Title / Company / Source · Oct 25, 2026            [status]   ☆ ↗ ⋮
 //   phones:    [☐] (B) Title / Company / Source · Oct 25, 2026                       ☆ ⋮
-//                      [status]                                       Open Posting ↗
+//                      [status]
 //
 // The columns have fixed widths, so they line up from row to row. A job
 // without a link keeps an empty space where ↗ would be, so ☆ and ⋮ line up
@@ -18,7 +18,9 @@ import { useCardClick } from '../lib/useCardClick.js'
 // names its area (pic, main, where, status, act).
 //
 // Clicking anywhere on the row (outside its buttons) opens the posting in a
-// new tab, or ticks the row in Select mode (lib/useCardClick.js).
+// new tab, or ticks the row in Select mode (lib/useCardClick.js). On phones
+// that tap is the way to open it, so there's no Open button there; a link
+// only screen readers see (VoiceOver) stands in for it.
 //
 // showStatus: the status chip, left out on To Apply (every job there is To
 // Apply). selecting: Select mode, with a tick box at the front.
@@ -79,7 +81,8 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
         </span>
       </div>
 
-      <div className="min-w-0 [grid-area:main]">
+      {/* relative: keeps the hidden link below inside the row. */}
+      <div className="relative min-w-0 [grid-area:main]">
         <h2 className="font-semibold text-ink wrap-anywhere md:text-[1.1875rem]">{heading}</h2>
         {subheading && <p className="text-muted wrap-anywhere md:mt-0.5">{subheading}</p>}
         {/* Below 1280px: where and when, under the company. */}
@@ -87,6 +90,13 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
           {where && <>{where} · </>}
           {when('')}
         </p>
+        {/* Phones: the posting's link, for screen readers only (sighted
+            people tap the row). From 768px the ↗ below does this. */}
+        {job.posting_url && (
+          <a href={job.posting_url} target="_blank" rel="noopener noreferrer" className="sr-only md:hidden">
+            Open posting for {heading} (opens in a new tab)
+          </a>
+        )}
       </div>
 
       {/* 1280px up: where and when in a column of their own. */}
@@ -98,34 +108,11 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
         <p className={`mt-1 text-sm ${job.posting_url ? 'pl-6' : ''}`}>{when('Added ')}</p>
       </div>
 
-      {/* Phones: a second line, the status on the left and Open Posting on
-          the right. From 768px this box steps aside (contents): the status
-          goes to its own column, and ↗ joins ☆ and ⋮. */}
-      {(showStatus || job.posting_url) && (
-        <div className="mt-2 flex items-center justify-between gap-3 [grid-area:extra] md:contents">
-          {showStatus ? (
-            <div className="md:[grid-area:status]">
-              <StatusBadge status={job.status} outcome={job.outcome} />
-            </div>
-          ) : (
-            <span />
-          )}
-          {job.posting_url && (
-            <a
-              href={job.posting_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="press -mr-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold whitespace-nowrap text-brand-blue hover:bg-todo-bg md:hidden"
-            >
-              {/* Under 360px wide, "Open ↗" (screen readers still hear
-                  "Open Posting"), so it fits beside a status chip. */}
-              <span>
-                Open<span className="max-[359px]:sr-only"> Posting</span>
-              </span>
-              <OpenIcon className="size-4" />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-          )}
+      {/* Phones: the status on a second line. From 768px it moves to its own
+          column. */}
+      {showStatus && (
+        <div className="mt-2 [grid-area:extra] md:[grid-area:status] md:mt-0">
+          <StatusBadge status={job.status} outcome={job.outcome} />
         </div>
       )}
 
