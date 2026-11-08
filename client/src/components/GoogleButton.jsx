@@ -112,8 +112,12 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
     // button is at most 400px wide and 40px tall, and only Google can draw
     // inside it, so the space around it is sized to match.
     <div className="relative min-h-10 w-full max-w-[400px]">
-      {/* Google draws its button in here. */}
-      <div ref={slot} className={`w-full ${ready ? '' : 'invisible'}`} />
+      {/* Google draws its button in here, inside a frame of its own page.
+          [color-scheme:light]: that page is a light one, and when a light
+          frame sits on a page in the dark theme the browser paints the
+          frame's background solid white (a white box around Google's dark
+          button). Marking this spot light too keeps the frame see-through. */}
+      <div ref={slot} className={`w-full [color-scheme:light] ${ready ? '' : 'invisible'}`} />
       {/* Until then, a grey stand-in the same size, so nothing jumps. */}
       {!ready && (
         <div className="absolute inset-x-0 top-0 h-10 animate-pulse rounded-md bg-subtle" aria-hidden="true" />
