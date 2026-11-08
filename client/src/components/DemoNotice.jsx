@@ -36,17 +36,20 @@ export default function DemoNotice({ className = '' }) {
   }
 
   return (
+    // Phones: one short line, so it doesn't push the page down. 768px up:
+    // the full note.
     <div
-      className={`flex items-start gap-3 rounded-card border border-line bg-todo-bg p-4 text-sm ${className}`}
+      className={`flex items-center gap-3 rounded-card border border-line bg-todo-bg py-1.5 pr-3 pl-4 text-sm md:items-start md:p-4 ${className}`}
       role="status"
     >
-      <svg className="mt-0.5 size-5 shrink-0 text-brand-blue" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
+      <svg className="size-5 shrink-0 text-brand-blue md:mt-0.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
         <circle cx="10" cy="10" r="8" />
         <path d="M10 9v5M10 6.25v.01" strokeLinecap="round" />
       </svg>
       <p className="flex-1">
-        <strong className="block text-ink">Demo mode</strong>
-        <span className="text-muted">
+        <strong className="text-ink md:block">Demo mode</strong>
+        <span className="text-muted md:hidden"> · saved in this browser</span>
+        <span className="hidden text-muted md:inline">
           Your jobs are saved in this browser only. There is no server or
           database behind this page.
         </span>

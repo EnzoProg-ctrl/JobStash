@@ -122,15 +122,17 @@ export default function SortMenu({ value, options, onChange }) {
         aria-label={`Sort jobs: ${options[chosen].label}`}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleButtonKey}
-        className="relative flex min-h-11 w-full items-center rounded-card border border-transparent bg-transparent pr-8 pl-8 text-left text-base font-semibold whitespace-nowrap text-ink max-[359px]:pr-7 max-[359px]:pl-7 max-[359px]:text-sm md:min-h-13.5 md:border-line md:bg-surface md:pr-10 md:pl-12 md:hover:bg-subtle"
+        // Phones: a square ⇅ button like its neighbours (the label is still
+        // read out, from aria-label). 768px up: "⇅ Newest first ⌄" in a box.
+        className="relative flex size-11 items-center justify-center rounded-card border border-line bg-surface text-left text-base font-semibold whitespace-nowrap text-ink hover:bg-subtle min-[360px]:size-12 md:size-auto md:min-h-13.5 md:w-full md:justify-start md:pr-10 md:pl-12"
       >
-        <svg ref={icon} className="pointer-events-none absolute top-1/2 left-1 size-5 -translate-y-1/2 text-ink md:left-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg ref={icon} className="pointer-events-none size-5 text-ink md:absolute md:top-1/2 md:left-4 md:-translate-y-1/2" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M6 3v14M3 14l3 3 3-3M14 17V3M11 6l3-3 3 3" />
         </svg>
         {/* key: the label fades in again whenever it changes. */}
-        <span key={value} className={picked ? 'sort-label-in' : undefined}>{options[chosen].label}</span>
+        <span key={value} className={`max-md:sr-only ${picked ? 'sort-label-in' : ''}`}>{options[chosen].label}</span>
         <svg
-          className={`pointer-events-none absolute top-1/2 right-2 size-4 -translate-y-1/2 text-ink transition-transform duration-200 md:right-4 ${open ? 'rotate-180' : ''}`}
+          className={`pointer-events-none absolute top-1/2 right-4 hidden size-4 -translate-y-1/2 text-ink transition-transform duration-200 md:block ${open ? 'rotate-180' : ''}`}
           viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
         >
           <path d="M4 6l4 4 4-4" />
@@ -146,7 +148,9 @@ export default function SortMenu({ value, options, onChange }) {
           aria-activedescendant={open ? `sort-option-${options[active].value}` : undefined}
           tabIndex={-1}
           onKeyDown={handleListKey}
-          className={`absolute left-0 z-20 w-max min-w-full rounded-card ${
+          // Phones: the button sits at the right of the row, so the list
+          // lines up with its right edge and opens leftward.
+          className={`absolute right-0 z-20 w-max min-w-full rounded-card md:right-auto md:left-0 ${
             up ? 'bottom-full mb-1 origin-bottom [--sort-shift:6px]' : 'top-full mt-1 origin-top'
           } border border-line bg-surface p-1 shadow-lg outline-none ${
             open ? 'sort-menu-in' : 'sort-menu-out pointer-events-none'

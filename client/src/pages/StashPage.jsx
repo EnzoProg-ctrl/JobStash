@@ -282,14 +282,16 @@ export default function StashPage() {
 
   return (
     <section>
-      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
         {/* A plain title: the brand column (BrandAside.jsx) already says what
             JobStash is for. Under it, where the stash stands right now, from
             every saved job (searching doesn't change it). The line keeps its
-            height while loading, so nothing jumps when the numbers arrive. */}
+            height while loading, so nothing jumps when the numbers arrive.
+            Not on phones: the tabs below show the same counts, and the room
+            goes to the jobs instead. */}
         <div>
           <h1 className="text-[2rem] leading-[1.1] font-bold tracking-tight text-ink md:text-[2.75rem]">My Stash</h1>
-          <p className="mt-3 min-h-7 text-lg text-muted">
+          <p className="mt-3 min-h-7 text-lg text-muted max-md:hidden">
             {status === 'ready' && jobs.length > 0 && (
               <>
                 <span className="font-semibold text-brand-blue">{toApplyTotal} to apply</span>
