@@ -88,6 +88,17 @@
   button:not(:disabled):active {
     transform: scale(0.97);
   }
+
+  /* The pointing hand over everything that can be clicked, like links get.
+     Tailwind 4 leaves buttons with the plain arrow, so Sign out, ☆, ⋮ and
+     the rest didn't look clickable next to Add Job (a link). A button that
+     can't be pressed right now (disabled) keeps the arrow. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  input[type="checkbox"]:not(:disabled),
+  label:has(> input[type="checkbox"]:not(:disabled)) {
+    cursor: pointer;
+  }
 }
 
 /* My Stash rows (JobCard.jsx): which part of a row goes where. Each part
