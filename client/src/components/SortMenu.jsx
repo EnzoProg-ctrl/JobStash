@@ -193,18 +193,19 @@ function lessMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-// A small "got it" when the sort changes: the ⇅ icon spins half a turn,
-// grows a little and turns blue, then settles. ⇅ looks the same upside down,
-// so it ends exactly as it started.
+// A small "got it" when the sort changes: the ⇅ icon turns half a turn,
+// briefly blue and a touch bigger, slowing smoothly to a stop (no
+// overshoot). ⇅ looks the same upside down, so it ends exactly as it
+// started.
 function flip(icon) {
   if (!icon?.animate || lessMotion()) return
   const blue = getComputedStyle(document.documentElement).getPropertyValue('--color-brand-blue')
   icon.animate(
     [
       { transform: 'rotate(0deg) scale(1)' },
-      { transform: 'rotate(110deg) scale(1.25)', color: blue, offset: 0.45 },
+      { transform: 'rotate(110deg) scale(1.12)', color: blue, offset: 0.4 },
       { transform: 'rotate(180deg) scale(1)' },
     ],
-    { duration: 350, easing: 'cubic-bezier(0.34, 1.4, 0.64, 1)' },
+    { duration: 350, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
   )
 }

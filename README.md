@@ -346,9 +346,10 @@ is gone, and the jobs now come from your database.
    **swipe a card to the left** in the list: it slides away over a red bin
    (let go before about 40% of the way, and it springs back). The cards go
    straight away and
-   *"Deleted "…" · Undo"* (or *"Deleted 3 jobs · Undo"*) shows for 5 seconds.
+   *"Deleted "…" · Undo"* (or *"Deleted 3 jobs · Undo"*) shows for 8 seconds (the countdown pauses while the mouse is over it or
+   it has keyboard focus).
    Only then are they really deleted, so **Undo** brings them back exactly as
-   they were. Deleting again, or leaving My Stash, within the 5 seconds
+   they were. Deleting again, or leaving My Stash, within the 8 seconds
    deletes the waiting ones at once;
    closing the tab or signing out leaves it in your stash. If deleting fails,
    the card comes back with a message.

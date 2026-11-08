@@ -15,6 +15,11 @@ import { Outlet } from 'react-router'
 
 // Shown when a tab has nothing in it. Different from the page having no jobs
 // at all, which gets its own message below.
+// How long the Undo message waits before a deleted job is really deleted.
+// Long enough to notice it and reach Undo; it also pauses while pointed at
+// or focused (holdUndo below).
+const UNDO_MS = 8000
+
 const EMPTY_TAB = {
   to_apply: 'Nothing left to apply for. Nice work!',
   done: 'Nothing marked as applied yet.',
@@ -74,14 +79,19 @@ export default function StashPage() {
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [view, setView] = useState(savedView)
   const [actionError, setActionError] = useState(null)
-  // The jobs just deleted, while their Undo message shows (5 seconds).
+  // The jobs just deleted, while their Undo message shows (UNDO_MS).
   const [deleted, setDeleted] = useState(null)
   // Select mode, and the ids of the ticked jobs.
   const [selecting, setSelecting] = useState(false)
   const [selected, setSelected] = useState(() => new Set())
-  // The same jobs, plus the 5-second timer, kept where the timer can read them.
+  // The same jobs, plus the Undo timer, kept where the timer can read them.
+  // timeLeft and startedAt let the timer pause while the Undo message is
+  // pointed at or focused, and carry on where it was.
   const pending = useRef(null)
   const timer = useRef(null)
+  const timeLeft = useRef(0)
+  const startedAt = useRef(0)
+  const held = useRef(false)
 
   // The card changes straight away, then the change is saved. If saving fails
   // the card goes back to how it was, so the screen never shows something that
@@ -128,8 +138,9 @@ export default function StashPage() {
   }
 
   // Delete: the card disappears straight away, and the Undo message shows for
-  // 5 seconds. Only when the time is up is the job really deleted, so Undo can
-  // bring it back exactly as it was.
+  // UNDO_MS (8 seconds), longer while it's pointed at or focused. Only when
+  // the time is up is the job really deleted, so Undo can bring it back
+  // exactly as it was.
   // Deleting is done from Select mode, one job or many at once (gone), or by
   // swiping a row to the left on a phone (one job).
   function handleDelete(gone) {
@@ -142,11 +153,33 @@ export default function StashPage() {
     smoothly(() => setJobs((current) => current.filter((row) => !ids.has(row.id))))
     pending.current = gone
     setDeleted(gone)
+    held.current = false
+    startUndoTimer(UNDO_MS)
+  }
+
+  function startUndoTimer(ms) {
+    timeLeft.current = ms
+    startedAt.current = Date.now()
     timer.current = setTimeout(() => {
-      gone.forEach(reallyDelete)
+      pending.current?.forEach(reallyDelete)
       pending.current = null
       setDeleted(null)
-    }, 5000)
+    }, ms)
+  }
+
+  // The mouse is over the Undo message, or it has keyboard focus (true), or
+  // neither any more (false). The time stops while it's held, so someone
+  // reaching for Undo, or a screen reader reading it out, doesn't run out of
+  // time; letting go gives at least 2 more seconds.
+  function holdUndo(hold) {
+    if (!pending.current || hold === held.current) return
+    held.current = hold
+    clearTimeout(timer.current)
+    if (hold) {
+      timeLeft.current -= Date.now() - startedAt.current
+    } else {
+      startUndoTimer(Math.max(timeLeft.current, 2000))
+    }
   }
 
   // Undo: stop the timer and put the jobs back. The list is sorted, so they
@@ -170,7 +203,7 @@ export default function StashPage() {
     }
   }
 
-  // Leaving My Stash within the 5 seconds: the waiting jobs are deleted on the
+  // Leaving My Stash within the 8 seconds: the waiting jobs are deleted on the
   // way out, instead of being forgotten when the timer disappears with the page.
   useEffect(() => {
     return () => {
@@ -516,6 +549,7 @@ export default function StashPage() {
               : `Deleted ${deleted.length} jobs`
           }
           onUndo={handleUndo}
+          onHold={holdUndo}
         />
       )}
       <Outlet context={{ onJobSaved: handleJobSaved }} />

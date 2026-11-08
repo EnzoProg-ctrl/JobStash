@@ -48,8 +48,8 @@ export default function DemoNotice({ className = '' }) {
       </svg>
       <p className="flex-1">
         <strong className="text-ink md:block">Demo mode</strong>
-        <span className="text-muted md:hidden"> · saved in this browser</span>
-        <span className="hidden text-muted md:inline">
+        <span className="text-ink/70 md:hidden"> · saved in this browser</span>
+        <span className="hidden text-ink/70 md:inline">
           Your jobs are saved in this browser only. There is no server or
           database behind this page.
         </span>
@@ -58,7 +58,7 @@ export default function DemoNotice({ className = '' }) {
         type="button"
         onClick={hide}
         aria-label="Hide the demo mode notice"
-        className="-m-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-white hover:text-ink"
+        className="-m-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-ink/70 hover:bg-white hover:text-ink"
       >
         <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <path d="M4 4l8 8M12 4l-8 8" />

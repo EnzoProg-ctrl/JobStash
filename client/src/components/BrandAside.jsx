@@ -31,7 +31,7 @@ export default function BrandAside() {
           <br />
           <span className="text-logo-blue">Apply later.</span>
         </p>
-        <p className="mt-4 max-w-[190px] text-[0.9375rem] leading-[1.45] text-muted 2xl:max-w-54 2xl:text-base">
+        <p className="mt-4 max-w-[190px] text-[0.9375rem] leading-[1.45] text-ink/70 2xl:max-w-54 2xl:text-base">
           A simple place to keep opportunities that matter to you.
         </p>
       </div>

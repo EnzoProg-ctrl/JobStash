@@ -222,7 +222,7 @@ function NextStep({ next, alsoWaiting, pending, className = '' }) {
           <p className="mt-3 text-lg leading-snug font-bold text-ink wrap-anywhere">
             Apply to {next.job_title ? `${next.job_title} at ${next.company_name}` : next.company_name}
           </p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-ink/70">
             Saved {timeAgo(next.added_at)}, the longest wait in your stash
             {alsoWaiting > 0 && <>, with {alsoWaiting} more after it</>}.
           </p>
@@ -249,7 +249,7 @@ function NextStep({ next, alsoWaiting, pending, className = '' }) {
           <p className="mt-3 text-lg leading-snug font-bold text-ink">
             {pending > 0 ? `You've applied to every job. ${pending} ${pending === 1 ? 'answer is' : 'answers are'} still to come.` : 'All caught up.'}
           </p>
-          <p className="mt-1 text-sm text-muted">Found another opening? Save it and apply when you're ready.</p>
+          <p className="mt-1 text-sm text-ink/70">Found another opening? Save it and apply when you're ready.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               to="/stash/add"

@@ -168,18 +168,19 @@ dialog[data-closing]::backdrop {
 }
 
 /* Select mode (StashPage, JobCard, BoardCard). A board card's tick box grows
-   in where its letter square was; ticking any box gives it a small bounce. */
+   in where its letter square was; ticking any box settles it in from a
+   little smaller. Both decelerate smoothly, without overshooting. */
 @utility pop-in {
-  animation: pop-in 180ms ease-out;
+  animation: pop-in 180ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.6); }
 }
 .select-box:checked {
-  animation: tick-bounce 200ms ease-out;
+  animation: tick-settle 180ms cubic-bezier(0.25, 1, 0.5, 1);
 }
-@keyframes tick-bounce {
-  50% { transform: scale(1.18); }
+@keyframes tick-settle {
+  from { transform: scale(0.8); }
 }
 
 /* Parts that fold open and shut (the Select bar, the Done filter): a grid
@@ -240,12 +241,12 @@ dialog[data-closing]::backdrop {
 }
 
 /* The sort dropdown (SortMenu.jsx). The list drops down from the button and
-   grows a little past its size before settling; the options slide in one
+   grows to its size, slowing smoothly as it gets there; the options slide in one
    after another (each gets its own animation-delay); the ✓ on the chosen one
    draws itself; closing folds it back up. --sort-shift is which way it
    moves in: down from the button, or up when the list opens upward. */
 @utility sort-menu-in {
-  animation: sort-menu-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.15);
+  animation: sort-menu-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes sort-menu-in {
   from { opacity: 0; transform: translateY(var(--sort-shift, -6px)) scaleY(0.85); }
