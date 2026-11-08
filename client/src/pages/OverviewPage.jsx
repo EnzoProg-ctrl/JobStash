@@ -26,8 +26,15 @@ const STAGES = [
   { key: 'pending', label: 'Pending', dot: 'bg-pending' },
   { key: 'accepted', label: 'Accepted', dot: 'bg-done' },
   { key: 'rejected', label: 'Rejected', dot: 'bg-error' },
-  { key: 'toApply', label: 'To Apply', dot: 'bg-brand-blue/25' },
+  { key: 'toApply', label: 'To Apply', dot: 'bg-brand-blue/25 dark:bg-brand-blue/50' },
 ]
+
+// Which of the four stages a job is at.
+function stageOf(job) {
+  if (job.status !== 'done') return 'toApply'
+  return job.outcome === 'accepted' || job.outcome === 'rejected' ? job.outcome : 'pending'
+}
+const noStages = () => ({ pending: 0, accepted: 0, rejected: 0, toApply: 0 })
 
 function summarise(jobs, now = Date.now()) {
   const doneJobs = jobs.filter((job) => job.status === 'done')
@@ -40,17 +47,29 @@ function summarise(jobs, now = Date.now()) {
   }
   const thisWeek = jobs.filter((job) => now - new Date(job.added_at).getTime() < WEEK).length
 
+  // Per site: how many jobs, and how each of them is doing (the same four
+  // stages as Progress), so the card can show which sites lead somewhere.
   const perSite = new Map()
   for (const job of jobs) {
     // A job without a link counts under where it was found, or "No link".
     const name = job.posting_url ? siteName(job.posting_url) || 'Unknown site' : job.source || 'No link'
-    perSite.set(name, (perSite.get(name) ?? 0) + 1)
+    const site = perSite.get(name) ?? { name, kind: job.posting_url ? 'site' : 'manual', count: 0, ...noStages() }
+    site.count += 1
+    site[stageOf(job)] += 1
+    perSite.set(name, site)
   }
   // Most jobs first; sites with the same number in A–Z order.
-  const sites = [...perSite].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  const sites = [...perSite.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
   const shown = sites.slice(0, TOP_SITES)
-  const others = sites.slice(TOP_SITES).reduce((sum, [, count]) => sum + count, 0)
-  if (others > 0) shown.push(['Other sites', others])
+  const rest = sites.slice(TOP_SITES)
+  if (rest.length > 0) {
+    const others = { name: 'Other sites', kind: 'others', count: 0, ...noStages() }
+    for (const site of rest) {
+      others.count += site.count
+      for (const stage of STAGES) others[stage.key] += site[stage.key]
+    }
+    shown.push(others)
+  }
 
   const newestFirst = [...jobs].sort((a, b) => b.added_at.localeCompare(a.added_at))
   // The job that has waited longest to be applied to: the next one to do.
@@ -63,6 +82,7 @@ function summarise(jobs, now = Date.now()) {
     counts,
     thisWeek,
     sites: shown,
+    sourceCount: sites.length,
     recent: newestFirst.slice(0, RECENT),
     next,
     alsoWaiting: Math.max(0, waiting.length - 1),
@@ -136,7 +156,7 @@ export default function OverviewPage() {
   )
 }
 
-function Summary({ saved, done, counts, thisWeek, sites, recent, next, alsoWaiting }) {
+function Summary({ saved, done, counts, thisWeek, sites, sourceCount, recent, next, alsoWaiting }) {
   return (
     <>
       {/* Below 1024px the two column boxes step aside (contents) and order-*
@@ -145,7 +165,7 @@ function Summary({ saved, done, counts, thisWeek, sites, recent, next, alsoWaiti
         {/* Left on laptops: Progress, then the sites. */}
         <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
           <Progress saved={saved} done={done} counts={counts} thisWeek={thisWeek} className="max-lg:order-2" />
-          <Sites sites={sites} saved={saved} className="max-lg:order-4" />
+          <Sites sites={sites} saved={saved} sourceCount={sourceCount} className="max-lg:order-4" />
         </div>
         {/* Right on laptops: what to do next, and the newest jobs. */}
         <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
@@ -307,27 +327,95 @@ function Recent({ jobs, className }) {
   )
 }
 
-function Sites({ sites, saved, className }) {
+// Where the jobs come from, and how each source is going:
+//
+//   LinkedIn brings the most (3 of 7). Your accepted job came from Kalibrr.
+//   [L] LinkedIn                      3 jobs
+//       ███▓▓▓▓░░░░░░  (its share of all jobs, in the Progress colours)
+//       2 to apply · 1 pending
+//
+// The bar's length is the site's share of all saved jobs (1 of 7 fills a
+// seventh); inside it, the same four colours as the Progress bar, in the same
+// order. The line under it says the same in words, which is also what screen
+// readers get (the bar itself is hidden from them).
+function Sites({ sites, saved, sourceCount, className }) {
   return (
     <Card title="Where your jobs come from" className={className}>
-      <ul className="mt-4 flex flex-col gap-3.5">
-        {sites.map(([name, count]) => (
-          <li key={name}>
-            <div className="flex items-baseline justify-between gap-4 text-sm">
-              <span className="min-w-0 truncate font-semibold text-ink">{name}</span>
-              <span className="shrink-0 text-muted tabular-nums">
-                {count} {count === 1 ? 'job' : 'jobs'}
-              </span>
-            </div>
-            {/* Bar length is the site's share of all saved jobs, so a site
-                with 1 of 7 fills a seventh (and a full bar means every job
-                came from there). */}
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-subtle" aria-hidden="true">
-              <div className="h-full rounded-full bg-brand-blue" style={{ width: `${(count / saved) * 100}%` }} />
+      <p className="mt-1 text-sm text-pretty text-muted">{takeaway(sites, saved, sourceCount)}</p>
+      <ul className="mt-5 flex flex-col gap-4">
+        {sites.map((site) => (
+          <li key={site.name} className="flex items-start gap-3">
+            <SiteBadge site={site} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline justify-between gap-4 text-sm">
+                <span className="min-w-0 truncate font-semibold text-ink" title={site.name}>{site.name}</span>
+                <span className="shrink-0 text-muted tabular-nums">
+                  {site.count} {site.count === 1 ? 'job' : 'jobs'}
+                </span>
+              </div>
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-subtle" aria-hidden="true">
+                <div className="flex h-full gap-0.5" style={{ width: `${(site.count / saved) * 100}%` }}>
+                  {STAGES.filter((stage) => site[stage.key] > 0).map((stage) => (
+                    <div key={stage.key} className={`h-full ${stage.dot}`} style={{ flexGrow: site[stage.key] }} />
+                  ))}
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-muted">
+                {STAGES.filter((stage) => site[stage.key] > 0)
+                  .map((stage) => `${site[stage.key]} ${stage.label.toLowerCase()}`)
+                  .join(' · ')}
+              </p>
             </div>
           </li>
         ))}
       </ul>
     </Card>
   )
+}
+
+// A square like the company letters on My Stash: the site's first letter in
+// its own colour; a pencil for jobs saved without a link (typed in: a
+// referral, a cold email); a plus for "Other sites".
+function SiteBadge({ site }) {
+  const base = 'flex size-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold'
+  if (site.kind === 'site') {
+    return (
+      <span className={`${base} ${avatarColour(site.name)}`} aria-hidden="true">
+        {site.name.charAt(0).toUpperCase()}
+      </span>
+    )
+  }
+  return (
+    <span className={`${base} bg-subtle text-muted`} aria-hidden="true">
+      <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        {site.kind === 'others' ? <path d="M8 3.5v9M3.5 8h9" /> : <path d="M10.5 2.5l3 3-7.5 7.5H3v-3z M9 4l3 3" />}
+      </svg>
+    </span>
+  )
+}
+
+// One sentence on top: where most jobs come from, and where the accepted
+// ones came from (if any). "Other sites" isn't a site, so it's left out.
+function takeaway(sites, saved, sourceCount) {
+  const named = sites.filter((site) => site.kind !== 'others')
+  const most = named[0].count
+  const leaders = named.filter((site) => site.count === most).map((site) => site.name)
+  let sentence
+  if (named.length === 1 && named[0].count === saved) {
+    sentence = `All your jobs come from ${leaders[0]}.`
+  } else if (leaders.length === 1) {
+    sentence = `${leaders[0]} brings the most (${most} of ${saved}).`
+  } else if (leaders.length === 2) {
+    sentence = `${leaders[0]} and ${leaders[1]} bring the most (${most} each).`
+  } else {
+    sentence = `Your jobs are spread across ${sourceCount} places.`
+  }
+
+  const accepted = sites.reduce((sum, site) => sum + site.accepted, 0)
+  const from = named.filter((site) => site.accepted > 0).map((site) => site.name)
+  if (accepted > 0 && from.length > 0) {
+    const where = from.length === 1 ? from[0] : `${from.slice(0, -1).join(', ')} and ${from.at(-1)}`
+    sentence += accepted === 1 ? ` Your accepted job came from ${where}.` : ` Your ${accepted} accepted jobs came from ${where}.`
+  }
+  return sentence
 }
