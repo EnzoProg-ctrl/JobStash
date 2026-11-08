@@ -80,7 +80,7 @@ export default function HomePage() {
             <span className="flex items-center gap-2 md:gap-4">
               <Link
                 to="/stash"
-                className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap text-white min-[360px]:px-4 hover:bg-brand-blue-dark md:h-12 md:px-5"
+                className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap text-on-brand min-[360px]:px-4 hover:bg-brand-blue-dark md:h-12 md:px-5"
               >
                 My Stash
               </Link>
@@ -93,7 +93,7 @@ export default function HomePage() {
           ) : (
             <a
               href="#sign-in"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap text-white min-[360px]:px-4 hover:bg-brand-blue-dark md:h-12 md:px-6"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-3 font-semibold whitespace-nowrap text-on-brand min-[360px]:px-4 hover:bg-brand-blue-dark md:h-12 md:px-6"
             >
               {demo ? 'Try the demo' : 'Sign in'}
             </a>
@@ -208,7 +208,7 @@ export default function HomePage() {
             the demo, or straight into My Stash when signed in. */}
         <Reveal
           as="section"
-          className="relative isolate mb-20 overflow-hidden rounded-3xl bg-brand-blue px-6 py-14 text-center text-white md:mb-28 md:py-20"
+          className="relative isolate mb-20 overflow-hidden rounded-3xl bg-brand-blue px-6 py-14 text-center text-on-brand md:mb-28 md:py-20"
           aria-labelledby="start-title"
         >
           <img
@@ -221,7 +221,7 @@ export default function HomePage() {
           <h2 id="start-title" className="mx-auto max-w-2xl text-3xl leading-tight font-bold tracking-tight text-balance md:text-[2.5rem]">
             {session ? 'Your stash is waiting.' : 'Your next job could be one link away.'}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-balance text-white/85">
+          <p className="mx-auto mt-4 max-w-xl text-lg text-balance text-on-brand/85">
             {session
               ? 'Pick up where you left off: apply to what you saved, and keep track of the answers.'
               : 'Start your stash in a few seconds, and never lose a job posting again.'}
@@ -303,7 +303,7 @@ function SignIn() {
       <div id="sign-in" className={SIGN_IN_AREA}>
         <Link
           to="/stash"
-          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-lg font-semibold text-white hover:bg-brand-blue-dark"
+          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-lg font-semibold text-on-brand hover:bg-brand-blue-dark"
         >
           Try the demo
           <ArrowIcon />
@@ -318,7 +318,7 @@ function SignIn() {
       <div id="sign-in" className={SIGN_IN_AREA}>
         <Link
           to="/stash"
-          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-lg font-semibold text-white hover:bg-brand-blue-dark"
+          className="press inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-lg font-semibold text-on-brand hover:bg-brand-blue-dark"
         >
           Go to My Stash
           <ArrowIcon />

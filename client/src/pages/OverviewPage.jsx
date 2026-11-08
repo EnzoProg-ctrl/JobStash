@@ -124,7 +124,7 @@ export default function OverviewPage() {
           <p className="mt-1 text-muted">Save your first job, and your progress shows up here.</p>
           <Link
             to="/stash/add"
-            className="press mt-4 inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-brand-blue-dark"
+            className="press mt-4 inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-5 font-semibold text-on-brand hover:bg-brand-blue-dark"
           >
             Add a job
           </Link>
@@ -232,7 +232,7 @@ function NextStep({ next, alsoWaiting, pending, className = '' }) {
                 href={next.posting_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="press inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-brand-blue px-4 text-sm font-semibold text-white hover:bg-brand-blue-dark"
+                className="press inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-brand-blue px-4 text-sm font-semibold text-on-brand hover:bg-brand-blue-dark"
               >
                 Open Posting
                 <svg className="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -253,7 +253,7 @@ function NextStep({ next, alsoWaiting, pending, className = '' }) {
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               to="/stash/add"
-              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-4 text-sm font-semibold text-white hover:bg-brand-blue-dark"
+              className="press inline-flex min-h-11 items-center rounded-lg bg-brand-blue px-4 text-sm font-semibold text-on-brand hover:bg-brand-blue-dark"
             >
               Add Job
             </Link>

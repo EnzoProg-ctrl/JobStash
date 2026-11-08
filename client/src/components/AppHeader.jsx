@@ -52,7 +52,7 @@ export default function AppHeader() {
         <div className="flex items-center gap-3 md:gap-4">
           <Link
             to="/stash/add"
-            className="press hidden h-12 items-center gap-2 rounded-lg bg-brand-blue px-5 font-semibold text-white hover:bg-brand-blue-dark md:inline-flex"
+            className="press hidden h-12 items-center gap-2 rounded-lg bg-brand-blue px-5 font-semibold text-on-brand hover:bg-brand-blue-dark md:inline-flex"
           >
             <svg className="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M10 4v12M4 10h12" />

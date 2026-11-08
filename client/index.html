@@ -8,6 +8,21 @@
     <title>JobStash-ph</title>
     <meta name="description" content="A digital clipboard for job hunting: save a job posting link on your phone, then open the same list on your laptop and apply." />
     <meta name="theme-color" content="#0F2D5B" />
+    <!-- Light or dark, decided before the page first paints, so a phone in
+         dark mode never flashes white. The saved choice wins, else the
+         device's setting. src/lib/theme.js takes over once the app runs. -->
+    <script>
+      (function () {
+        var theme = null
+        try {
+          theme = localStorage.getItem('jobstash:theme')
+        } catch (error) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = theme
+      })()
+    </script>
     <!-- Proves to Google Search Console that this site is ours, for brand
          verification of the Google sign-in screen. Leave it in: Google checks
          it again from time to time. -->

@@ -259,7 +259,7 @@ export default function AddJobDialog({ manual = false }) {
         // when the pop-up is too short for them (small phones), and the Save
         // bar under them, always in sight. open:flex, not flex: a closed
         // <dialog> must stay hidden.
-        className="top-[env(safe-area-inset-top)] bottom-[env(safe-area-inset-bottom)] m-auto max-h-[calc(100%_-_2rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 open:flex"
+        className="top-[env(safe-area-inset-top)] bottom-[env(safe-area-inset-bottom)] m-auto max-h-[calc(100%_-_2rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-ink/40 dark:backdrop:bg-black/55 open:flex"
       >
         {/* As tall as its contents, shrinking (and scrolling) only when the
             screen is too short. Not flex-1: from a starting height of 0,
@@ -476,7 +476,7 @@ export default function AddJobDialog({ manual = false }) {
             form="add-job-form"
             // Also while closing, so a quick second click can't save it twice.
             disabled={saving || closing}
-            className="press inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-brand-blue px-8 font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60 md:flex-none"
+            className="press inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-brand-blue px-8 font-semibold text-on-brand hover:bg-brand-blue-dark disabled:opacity-60 md:flex-none"
           >
             {saving ? 'Saving…' : 'Save Job'}
           </button>
@@ -487,9 +487,10 @@ export default function AddJobDialog({ manual = false }) {
           pinned to the top and bottom edges of the page, and ignores the
           dimmed background behind the pop-up. So those stayed light above
           and below the dimmed page. These two grey bars sit on top of it at
-          both edges, and Safari copies their grey: the grey white turns when
-          dimmed (#9fa2aa), as the header and the bottom bar there are white.
-          They turn from white to grey with the dimming (styles.css). They're
+          both edges, and Safari copies their grey: the colour the header and
+          the bottom bar turn when dimmed (--edge-dim in styles.css: #9fa2aa,
+          or near-black in the dark theme). They change colour with the
+          dimming (styles.css). They're
           a popover so they share the pop-up's top layer (bars beneath it are
           ignored). Phones only; tested on an iPhone. */}
       <div
@@ -499,10 +500,10 @@ export default function AddJobDialog({ manual = false }) {
         data-closing={closing || undefined}
         className="dialog-edges pointer-events-none fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 md:hidden"
       >
-        <span className="pointer-events-auto fixed inset-x-0 top-0 h-4 bg-[#9fa2aa]" />
+        <span className="pointer-events-auto fixed inset-x-0 top-0 h-4 bg-(--edge-dim)" />
         {/* Only 4px at the bottom: the bottom bar's labels end 8px above the
             edge, and a taller grey bar cut through them. */}
-        <span className="pointer-events-auto fixed inset-x-0 bottom-0 h-1 bg-[#9fa2aa]" />
+        <span className="pointer-events-auto fixed inset-x-0 bottom-0 h-1 bg-(--edge-dim)" />
       </div>
     </>
   )

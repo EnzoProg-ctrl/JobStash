@@ -454,7 +454,7 @@ export default function StashPage() {
                     type="button"
                     onClick={deleteSelected}
                     disabled={!selectedVisible.length}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-error px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-40"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-error px-4 text-sm font-semibold text-on-brand hover:bg-red-800 dark:hover:bg-red-300 disabled:opacity-40"
                   >
                     <svg className="size-4 max-sm:hidden" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.75 6.5v4.5M9.25 6.5v4.5" />

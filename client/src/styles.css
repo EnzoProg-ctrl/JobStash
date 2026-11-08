@@ -20,6 +20,7 @@
   --color-done: #15803D;         /* Done badge text */
   --color-done-bg: #F0FDF4;      /* Done badge background */
   --color-error: #B91C1C;        /* form error messages */
+  --color-on-brand: #FFFFFF;     /* text on a brand-blue or error fill (buttons) */
 
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --text-heading: 2.5rem;        /* 40px: screen titles ("My Stash") */
@@ -29,20 +30,60 @@
   --radius-card: 12px;           /* job cards, form cards */
 }
 
+/* dark: classes (dark:bg-…) apply under the dark theme, which is the
+   data-theme attribute on <html> (lib/theme.js), not the device setting
+   directly, so a person's own choice wins. */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /* Page-wide defaults. Everything else is styled with classes on the element. */
 @layer base {
-  /* The design has one light theme. Saying so stops the browser drawing dark
-     form controls and scrollbars when the computer is in dark mode. */
+  /* Light theme. color-scheme tells the browser which theme its own parts
+     (form controls, scrollbars) should follow.
+     --dialog-dim and --edge-dim: the page background and the white header /
+     bottom bar as they look under a pop-up's dimming (see html:has(dialog)
+     below and AddJobDialog.jsx). */
   :root {
     color-scheme: light;
+    --dialog-dim: #9b9fa8;
+    --edge-dim: #9fa2aa;
     /* Links to a part of the same page (How it works, Features, Sign in on
        the landing page) glide there instead of jumping. Switched off for
        reduced motion by the block at the end of this file. */
     scroll-behavior: smooth;
   }
 
+  /* Dark theme: deep navy. The same tokens with dark values, so every
+     bg-surface, text-ink, border-line… follows. Text pairs are at least
+     4.5:1 (muted on surface 6.6:1, brand-blue on bg 7.3:1). on-brand turns
+     dark because brand-blue turns light: dark text on light-blue buttons.
+     The dims: black at 55% (dark:backdrop:bg-black/55 in AddJobDialog) over
+     the page background and over the surface. */
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --color-primary: #E5EAF2;
+    --color-accent: #94A3B8;
+    --color-bg: #0B1120;
+    --color-surface: #111A2B;
+    --color-ink: #E5EAF2;
+    --color-muted: #94A3B8;
+    --color-line: #243049;
+    --color-subtle: #1A2436;
+    --color-brand-blue: #60A5FA;
+    --color-brand-blue-dark: #93C5FD;
+    --color-logo-blue: #60A5FA;
+    --color-pending: #94A3B8;
+    --color-todo: #93C5FD;
+    --color-todo-bg: #172554;
+    --color-done: #4ADE80;
+    --color-done-bg: #052E16;
+    --color-error: #F87171;
+    --color-on-brand: #0B1120;
+    --dialog-dim: #05080e;
+    --edge-dim: #080c13;
+  }
+
   /* While a pop-up is open, the root turns the same grey as the dimmed page
-     (ink at 40% over the page background, #9b9fa8), for browsers that colour
+     (ink at 40% over the page background, --dialog-dim), for browsers that colour
      their edges from it. iPhone Safari needs more: the grey edge bars in
      AddJobDialog.jsx. The page itself is painted by body, so nothing else
      changes.
@@ -50,7 +91,7 @@
      scrollbar-gutter keeps the space of the page's scrollbar (on computers
      that show one), so the page doesn't shift sideways when it disappears. */
   html:has(dialog[open]) {
-    background-color: #9b9fa8;
+    background-color: var(--dialog-dim);
     overflow: hidden;
     scrollbar-gutter: stable;
   }
@@ -148,8 +189,9 @@ dialog[data-closing] {
 dialog[data-closing]::backdrop {
   animation: fade-out 150ms ease-in forwards;
 }
-/* The grey edges for iPhone Safari (AddJobDialog.jsx) turn from white to
-   grey as the page dims, and back as it brightens, in step with it. They
+/* The grey edges for iPhone Safari (AddJobDialog.jsx) turn from the header's
+   colour (surface: white, or navy in the dark theme) to the dimmed colour
+   (--edge-dim) as the page dims, and back as it brightens, in step with it. They
    stay solid and change colour rather than fading: Safari follows a colour
    change smoothly, but not a fade (tested on an iPhone). */
 .dialog-edges:popover-open > span {
@@ -159,10 +201,10 @@ dialog[data-closing]::backdrop {
   animation: edge-grey-to-white 150ms ease-in forwards;
 }
 @keyframes white-to-edge-grey {
-  from { background-color: #fff; }
+  from { background-color: var(--color-surface); }
 }
 @keyframes edge-grey-to-white {
-  to { background-color: #fff; }
+  to { background-color: var(--color-surface); }
 }
 
 @keyframes pop-up-in {

@@ -66,7 +66,7 @@ export default function JobCard({ job, showStatus, onSetStatus, onToggleFavorite
       {/* Behind the row, uncovered as it slides left: red, with a bin that
           grows in as you swipe. Only there while swiping. */}
       {swipe.swiping && (
-        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-end bg-error pr-7 text-white">
+        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-end bg-error pr-7 text-on-brand">
           <BinIcon
             className="size-6"
             style={{ opacity: 'var(--swipe-progress, 0)', transform: 'scale(calc(0.6 + 0.4 * var(--swipe-progress, 0)))' }}
