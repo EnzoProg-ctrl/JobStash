@@ -18,18 +18,18 @@ import tilesArt from '../assets/branding/jobstash-tiles.svg'
 // My Stash), so going from here into the app feels like one place.
 
 // How it works, in the order it happens. Step 2 is the link preview
-// (server/linkPreview.js); jobs without a link (a referral, a cold email) can
-// be typed in instead.
+// (server/linkPreview.js). It only names sites that really fill in:
+// JobStreet and Indeed block it, so the text says so rather than promise it.
 const STEPS = [
   {
     icon: LinkIcon,
     title: 'Paste the link',
-    text: 'Found a job on LinkedIn, JobStreet or a company site? Paste its link into Add Job, on your phone or your computer.',
+    text: "Found a job on LinkedIn, Kalibrr or a company's careers page? Paste its link into Add Job, on your phone or your computer.",
   },
   {
     icon: WandIcon,
     title: 'The details fill themselves in',
-    text: 'JobStash reads the posting for the company and the job title. No link, like a referral or a cold email? Just type them in.',
+    text: 'JobStash reads the posting and fills in the company and the job title. JobStreet and Indeed block this, so for those, and for jobs without a link, you type the company yourself.',
   },
   {
     icon: CheckIcon,
@@ -244,7 +244,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between md:px-8">
           <div>
             <Logo className="text-2xl" />
-            <p className="mt-2 text-sm text-muted">Stash today. A brighter tomorrow.</p>
+            <p className="mt-2 text-sm text-muted">Stash it. Apply later.</p>
           </div>
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-muted" aria-label="Footer">
             <a href="#how-it-works" className="inline-flex min-h-11 items-center hover:text-ink">How it works</a>

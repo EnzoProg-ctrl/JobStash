@@ -26,9 +26,10 @@ export default function BrandAside() {
       {/* The gap above the slogan grows with the screen's height. */}
       <div className="relative z-10 mt-[min(6rem,9vh)]">
         <p className="text-2xl leading-tight font-bold tracking-tight text-ink 2xl:text-[1.625rem]">
-          Save today.
+          {/* The same slogan as the landing page and its footer. */}
+          Stash it.
           <br />
-          <span className="text-logo-blue">Apply tomorrow.</span>
+          <span className="text-logo-blue">Apply later.</span>
         </p>
         <p className="mt-4 max-w-[190px] text-[0.9375rem] leading-[1.45] text-muted 2xl:max-w-54 2xl:text-base">
           A simple place to keep opportunities that matter to you.
