@@ -5,13 +5,14 @@ import { usePageTitle } from '../lib/usePageTitle.js'
 
 // Overview: how the job hunt is going, at a glance.
 //
-//   [ Saved ] [ To Apply ] [ Pending ] [ Accepted ] [ Rejected ]
-//   [ Progress (one bar, four parts)   ]  [ Next step      ]
-//   [ Where your jobs come from        ]  [ Recently added ]
+//   [ Progress: "7 saved · 3 applied (43%) · +2 this week",
+//     one bar in four parts, and their counts ]  [ Next step      ]
+//   [ Where your jobs come from               ]  [ Recently added ]
 //
-// Phones and tablets: one card under another, the next step first (after the
-// numbers), as it's the part to act on. Everything is worked out from the
-// same list My Stash shows, so the two always agree.
+// Each number appears once: the counts per stage live under the bar, not
+// again in tiles of their own. Phones and tablets: one card under another,
+// the next step first, as it's the part to act on. Everything is worked out
+// from the same list My Stash shows, so the two always agree.
 
 const WEEK = 7 * 24 * 60 * 60 * 1000
 // The sites list shows this many sites by name; the rest are added up as
@@ -74,15 +75,14 @@ export default function OverviewPage() {
 
   return (
     <section>
-      <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">Overview</p>
-      <h1 className="mt-2 text-[2rem] leading-[1.1] font-bold tracking-tight text-ink md:text-[2.75rem]">
+      <h1 className="text-[2rem] leading-[1.1] font-bold tracking-tight text-ink md:text-[2.75rem]">
         How your job hunt <span className="text-brand-blue">is going</span>.
       </h1>
       <p className="mt-3 text-lg text-muted">Your saved jobs, where they stand, and what to do next.</p>
 
-      {/* Loading: grey stand-ins for the five numbers, like My Stash's grey
-          rows. After 5 seconds a note that it's taking longer than usual
-          joins them. */}
+      {/* Loading: grey stand-ins for the top two cards (Progress and Next
+          step), like My Stash's grey rows. After 5 seconds a note that it's
+          taking longer than usual joins them. */}
       {status === 'loading' && (
         <div className="mt-8" role="status">
           <span className="sr-only">Loading your overview…</span>
@@ -91,13 +91,16 @@ export default function OverviewPage() {
               Still loading. This is taking longer than usual; a slow connection can do this.
             </p>
           )}
-          <div className="grid animate-pulse grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4" aria-hidden="true">
-            {[0, 1, 2, 3, 4].map((tile) => (
-              <div key={tile} className={`h-28 rounded-card border border-line bg-surface p-5 ${tile === 0 ? 'col-span-2 lg:col-span-1' : ''}`}>
-                <span className="block h-3 w-20 rounded bg-subtle" />
-                <span className="mt-4 block h-8 w-12 rounded bg-line" />
-              </div>
-            ))}
+          <div className="grid animate-pulse gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6" aria-hidden="true">
+            <div className="h-40 rounded-card border border-line bg-surface p-6">
+              <span className="block h-3 w-24 rounded bg-subtle" />
+              <span className="mt-4 block h-5 w-64 max-w-full rounded bg-line" />
+              <span className="mt-5 block h-3 rounded-full bg-subtle" />
+            </div>
+            <div className="h-40 rounded-card border border-line bg-surface p-6 max-lg:hidden">
+              <span className="block h-3 w-20 rounded bg-subtle" />
+              <span className="mt-4 block h-5 w-40 rounded bg-line" />
+            </div>
           </div>
         </div>
       )}
@@ -136,29 +139,13 @@ export default function OverviewPage() {
 function Summary({ saved, done, counts, thisWeek, sites, recent, next, alsoWaiting }) {
   return (
     <>
-      {/* The five numbers. Phones and tablets: Saved across the top, then two
-          by two. Laptops: one row. */}
-      <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4">
-        <Stat
-          label="Saved"
-          value={saved}
-          dot="bg-ink"
-          note={thisWeek > 0 ? `+${thisWeek} this week` : 'None added this week'}
-          className="col-span-2 lg:col-span-1"
-        />
-        <Stat label="To Apply" value={counts.toApply} dot="bg-brand-blue" />
-        <Stat label="Pending" value={counts.pending} dot="bg-pending" />
-        <Stat label="Accepted" value={counts.accepted} dot="bg-done" />
-        <Stat label="Rejected" value={counts.rejected} dot="bg-error" />
-      </div>
-
       {/* Below 1024px the two column boxes step aside (contents) and order-*
           puts the cards in phone order: next step, progress, recent, sites. */}
-      <div className="mt-4 flex flex-col gap-4 lg:mt-6 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6">
+      <div className="mt-8 flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6">
         {/* Left on laptops: Progress, then the sites. */}
         <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
-          <Progress saved={saved} done={done} counts={counts} className="max-lg:order-2" />
-          <Sites sites={sites} className="max-lg:order-4" />
+          <Progress saved={saved} done={done} counts={counts} thisWeek={thisWeek} className="max-lg:order-2" />
+          <Sites sites={sites} saved={saved} className="max-lg:order-4" />
         </div>
         {/* Right on laptops: what to do next, and the newest jobs. */}
         <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
@@ -182,34 +169,22 @@ function Card({ title, aside, children, className = '' }) {
   )
 }
 
-function Stat({ label, value, dot, note, className = '' }) {
-  return (
-    <div className={`rounded-card border border-line bg-surface p-4 md:p-5 ${className}`}>
-      <p className="flex items-center gap-2 text-sm font-medium text-muted">
-        <span className={`size-2 rounded-full ${dot}`} aria-hidden="true" />
-        {label}
-      </p>
-      <p className="mt-2 text-3xl font-bold tracking-tight text-ink tabular-nums md:text-4xl">{value}</p>
-      {note && <p className="mt-1 text-sm text-muted">{note}</p>}
-    </div>
-  )
-}
-
-// One bar in four parts: Pending, Accepted and Rejected (applied), then To
-// Apply (not yet). Each part's length is its share of all saved jobs.
-function Progress({ saved, done, counts, className }) {
+// The whole picture in one sentence ("7 saved · 3 applied (43%) · +2 this
+// week"), then one bar in four parts: Pending, Accepted and Rejected
+// (applied), then To Apply (not yet). Each part's length is its share of all
+// saved jobs; the count for each is written under the bar.
+function Progress({ saved, done, counts, thisWeek, className }) {
   const percent = Math.round((done / saved) * 100)
 
   return (
-    <Card
-      title="Progress"
-      className={className}
-      aside={
-        <p className="text-sm text-muted">
-          <span className="font-semibold text-ink">{done} of {saved}</span> applied · {percent}%
-        </p>
-      }
-    >
+    <Card title="Progress" className={className}>
+      <p className="mt-2 text-lg text-muted">
+        <span className="font-bold text-ink tabular-nums">{saved} saved</span>
+        {' · '}
+        <span className="font-bold text-ink tabular-nums">{done} applied</span> ({percent}%)
+        {' · '}
+        {thisWeek > 0 ? `+${thisWeek} this week` : 'none added this week'}
+      </p>
       <div
         className="mt-4 flex h-3 gap-0.5 overflow-hidden rounded-full bg-subtle"
         role="progressbar"
@@ -332,9 +307,7 @@ function Recent({ jobs, className }) {
   )
 }
 
-function Sites({ sites, className }) {
-  const biggest = sites[0][1]
-
+function Sites({ sites, saved, className }) {
   return (
     <Card title="Where your jobs come from" className={className}>
       <ul className="mt-4 flex flex-col gap-3.5">
@@ -346,9 +319,11 @@ function Sites({ sites, className }) {
                 {count} {count === 1 ? 'job' : 'jobs'}
               </span>
             </div>
-            {/* Bar length compared with the biggest site, so the top site fills the row. */}
+            {/* Bar length is the site's share of all saved jobs, so a site
+                with 1 of 7 fills a seventh (and a full bar means every job
+                came from there). */}
             <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-subtle" aria-hidden="true">
-              <div className="h-full rounded-full bg-brand-blue" style={{ width: `${(count / biggest) * 100}%` }} />
+              <div className="h-full rounded-full bg-brand-blue" style={{ width: `${(count / saved) * 100}%` }} />
             </div>
           </li>
         ))}
