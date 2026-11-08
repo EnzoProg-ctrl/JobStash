@@ -31,7 +31,7 @@ export default function AppHeader() {
   }
 
   return (
-    <header className="relative z-20 bg-surface">
+    <header className="relative z-20 bg-surface dark:bg-bg">
       <div className="flex items-center justify-between gap-3 px-4 py-3 md:h-20 md:px-8 md:py-0 lg:pl-12">
         <div className="flex items-center gap-8 self-stretch">
           <Link to="/stash" aria-label="JobStash, go to My Stash" className="flex items-center lg:hidden">
@@ -82,10 +82,12 @@ export default function AppHeader() {
           )}
         </div>
       </div>
-      {/* The fade from the bar's white into the page's background. */}
+      {/* The fade from the bar's white into the page's background. Light
+          theme only: in the dark theme the bar is the page's own navy, so
+          there's nothing to fade (a fade there showed as a band). */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-full h-6 bg-linear-to-b from-surface to-bg"
+        className="pointer-events-none absolute inset-x-0 top-full h-6 bg-linear-to-b from-surface to-bg dark:hidden"
       />
     </header>
   )

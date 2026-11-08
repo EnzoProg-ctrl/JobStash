@@ -74,7 +74,7 @@ export default function BrandAside() {
       />
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 right-0 h-26 w-12 bg-linear-to-r from-transparent to-surface mask-[linear-gradient(to_bottom,black_5rem,transparent)]"
+        className="pointer-events-none absolute top-0 right-0 h-26 w-12 bg-linear-to-r from-transparent to-surface dark:to-bg mask-[linear-gradient(to_bottom,black_5rem,transparent)]"
       />
     </aside>
   )
