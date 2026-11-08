@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { useTheme } from '../lib/theme.js'
 
 // Google's own "Sign in with Google" button (Google Identity Services).
 //
@@ -53,18 +52,32 @@ async function makeNonce() {
 
 export const googleButtonAvailable = Boolean(CLIENT_ID)
 
+// Google draws its button in two steps: first a plain "Sign in with Google",
+// then, once it has checked who's signed in to Google, "Sign in as Enzo".
+// That swap happens inside Google's frame, out of our reach, so the grey
+// stand-in stays up until the frames have loaded plus SETTLE_MS for the swap,
+// then the button fades in. MAX_WAIT_MS: shown anyway if the frames never
+// report in.
+const SETTLE_MS = 600
+const MAX_WAIT_MS = 3000
+
 export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
-  const slot = useRef(null)
+  const box = useRef(null)
+  // One button per theme, drawn once: Google's outline button for the light
+  // theme, its dark one for the dark theme. Switching themes only shows the
+  // other one, so Google doesn't redraw (and replay the swap) each time.
+  const lightSlot = useRef(null)
+  const darkSlot = useRef(null)
   const [ready, setReady] = useState(false)
   // The latest onToken, so Google's callback never calls an old one.
   const latest = useRef(onToken)
   latest.current = onToken
-  // Google's outline button on the light theme, its dark one on the dark
-  // theme; redrawn when the theme changes.
-  const theme = useTheme()
 
   useEffect(() => {
     let cancelled = false
+    let observer = null
+    const timers = []
+    setReady(false)
     // Give up and use the old button if Google hasn't answered in 8 seconds.
     const giveUp = setTimeout(() => !cancelled && onUnavailable(), 8000)
 
@@ -79,9 +92,8 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
           ux_mode: 'popup',
           callback: ({ credential }) => latest.current(credential, nonce),
         })
-        google.accounts.id.renderButton(slot.current, {
+        const options = {
           type: 'standard',
-          theme: theme === 'dark' ? 'filled_black' : 'outline',
           size: 'large',
           shape: 'rectangular',
           text: 'signin_with',
@@ -90,9 +102,34 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
           // browser's language).
           locale: 'en',
           // Google's button is at most 400px wide; match the space it's in.
-          width: Math.min(400, slot.current.offsetWidth || 320),
-        })
-        setReady(true)
+          width: Math.min(400, box.current.offsetWidth || 320),
+        }
+        const slots = [lightSlot.current, darkSlot.current]
+        // A new attempt starts from empty slots.
+        for (const slot of slots) slot.replaceChildren()
+        google.accounts.id.renderButton(lightSlot.current, { ...options, theme: 'outline' })
+        google.accounts.id.renderButton(darkSlot.current, { ...options, theme: 'filled_black' })
+
+        const reveal = () => !cancelled && setReady(true)
+        timers.push(setTimeout(reveal, MAX_WAIT_MS))
+        // Wait for both of Google's frames to load (they're added a moment
+        // after renderButton), then give the swap time to happen.
+        const seen = new Set()
+        let loaded = 0
+        const watch = () => {
+          for (const slot of slots) {
+            const frame = slot.querySelector('iframe')
+            if (!frame || seen.has(frame)) continue
+            seen.add(frame)
+            frame.addEventListener('load', () => {
+              loaded += 1
+              if (loaded === slots.length) timers.push(setTimeout(reveal, SETTLE_MS))
+            }, { once: true })
+          }
+        }
+        observer = new MutationObserver(watch)
+        for (const slot of slots) observer.observe(slot, { childList: true, subtree: true })
+        watch()
       })
       .catch(() => {
         clearTimeout(giveUp)
@@ -102,22 +139,33 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
     return () => {
       cancelled = true
       clearTimeout(giveUp)
+      timers.forEach(clearTimeout)
+      observer?.disconnect()
     }
-    // A new attempt (after a failed sign-in) or a theme change draws a fresh
-    // button with a fresh one-time value.
-  }, [attempt, theme])
+    // A new attempt (after a failed sign-in) draws fresh buttons with a
+    // fresh one-time value.
+  }, [attempt])
 
   return (
     // Lined up on the left, like the headline and text above it. Google's
     // button is at most 400px wide and 40px tall, and only Google can draw
     // inside it, so the space around it is sized to match.
-    <div className="relative min-h-10 w-full max-w-[400px]">
-      {/* Google draws its button in here, inside a frame of its own page.
-          [color-scheme:light]: that page is a light one, and when a light
+    <div ref={box} className="relative min-h-10 w-full max-w-[400px]">
+      {/* Google draws its buttons in here, each inside a frame of its own
+          page. Both stay in the page (invisible, not removed, so both load);
+          the theme decides which one shows and can be clicked.
+          [color-scheme:light]: Google's page is a light one, and when a light
           frame sits on a page in the dark theme the browser paints the
-          frame's background solid white (a white box around Google's dark
+          frame's background solid white (a white box around the dark
           button). Marking this spot light too keeps the frame see-through. */}
-      <div ref={slot} className={`w-full [color-scheme:light] ${ready ? '' : 'invisible'}`} />
+      <div
+        className={`relative [color-scheme:light] transition-opacity duration-300 ${
+          ready ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      >
+        <div ref={lightSlot} className="w-full dark:invisible" />
+        <div ref={darkSlot} className="invisible absolute inset-0 w-full dark:visible" />
+      </div>
       {/* Until then, a grey stand-in the same size, so nothing jumps. */}
       {!ready && (
         <div className="absolute inset-x-0 top-0 h-10 animate-pulse rounded-md bg-subtle" aria-hidden="true" />
