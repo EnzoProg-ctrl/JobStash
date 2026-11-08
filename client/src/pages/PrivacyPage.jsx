@@ -14,7 +14,7 @@ import { usePageTitle } from '../lib/usePageTitle.js'
 // GitHub page instead.
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL
 const GITHUB = 'https://github.com/EnzoProg-ctrl/JobStash'
-const UPDATED = '4 November 2026'
+const UPDATED = '8 November 2026'
 
 function ContactLink() {
   return CONTACT_EMAIL ? (
@@ -94,6 +94,10 @@ export default function PrivacyPage() {
             Your browser remembers that you're signed in, so you don't have to sign in on every
             visit. <strong>Sign out</strong> in My Stash removes it. On a shared computer, sign out
             when you're done.
+          </p>
+          <p className="mt-3">
+            If you switch between light and dark mode, your browser also remembers that choice. It's
+            only a setting: nothing about you, and it never leaves your device.
           </p>
         </Section>
 

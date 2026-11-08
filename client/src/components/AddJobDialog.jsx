@@ -449,7 +449,7 @@ export default function AddJobDialog({ manual = false }) {
               )}
 
               {saveError && (
-                <p role="alert" className="rounded-xl border border-error/30 bg-red-50 p-3 text-sm text-error">
+                <p role="alert" className="rounded-xl border border-error/30 bg-red-50 p-3 dark:bg-red-500/10 text-sm text-error">
                   Couldn't save: {saveError}
                 </p>
               )}

@@ -94,7 +94,7 @@ export default function StashToolbar({
         onClick={() => onFavoritesOnlyChange(!favoritesOnly)}
         title="Show only favourites"
         className={`col-start-2 row-start-1 inline-flex size-11 items-center justify-center gap-1.5 rounded-card border font-semibold min-[360px]:size-12 md:size-13.5 xl:h-13.5 xl:w-auto xl:px-4 ${
-          favoritesOnly ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-line bg-surface text-ink hover:bg-subtle'
+          favoritesOnly ? 'border-amber-400 bg-amber-50 text-amber-800 dark:border-amber-400/60 dark:bg-amber-400/10 dark:text-amber-300' : 'border-line bg-surface text-ink hover:bg-subtle'
         }`}
       >
         <svg

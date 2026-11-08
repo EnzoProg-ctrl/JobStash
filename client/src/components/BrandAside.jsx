@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import Logo from './Logo.jsx'
 import sidebarArt from '../assets/branding/jobstash-sidebar-art.svg'
+import tilesArt from '../assets/branding/jobstash-tiles.svg'
 
 // The brand column on the left of the app's pages, on wide screens only (1024px
 // and up): the logo at the top, the slogan, and right under it the stacked
@@ -14,7 +15,8 @@ import sidebarArt from '../assets/branding/jobstash-sidebar-art.svg'
 // (sticky, h-dvh), whatever the length of the page beside it.
 export default function BrandAside() {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col self-start overflow-hidden bg-[linear-gradient(165deg,#F6F9FE_0%,#F1F6FE_40%,#EDF4FE_70%,#F2F7FE_100%)] px-8 lg:flex xl:w-72 2xl:w-84 2xl:pr-8 2xl:pl-12">
+    // The dark theme has its own gradient: navy, a step bluer than the page.
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col self-start overflow-hidden bg-[linear-gradient(165deg,#F6F9FE_0%,#F1F6FE_40%,#EDF4FE_70%,#F2F7FE_100%)] px-8 lg:flex xl:w-72 2xl:w-84 2xl:pr-8 2xl:pl-12 dark:bg-[linear-gradient(165deg,#0F1A30_0%,#0E182C_40%,#101C34_70%,#0D1628_100%)]">
       {/* The same height as the header beside it (AppHeader.jsx), so the logo
           lines up with Overview, My Stash and Add Job. */}
       <div className="relative z-10 flex h-20 shrink-0 items-center border-b border-line pb-3">
@@ -45,7 +47,16 @@ export default function BrandAside() {
         alt=""
         aria-hidden="true"
         draggable="false"
-        className="pointer-events-none mt-3 -mr-8 -ml-8 w-[calc(100%+4rem)] max-w-none shrink-0 select-none 2xl:-ml-12 2xl:w-[calc(100%+5rem)]"
+        className="pointer-events-none mt-3 -mr-8 -ml-8 w-[calc(100%+4rem)] max-w-none shrink-0 select-none 2xl:-ml-12 2xl:w-[calc(100%+5rem)] dark:hidden"
+      />
+      {/* Dark theme: that artwork's pale floor would show as a light block on
+          navy, so the tiles alone (as on the landing page), softened. */}
+      <img
+        src={tilesArt}
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+        className="pointer-events-none mt-6 hidden w-[110%] max-w-none shrink-0 opacity-55 select-none dark:block"
       />
 
       {/* Where the column meets the dashboard: no line at all. Its last

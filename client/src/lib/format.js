@@ -59,12 +59,12 @@ export function addedOn(date) {
 // Letter-circle colours. Each pair passes the 4.5 : 1 contrast check. A company
 // always gets the same colour, because it is picked from its name.
 const AVATAR_COLOURS = [
-  'bg-blue-100 text-blue-700',
-  'bg-emerald-100 text-emerald-700',
-  'bg-violet-100 text-violet-700',
-  'bg-rose-100 text-rose-700',
-  'bg-amber-100 text-amber-700',
-  'bg-teal-100 text-teal-700',
+  'bg-blue-100 text-blue-700 dark:bg-blue-400/15 dark:text-blue-300',
+  'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300',
+  'bg-violet-100 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300',
+  'bg-rose-100 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300',
+  'bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300',
+  'bg-teal-100 text-teal-700 dark:bg-teal-400/15 dark:text-teal-300',
 ]
 
 // Mixes the letters (×31 each step) rather than just adding them, so similar

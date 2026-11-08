@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { useMenu } from '../lib/useMenu.js'
+import { switchTheme, useTheme } from '../lib/theme.js'
+import { ThemeIcon } from './ThemeToggle.jsx'
 
-// The ⋮ in the landing page header on phones. On wider screens "How it works"
-// and "Features" sit in the header itself; a phone has no room for them next
-// to the logo and the Sign in button, so they live in this menu instead.
+// The ⋮ in the landing page header on phones. On wider screens "How it works",
+// "Features" and the light / dark toggle sit in the header itself; a phone has
+// no room for them next to the logo and the Sign in button, so they live in
+// this menu instead.
 //
 // It closes when you pick something, press Esc, or tap anywhere outside it
 // (lib/useMenu.js). The two section links glide down the page (styles.css).
@@ -15,6 +18,7 @@ export default function LandingMenu() {
   const { open, setOpen, wrapper, button } = useMenu()
   const close = () => setOpen(false)
   const firstItem = useRef(null)
+  const theme = useTheme()
 
   // Opening the menu moves focus into it, so Enter picks straight away.
   // (React's autoFocus only works on buttons and form fields, not links.)
@@ -53,6 +57,19 @@ export default function LandingMenu() {
             Features
           </a>
           <div className="my-1 border-t border-line" />
+          {/* The new theme spreads out from here as the menu closes. */}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={(event) => {
+              switchTheme(event.currentTarget)
+              close()
+            }}
+            className={`${itemClass} gap-2`}
+          >
+            <ThemeIcon className="size-4" />
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
           <Link to="/privacy" role="menuitem" onClick={close} className={itemClass}>
             Privacy
           </Link>

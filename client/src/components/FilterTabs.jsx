@@ -43,7 +43,7 @@ export default function FilterTabs({ value, counts, onChange }) {
             {tab.label}
             <span
               className={`rounded-full px-1.5 text-xs font-semibold transition-colors duration-300 sm:px-2 md:text-sm ${
-                active ? 'bg-white text-brand-blue' : 'bg-subtle text-ink'
+                active ? 'bg-surface text-brand-blue' : 'bg-subtle text-ink'
               }`}
             >
               {counts[tab.value]}

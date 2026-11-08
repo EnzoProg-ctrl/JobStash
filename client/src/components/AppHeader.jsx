@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router'
 import useSlider from '../lib/useSlider.js'
 import AccountMenu from './AccountMenu.jsx'
 import Logo from './Logo.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 import UserAvatar from './UserAvatar.jsx'
 import { signOut, useAuth } from '../lib/auth.jsx'
 
@@ -50,6 +51,8 @@ export default function AppHeader() {
         </div>
 
         <div className="flex items-center gap-3 md:gap-4">
+          {/* Light / dark, on every screen size. */}
+          <ThemeToggle />
           <Link
             to="/stash/add"
             className="press hidden h-12 items-center gap-2 rounded-lg bg-brand-blue px-5 font-semibold text-on-brand hover:bg-brand-blue-dark md:inline-flex"

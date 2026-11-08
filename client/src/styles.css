@@ -415,6 +415,41 @@ div[role="status"].fixed {
   animation: none;
 }
 
+/* Switching between light and dark (switchTheme in lib/theme.js): the page
+   in its new colours is uncovered by a circle that grows from the toggle
+   (--theme-x/y) until it reaches the farthest corner (--theme-r), fast at
+   first and slowing smoothly to a stop. The old page stays still beneath it.
+   The bottom bar and the Undo message lose their own names meanwhile, so
+   they change with the page instead of on their own. */
+:root.switching-theme .bottom-nav,
+:root.switching-theme div[role="status"].fixed {
+  view-transition-name: none;
+}
+:root.switching-theme::view-transition-old(root) {
+  animation: none;
+}
+:root.switching-theme::view-transition-new(root) {
+  animation: theme-reveal 550ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--theme-x) var(--theme-y)); }
+  to { clip-path: circle(var(--theme-r) at var(--theme-x) var(--theme-y)); }
+}
+
+/* The toggle's icon (ThemeToggle.jsx): the sun's core grows into a full
+   circle and a second circle slides over it to cut out a crescent, while
+   the rays turn and shrink away; and back again. */
+.theme-icon :is(.theme-core, .theme-cut, .theme-rays) {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease-out;
+}
+.theme-icon .theme-core { transform: scale(0.6); }
+.theme-icon .theme-cut { transform: translate(9px, -9px); }
+[data-theme="dark"] .theme-icon .theme-core { transform: scale(1); }
+[data-theme="dark"] .theme-icon .theme-cut { transform: translate(0, 0); }
+[data-theme="dark"] .theme-icon .theme-rays { transform: rotate(90deg) scale(0.5); opacity: 0; }
+
 /* For links styled as buttons ("Add Job", "Open Posting"…). */
 @utility press {
   &:active {

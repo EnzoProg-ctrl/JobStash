@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTheme } from '../lib/theme.js'
 
 // Google's own "Sign in with Google" button (Google Identity Services).
 //
@@ -58,6 +59,9 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
   // The latest onToken, so Google's callback never calls an old one.
   const latest = useRef(onToken)
   latest.current = onToken
+  // Google's outline button on the light theme, its dark one on the dark
+  // theme; redrawn when the theme changes.
+  const theme = useTheme()
 
   useEffect(() => {
     let cancelled = false
@@ -77,7 +81,7 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
         })
         google.accounts.id.renderButton(slot.current, {
           type: 'standard',
-          theme: 'outline',
+          theme: theme === 'dark' ? 'filled_black' : 'outline',
           size: 'large',
           shape: 'rectangular',
           text: 'signin_with',
@@ -99,9 +103,9 @@ export default function GoogleButton({ onToken, onUnavailable, attempt = 0 }) {
       cancelled = true
       clearTimeout(giveUp)
     }
-    // A new attempt (after a failed sign-in) draws a fresh button with a
-    // fresh one-time value.
-  }, [attempt])
+    // A new attempt (after a failed sign-in) or a theme change draws a fresh
+    // button with a fresh one-time value.
+  }, [attempt, theme])
 
   return (
     // Lined up on the left, like the headline and text above it. Google's

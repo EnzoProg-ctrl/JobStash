@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import DemoNotice from '../components/DemoNotice.jsx'
 import GoogleButton, { googleButtonAvailable } from '../components/GoogleButton.jsx'
 import LandingMenu from '../components/LandingMenu.jsx'
+import ThemeToggle from '../components/ThemeToggle.jsx'
 import Logo from '../components/Logo.jsx'
 import Reveal from '../components/Reveal.jsx'
 import StashPreview from '../components/StashPreview.jsx'
@@ -76,6 +77,8 @@ export default function HomePage() {
         <nav className="flex items-center gap-2 md:gap-8" aria-label="Page sections">
           <a href="#how-it-works" className="hidden font-semibold text-muted hover:text-ink md:inline">How it works</a>
           <a href="#features" className="hidden font-semibold text-muted hover:text-ink md:inline">Features</a>
+          {/* Light / dark. Phones have it in the ⋮ menu instead (no room). */}
+          <ThemeToggle className="max-md:hidden" />
           {session ? (
             <span className="flex items-center gap-2 md:gap-4">
               <Link
@@ -117,14 +120,14 @@ export default function HomePage() {
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`${DECORATION} absolute -top-6 -right-80 -z-10 hidden w-[26rem] opacity-40 xl:block`}
+            className={`${DECORATION} absolute -top-6 -right-80 -z-10 hidden w-[26rem] opacity-40 xl:block dark:opacity-20`}
           />
           <img
             src={tilesArt}
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`${DECORATION} absolute top-32 -left-56 -z-10 hidden w-[20rem] -scale-x-100 opacity-35 xl:block`}
+            className={`${DECORATION} absolute top-32 -left-56 -z-10 hidden w-[20rem] -scale-x-100 opacity-35 xl:block dark:opacity-20`}
           />
           <p className="inline-block rounded-full bg-todo-bg px-4 py-1.5 text-sm font-semibold text-brand-blue">
             A simpler way to job hunt
@@ -283,7 +286,7 @@ const DECORATION = 'pointer-events-none select-none'
 
 // The white button in the blue band at the end of the page.
 const START_BUTTON =
-  'press mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-white px-8 text-lg font-semibold text-brand-blue hover:bg-todo-bg'
+  'press mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-lg bg-on-brand px-8 text-lg font-semibold text-brand-blue hover:bg-todo-bg dark:hover:bg-surface'
 
 function SignIn() {
   const { session, loading } = useAuth()

@@ -371,6 +371,11 @@ is gone, and the jobs now come from your database.
    landing page confirms it. Your other devices stay signed in. On a shared
    computer, sign out when you're done. JobStash's Sign out doesn't sign you
    out of Google itself.
+14. **Light and dark mode.** JobStash follows your device's setting until
+   you choose. The sun / moon button in the header (in the ⋮ menu on the
+   landing page on phones) switches it: the new theme spreads out from the
+   button in a growing circle, and the choice is remembered in this browser.
+   With "reduce motion" on, it switches at once.
 
 ### The API
 
@@ -409,7 +414,7 @@ JobStash/
 │       ├── pages/              one file per screen: landing, My Stash, Overview, Privacy
 │       ├── components/         parts of the screens: job card, board, ⋮ menus, star,
 │       │                       Add Job pop-up, bottom bar, status chips, Undo message
-│       ├── lib/                sign-in, loading jobs, animations, small helpers
+│       ├── lib/                sign-in, loading jobs, animations, light / dark theme, small helpers
 │       └── api/                the only code that fetches data (demo mode or the real API)
 ├── server/                     the API (Node.js, Express)
 │   ├── server.js               the routes and their checks (Vercel runs this)

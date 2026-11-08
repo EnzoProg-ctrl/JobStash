@@ -21,7 +21,7 @@ export default function StatusBadge({ status, outcome }) {
 
   if (status === 'done' && outcome === 'rejected') {
     return (
-      <span className={`${pill} bg-red-50 text-error`}>
+      <span className={`${pill} bg-red-50 text-error dark:bg-red-500/15`}>
         <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
           <circle cx="8" cy="8" r="6.25" />
           <path d="M5.75 5.75l4.5 4.5M10.25 5.75l-4.5 4.5" />
@@ -34,7 +34,7 @@ export default function StatusBadge({ status, outcome }) {
   if (status === 'done') {
     // Pending: applied, no answer yet. Neutral rather than good or bad.
     return (
-      <span className={`${pill} bg-slate-100 text-slate-700`}>
+      <span className={`${pill} bg-slate-100 text-slate-700 dark:bg-slate-700/60 dark:text-slate-200`}>
         <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="8" cy="8" r="6.25" />
           <path d="M8 4.75V8l2.25 1.5" />

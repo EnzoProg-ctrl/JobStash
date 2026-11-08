@@ -58,7 +58,7 @@ export default function DemoNotice({ className = '' }) {
         type="button"
         onClick={hide}
         aria-label="Hide the demo mode notice"
-        className="-m-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-ink/70 hover:bg-white hover:text-ink"
+        className="-m-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-ink/70 hover:bg-surface hover:text-ink"
       >
         <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <path d="M4 4l8 8M12 4l-8 8" />
